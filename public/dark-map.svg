@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#141a21"/>
+  <path d="M-100,200 L300,220 L350,50 L500,-50 M250,850 L300,500 L600,450 L850,300 M500,850 L550,600 L850,550 M-50,600 L200,650 L300,500" stroke="#1c2530" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M-100,200 L300,220 L350,50 L500,-50 M250,850 L300,500 L600,450 L850,300 M500,850 L550,600 L850,550 M-50,600 L200,650 L300,500" stroke="#25303c" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <path d="M100,-50 L120,300 L-50,350 M400,-50 L380,300 L120,300 M650,-50 L600,200 L850,250 M750,850 L700,650 L850,600 M100,850 L150,550 L-50,500" stroke="#1c2530" stroke-width="24" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100,-50 L120,300 L-50,350 M400,-50 L380,300 L120,300 M650,-50 L600,200 L850,250 M750,850 L700,650 L850,600 M100,850 L150,550 L-50,500" stroke="#25303c" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Water bodies -->
+  <path d="M800,0 L700,0 L650,50 L680,150 L800,200 Z" fill="#0f1924" opacity="0.8"/>
+  <path d="M0,700 L100,680 L150,750 L120,800 L0,800 Z" fill="#0f1924" opacity="0.8"/>
+
+  <!-- Parks -->
+  <path d="M300,300 L350,280 L400,320 L380,380 L320,350 Z" fill="#1b2820" opacity="0.8"/>
+  <path d="M500,600 L550,580 L600,620 L580,680 L520,650 Z" fill="#1b2820" opacity="0.8"/>
+  
+  <!-- Grid overlay for texture -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="1" stroke-opacity="0.02"/>
+  </pattern>
+  <rect width="800" height="800" fill="url(#grid)" />
+</svg>
