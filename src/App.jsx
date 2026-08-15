@@ -6,7 +6,7 @@ import './index.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ════════ CURSOR ════════ */
+/* â•â•â•â•â•â•â•â• CURSOR â•â•â•â•â•â•â•â• */
 function Cursor() {
   const dotRef = useRef(null);
   const symbolRef = useRef(null);
@@ -81,7 +81,7 @@ function Cursor() {
   );
 }
 
-/* ════════ LOADER ════════ */
+/* â•â•â•â•â•â•â•â• LOADER â•â•â•â•â•â•â•â• */
 function Loader({ onDone }) {
   const counterRef = useRef(null);
   const barRef = useRef(null);
@@ -120,7 +120,7 @@ function Loader({ onDone }) {
   );
 }
 
-/* ════════ MAGNETIC ════════ */
+/* â•â•â•â•â•â•â•â• MAGNETIC â•â•â•â•â•â•â•â• */
 let audioCtx;
 const playHoverSound = () => {
   try {
@@ -196,7 +196,7 @@ function Magnetic({ children }) {
   );
 }
 
-/* ════════ HERO CANVAS ════════ */
+/* â•â•â•â•â•â•â•â• HERO CANVAS â•â•â•â•â•â•â•â• */
 function HeroCanvas() {
   const canvasRef = useRef(null);
 
@@ -307,7 +307,7 @@ function HeroCanvas() {
   return <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />;
 }
 
-/* ════════ NAV ════════ */
+/* â•â•â•â•â•â•â•â• NAV â•â•â•â•â•â•â•â• */
 function Nav() {
   const [time, setTime] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -356,7 +356,7 @@ function Nav() {
   );
 }
 
-/* ════════ HERO ════════ */
+/* â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• */
 function Hero() {
   const ref = useRef(null);
 
@@ -400,7 +400,7 @@ function Hero() {
 
 
 
-/* ════════ ABOUT ════════ */
+/* â•â•â•â•â•â•â•â• ABOUT â•â•â•â•â•â•â•â• */
 function About() {
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
@@ -531,9 +531,9 @@ function About() {
   );
 }
 
-/* ════════ EXPERIENCE (HORIZONTAL SCROLL) ════════ */
+/* â•â•â•â•â•â•â•â• EXPERIENCE (HORIZONTAL SCROLL) â•â•â•â•â•â•â•â• */
 
-/* ════════ PROJECTS (3D DECK) ════════ */
+/* â•â•â•â•â•â•â•â• PROJECTS (3D DECK) â•â•â•â•â•â•â•â• */
 function ProjectsDeck() {
   const containerRef = useRef(null);
 
@@ -766,7 +766,7 @@ function ProjectsDeck() {
   );
 }
 
-/* ════════ SKILLS ════════ */
+/* â•â•â•â•â•â•â•â• SKILLS â•â•â•â•â•â•â•â• */
 function Skills() {
   const getImg = (src, invert = false) => `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" style="width: 100%; height: 100%; object-fit: contain; ${invert ? 'filter: invert(1);' : ''}" />`;
 
@@ -790,7 +790,7 @@ function Skills() {
     { name: 'Retell AI', symbol: '🤖' }, 
     { name: 'Claude AI', symbol: '🧠' }, 
     { name: 'Plivo', symbol: '📞' },
-    { name: 'nexHealth APIs', symbol: '🏥' }, 
+    { name: 'nexHealth APIs', symbol: '🦷' }, 
     { name: 'OpenRouter', symbol: '🌐' }, 
     { name: 'MediaPipe', symbol: '👁️' },
     { name: 'Power BI', symbol: '📊' }, 
@@ -915,6 +915,10 @@ function ExperienceEditorial() {
 
   const handleTabSwitch = (tab) => {
     if (tab === activeTab) return;
+    
+    const msg = tab === 'experience' ? 'Work history!' : 'Education history!';
+    window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '💼', msg } }));
+
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
     
     // Animate out with stagger
@@ -1056,61 +1060,236 @@ function Contact() {
     </section>
   );
 }
-/* ════════ GUIDE CHARACTER ════════ */
-function GuideCharacter() {
-  const [dialogue, setDialogue] = useState("Hey there! Welcome to my digital space.");
+/* ════════ PIKACHU PET ════════ */
+function PikaPet() {
+  const petRef = useRef(null);
+  const posRef = useRef({ x: typeof window !== 'undefined' ? window.innerWidth - 120 : 300, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 300 });
+  const targetRef = useRef({ ...posRef.current });
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+  const draggingRef = useRef(false);
+  const thrownRef = useRef(false);
+  const velocityRef = useRef({ x: 0, y: 0 });
+  const lastPosRef = useRef({ x: 300, y: 300 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const [frame, setFrame] = useState(0);
+  const [petState, setPetState] = useState('idle');
+  const [facingLeft, setFacingLeft] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [bubble, setBubble] = useState({ section: '⚡', msg: 'Pika pika!', show: true });
   const [visible, setVisible] = useState(false);
+  const lastMoveRef = useRef(Date.now());
 
   useEffect(() => {
-    // Show character after 2.5s initial load
-    const timer = setTimeout(() => setVisible(true), 2500);
-    
-    // Set up ScrollTrigger for each section
+    const showTimer = setTimeout(() => setVisible(true), 2500);
+    const onMouse = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('mousemove', onMouse, { passive: true });
+
+    // Random wander
+    const wanderInterval = setInterval(() => {
+      if (draggingRef.current) return;
+      const pad = 80;
+      targetRef.current = {
+        x: pad + Math.random() * (window.innerWidth - pad * 2),
+        y: pad + Math.random() * (window.innerHeight - pad * 2),
+      };
+    }, 3000 + Math.random() * 3000);
+
+    // Section guide
     const sections = [
-      { id: '#home', text: "Hey there! Welcome to my digital space. I'm your portfolio guide." },
-      { id: '#about', text: "Here is a little about me. I transform complex problems into elegant web apps!" },
-      { id: '#experience', text: "Check out my timeline! Click to expand my work and education history." },
-      { id: '#projects', text: "These are some of my best creations. Check out the tech stacks!" },
-      { id: '#skills', text: "Look at all these technologies I work with daily." },
-      { id: '#contact', text: "Ready to collaborate? Let's build something great together!" }
+      { id: '#home', section: '⚡', msg: 'Pika pika! Welcome!' },
+      { id: '#about', section: '👤', msg: 'About Sujith!' },
+      { id: '#experience', section: '💼', msg: 'Work & Education!' },
+      { id: '#work', section: '🚀', msg: 'These projects are so cool!' },
+      { id: '#skills', section: '🔧', msg: 'Tech stack!' },
+      { id: '#contact', section: '📬', msg: 'Say hello!' }
     ];
-
     const triggers = [];
-
     sections.forEach((sec) => {
       const el = document.querySelector(sec.id);
       if (el) {
-        const st = ScrollTrigger.create({
-          trigger: el,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => setDialogue(sec.text),
-          onEnterBack: () => setDialogue(sec.text),
-        });
-        triggers.push(st);
+        triggers.push(ScrollTrigger.create({
+          trigger: el, start: 'top center', end: 'bottom center',
+          onEnter: () => setBubble({ section: sec.section, msg: sec.msg, show: true }),
+          onEnterBack: () => setBubble({ section: sec.section, msg: sec.msg, show: true }),
+        }));
       }
     });
 
+    const onPikaSpeak = (e) => {
+      setBubble({ section: e.detail.section, msg: e.detail.msg, show: true });
+    };
+    window.addEventListener('pika-speak', onPikaSpeak);
+
+    // Drag handlers
+    const onDragMove = (e) => {
+      if (!draggingRef.current) return;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      posRef.current.x = cx - dragOffsetRef.current.x;
+      posRef.current.y = cy - dragOffsetRef.current.y;
+      targetRef.current = { ...posRef.current };
+      if (petRef.current) {
+        petRef.current.style.left = `${posRef.current.x}px`;
+        petRef.current.style.top = `${posRef.current.y}px`;
+      }
+    };
+    const onDragEnd = (e) => {
+      if (!draggingRef.current) return;
+      const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+      const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+      const movedDist = Math.hypot(cx - dragStartRef.current.x, cy - dragStartRef.current.y);
+      draggingRef.current = false;
+      setIsDragging(false);
+      targetRef.current = { ...posRef.current };
+      lastMoveRef.current = Date.now();
+      if (movedDist < 6) {
+        setPetState('jumping');
+        setBubble({ section: '\u26A1', msg: 'Pika pika!!', show: true });
+        setTimeout(() => {
+          setPetState('sparking');
+          setTimeout(() => { setPetState('idle'); lastMoveRef.current = Date.now(); }, 600);
+        }, 450);
+      } else {
+        thrownRef.current = true;
+        setPetState('tumbling');
+        setBubble({ section: '\u26A1', msg: 'Wheee!', show: true });
+      }
+    };
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('touchend', onDragEnd);
+
+    // Main animation loop
+    let walkFrame = 0;
+    let fc = 0;
+    const loop = () => {
+      const pos = posRef.current;
+      
+      if (draggingRef.current) { 
+        velocityRef.current.x = pos.x - lastPosRef.current.x;
+        velocityRef.current.y = pos.y - lastPosRef.current.y;
+        lastPosRef.current = { ...pos };
+        rafRef.current = requestAnimationFrame(loop); 
+        return; 
+      }
+      
+      if (thrownRef.current) {
+        pos.x += velocityRef.current.x;
+        pos.y += velocityRef.current.y;
+        velocityRef.current.x *= 0.94;
+        velocityRef.current.y *= 0.94;
+        
+        // Bounce off edges
+        if (pos.x <= 10) { pos.x = 10; velocityRef.current.x *= -0.8; setFacingLeft(false); }
+        if (pos.x >= window.innerWidth - 90) { pos.x = window.innerWidth - 90; velocityRef.current.x *= -0.8; setFacingLeft(true); }
+        if (pos.y <= 10) { pos.y = 10; velocityRef.current.y *= -0.8; }
+        if (pos.y >= window.innerHeight - 90) { pos.y = window.innerHeight - 90; velocityRef.current.y *= -0.8; }
+        
+        if (Math.hypot(velocityRef.current.x, velocityRef.current.y) < 0.8) {
+          thrownRef.current = false;
+          targetRef.current = { ...pos };
+          setPetState('idle');
+          setBubble({ section: '\u26A1', msg: 'Oof! That was fun!', show: true });
+        }
+        
+        if (petRef.current) {
+          petRef.current.style.left = `${pos.x}px`;
+          petRef.current.style.top = `${pos.y}px`;
+        }
+        lastPosRef.current = { ...pos };
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const mouse = mouseRef.current;
+      const distToMouse = Math.hypot(mouse.x - pos.x, mouse.y - pos.y);
+      const followTarget = distToMouse < 180 ? { x: mouse.x - 40, y: mouse.y - 40 } : targetRef.current;
+      const dx = followTarget.x - pos.x;
+      const dy = followTarget.y - pos.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 5) {
+        const speed = distToMouse < 150 ? 1.8 : 2.5;
+        pos.x += (dx / dist) * speed;
+        pos.y += (dy / dist) * speed;
+        pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
+        pos.y = Math.max(10, Math.min(window.innerHeight - 90, pos.y));
+        setFacingLeft(dx < 0);
+        fc++;
+        if (fc % 8 === 0) { walkFrame = walkFrame === 1 ? 2 : 1; setFrame(walkFrame); }
+        setPetState('walking');
+        lastMoveRef.current = Date.now();
+      } else {
+        setFrame(0);
+        setPetState(Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle');
+      }
+
+      if (petRef.current) {
+        petRef.current.style.left = `${pos.x}px`;
+        petRef.current.style.top = `${pos.y}px`;
+      }
+      lastPosRef.current = { ...pos };
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(showTimer);
+      clearInterval(wanderInterval);
+      cancelAnimationFrame(rafRef.current);
       triggers.forEach(t => t.kill());
+      window.removeEventListener('mousemove', onMouse);
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', onDragEnd);
+      window.removeEventListener('pika-speak', onPikaSpeak);
     };
   }, []);
 
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    draggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: cx, y: cy };
+    dragOffsetRef.current = { x: cx - posRef.current.x, y: cy - posRef.current.y };
+    setPetState('idle');
+    setBubble({ section: '\u26A1', msg: 'Pika~?!', show: true });
+  };
+
+
+  const cls = ['pika-pet', visible && 'visible', facingLeft && 'face-left', isDragging && 'dragging', petState === 'jumping' && 'jumping', petState === 'tumbling' && 'tumbling', petState === 'sparking' && 'sparking', petState === 'sleeping' && 'sleeping'].filter(Boolean).join(' ');
+  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : 'idle';
+
   return (
-    <div className={`guide-character ${visible ? 'visible' : ''}`}>
-      <div className="guide-avatar" onClick={() => setVisible(!visible)}>
-        <img src="/pixel-girl.png" alt="Pixel Guide" />
+    <div className={cls} ref={petRef} style={{ left: posRef.current.x, top: posRef.current.y }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+      <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
+        <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
       </div>
-      <div className="guide-speech-bubble">
-        <p>{dialogue}</p>
-        <button className="guide-close" onClick={() => setVisible(false)} aria-label="Dismiss guide">×</button>
+      <div className="pika-zzz">zzZ</div>
+      <div className={`pika-sprite ${sprCls}`} data-frame={frame}>
+        <div className="pika-body" />
+        <div className="pika-shadow" />
+      </div>
+      <div className="pika-sparks">
+        <div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" />
       </div>
     </div>
   );
 }
 
-/* ════════ APP ════════ */
+
+
+
+
+
+
+/* â•â•â•â•â•â•â•â• APP â•â•â•â•â•â•â•â• */
 export default function App() {
   const [loaded, setLoaded] = useState(false);
 
@@ -1151,12 +1330,13 @@ export default function App() {
         <Skills />
         <Contact />
       </main>
-      <GuideCharacter />
+      <PikaPet />
       <footer className="footer">
-        <span>© 2026 Sujith</span>
+        <span>Â© 2026 Sujith</span>
         <span>Designed & Built with React + GSAP</span>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer">github.com/thesujith23</a>
       </footer>
     </>
   );
 }
+

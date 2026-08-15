@@ -30,7 +30,7 @@ body {
 a { color: inherit; text-decoration: none; cursor: none; }
 button { cursor: none; }
 
-/* ═══════════ LOADER ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• LOADER â•â•â•â•â•â•â•â•â•â•â• */
 .loader {
   position: fixed; inset: 0; z-index: 9999;
   background: var(--bg); display: flex; align-items: center; justify-content: center;
@@ -51,7 +51,7 @@ button { cursor: none; }
   letter-spacing: 0.3em; text-transform: uppercase;
 }
 
-/* ═══════════ CURSOR ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• CURSOR â•â•â•â•â•â•â•â•â•â•â• */
 .cursor-dot {
   position: fixed; top: 0; left: 0; width: 16px; height: 16px;
   background: #FFF; border-radius: 50%; pointer-events: none;
@@ -79,7 +79,7 @@ button { cursor: none; }
   opacity: 1;
 }
 
-/* ═══════════ NOISE ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• NOISE â•â•â•â•â•â•â•â•â•â•â• */
 .grain {
   position: fixed; inset: -50%; z-index: 9990; pointer-events: none;
   width: 200%; height: 200%; opacity: 0.04;
@@ -94,7 +94,7 @@ button { cursor: none; }
   100% { transform: translate(2%, 2%); }
 }
 
-/* ═══════════ NAV ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• NAV â•â•â•â•â•â•â•â•â•â•â• */
 .nav {
   position: fixed; 
   top: -100px; 
@@ -160,7 +160,7 @@ button { cursor: none; }
   .nav-links { display: none; }
 }
 
-/* ═══════════ HERO ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â•â•â•â• */
 .hero {
   height: 100svh;
   max-height: 100vh;
@@ -195,7 +195,7 @@ button { cursor: none; }
   writing-mode: vertical-rl;
 }
 
-/* ═══════════ CREATIVE RESUME BUTTON ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• CREATIVE RESUME BUTTON â•â•â•â•â•â•â•â•â•â•â• */
 @keyframes spin-gradient {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -305,7 +305,7 @@ button { cursor: none; }
 }
 
 
-/* ═══════════ ABOUT ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• ABOUT â•â•â•â•â•â•â•â•â•â•â• */
 .about { padding: 40px 48px 160px; position: relative; }
 .about-label {
   font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.4em;
@@ -353,7 +353,7 @@ button { cursor: none; }
   50% { opacity: 0; }
 }
 
-/* ═══════════ PROJECTS (HORIZONTAL SCROLL) ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• PROJECTS (HORIZONTAL SCROLL) â•â•â•â•â•â•â•â•â•â•â• */
 .projects-horizontal {
   position: relative;
   height: 100vh;
@@ -493,7 +493,7 @@ button { cursor: none; }
   .proj-h-card:hover { transform: translateY(-8px) scale(1); }
 }
 
-/* ═══════════ SKILLS ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• SKILLS â•â•â•â•â•â•â•â•â•â•â• */
 .skills { padding: 160px 48px; background: #000; color: #FFF; }
 .skills-header {
   display: flex; justify-content: space-between; align-items: flex-end;
@@ -538,7 +538,7 @@ button { cursor: none; }
 }
 @media (max-width: 768px) { .skills { padding: 100px 24px; } }
 
-/* ═══════════ EXPERIENCE (EDITORIAL) ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• EXPERIENCE (EDITORIAL) â•â•â•â•â•â•â•â•â•â•â• */
 .exp-editorial {
   position: relative;
   background: #0a0a0a; /* Darker mode inversion for better glow contrast */
@@ -934,7 +934,7 @@ button { cursor: none; }
 }
 
 
-/* ═══════════ CONTACT ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• CONTACT â•â•â•â•â•â•â•â•â•â•â• */
 .contact { padding: 160px 48px; text-align: center; position: relative; }
 .contact-eyebrow {
   font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.4em;
@@ -971,7 +971,7 @@ button { cursor: none; }
 }
 @media (max-width: 768px) { .contact { padding: 100px 24px; } }
 
-/* ═══════════ FOOTER ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• FOOTER â•â•â•â•â•â•â•â•â•â•â• */
 .footer {
   padding: 32px 48px; border-top: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
@@ -980,7 +980,7 @@ button { cursor: none; }
 }
 .footer a:hover { color: var(--accent); }
 
-/* ═══════════ REVEAL ═══════════ */
+/* â•â•â•â•â•â•â•â•â•â•â• REVEAL â•â•â•â•â•â•â•â•â•â•â• */
 .reveal-up {
   opacity: 0; transform: translateY(60px);
   transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
@@ -989,98 +989,167 @@ button { cursor: none; }
   opacity: 1; transform: translateY(0);
 }
 
-/* ═══════════ GUIDE CHARACTER ═══════════ */
-.guide-character {
+/* â•â•â•â•â•â•â•â•â•â•â• PIKACHU PIXEL PET â•â•â•â•â•â•â•â•â•â•â• */
+.pika-pet {
   position: fixed;
-  bottom: 24px;
-  left: 24px;
-  z-index: 100;
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
-  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
-}
-
-.guide-character.visible {
-  opacity: 1;
+  z-index: 200;
   pointer-events: auto;
-  transform: translateY(0);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  user-select: none;
+}
+.pika-pet.visible { opacity: 1; }
+.pika-pet.dragging { cursor: grabbing; }
+.pika-pet.face-left .pika-sprite { transform: scaleX(-1) scale(1.3); }
+
+.pika-pet.dragging .pika-sprite {
+  animation: pikaDangle 0.4s ease-in-out infinite !important;
+}
+.pika-pet.face-left.dragging .pika-sprite {
+  animation: pikaDangleLeft 0.4s ease-in-out infinite !important;
 }
 
-.guide-avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 20px rgba(246, 36, 64, 0.4);
-  background: var(--bg);
-  animation: floatAvatar 3.5s ease-in-out infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.pika-pet.tumbling .pika-sprite {
+  animation: pikaTumble 0.5s linear infinite !important;
+}
+.pika-pet.face-left.tumbling .pika-sprite {
+  animation: pikaTumbleLeft 0.5s linear infinite !important;
 }
 
-.guide-avatar img {
-  width: 130%;
-  height: 130%;
-  object-fit: cover;
-  mix-blend-mode: screen;
+@keyframes pikaDangle {
+  0%, 100% { transform: scale(1.3) rotate(-12deg); }
+  50% { transform: scale(1.3) rotate(12deg); }
+}
+@keyframes pikaDangleLeft {
+  0%, 100% { transform: scaleX(-1) scale(1.3) rotate(-12deg); }
+  50% { transform: scaleX(-1) scale(1.3) rotate(12deg); }
 }
 
-.guide-speech-bubble {
-  background: var(--surface);
-  border: 1px solid rgba(255,229,191,0.1);
-  padding: 16px 20px;
-  border-radius: 20px 20px 20px 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  max-width: 250px;
+@keyframes pikaTumble {
+  0% { transform: scale(1.3) rotate(0deg); }
+  100% { transform: scale(1.3) rotate(360deg); }
+}
+@keyframes pikaTumbleLeft {
+  0% { transform: scaleX(-1) scale(1.3) rotate(0deg); }
+  100% { transform: scaleX(-1) scale(1.3) rotate(-360deg); }
+}
+
+.pika-sprite {
+  width: 48px; height: 48px;
   position: relative;
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: var(--text);
-  animation: floatBubble 3.5s ease-in-out infinite 0.2s;
+  image-rendering: pixelated;
+  transform: scale(1.3);
+  transform-origin: center bottom;
 }
 
-.guide-speech-bubble p {
-  margin: 0;
-}
-
-.guide-close {
+.pika-body {
   position: absolute;
-  top: 4px;
-  right: 8px;
+  width: 4px; height: 4px;
+  top: 0; left: 0;
   background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: color 0.2s;
 }
 
-.guide-close:hover {
-  color: var(--accent);
+/* â”€â”€ FRAME 0: Idle â”€â”€ */
+.pika-sprite[data-frame="0"] .pika-body {
+  box-shadow:
+    4px 0 0 #1a1a1a, 36px 0 0 #1a1a1a,
+    4px 4px 0 #1a1a1a, 8px 4px 0 #1a1a1a, 32px 4px 0 #1a1a1a, 36px 4px 0 #1a1a1a,
+    8px 8px 0 #FFD700, 12px 8px 0 #FFD700, 28px 8px 0 #FFD700, 32px 8px 0 #FFD700,
+    12px 12px 0 #FFD700, 16px 12px 0 #FFD700, 20px 12px 0 #FFD700, 24px 12px 0 #FFD700, 28px 12px 0 #FFD700,
+    8px 16px 0 #FFD700, 12px 16px 0 #FFD700, 16px 16px 0 #1a1a1a, 20px 16px 0 #FFD700, 24px 16px 0 #1a1a1a, 28px 16px 0 #FFD700, 32px 16px 0 #FFD700,
+    8px 20px 0 #FFD700, 12px 20px 0 #F62440, 16px 20px 0 #FFD700, 20px 20px 0 #FFD700, 24px 20px 0 #FFD700, 28px 20px 0 #F62440, 32px 20px 0 #FFD700,
+    12px 24px 0 #FFD700, 16px 24px 0 #FFD700, 20px 24px 0 #2a1b3d, 24px 24px 0 #FFD700, 28px 24px 0 #FFD700,
+    12px 28px 0 #FFD700, 16px 28px 0 #FFD700, 20px 28px 0 #FFD700, 24px 28px 0 #FFD700, 28px 28px 0 #FFD700,
+    8px 32px 0 #FFD700, 12px 32px 0 #FFD700, 16px 32px 0 #FFF8DC, 20px 32px 0 #FFF8DC, 24px 32px 0 #FFF8DC, 28px 32px 0 #FFD700, 32px 32px 0 #FFD700,
+    8px 36px 0 #FFD700, 12px 36px 0 #FFD700, 16px 36px 0 #FFF8DC, 20px 36px 0 #FFF8DC, 24px 36px 0 #FFF8DC, 28px 36px 0 #FFD700, 32px 36px 0 #FFD700,
+    32px 28px 0 #B8860B, 36px 24px 0 #FFD700, 40px 20px 0 #FFD700, 40px 24px 0 #FFD700,
+    12px 40px 0 #FFD700, 16px 40px 0 #FFD700, 24px 40px 0 #FFD700, 28px 40px 0 #FFD700,
+    12px 44px 0 #B8860B, 16px 44px 0 #B8860B, 24px 44px 0 #B8860B, 28px 44px 0 #B8860B;
 }
 
-@keyframes floatAvatar {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-  100% { transform: translateY(0); }
+/* â”€â”€ FRAME 1: Walk A â”€â”€ */
+.pika-sprite[data-frame="1"] .pika-body {
+  box-shadow:
+    4px 0 0 #1a1a1a, 36px 0 0 #1a1a1a,
+    4px 4px 0 #1a1a1a, 8px 4px 0 #1a1a1a, 32px 4px 0 #1a1a1a, 36px 4px 0 #1a1a1a,
+    8px 8px 0 #FFD700, 12px 8px 0 #FFD700, 28px 8px 0 #FFD700, 32px 8px 0 #FFD700,
+    12px 12px 0 #FFD700, 16px 12px 0 #FFD700, 20px 12px 0 #FFD700, 24px 12px 0 #FFD700, 28px 12px 0 #FFD700,
+    8px 16px 0 #FFD700, 12px 16px 0 #FFD700, 16px 16px 0 #1a1a1a, 20px 16px 0 #FFD700, 24px 16px 0 #1a1a1a, 28px 16px 0 #FFD700, 32px 16px 0 #FFD700,
+    8px 20px 0 #FFD700, 12px 20px 0 #F62440, 16px 20px 0 #FFD700, 20px 20px 0 #FFD700, 24px 20px 0 #FFD700, 28px 20px 0 #F62440, 32px 20px 0 #FFD700,
+    12px 24px 0 #FFD700, 16px 24px 0 #FFD700, 20px 24px 0 #2a1b3d, 24px 24px 0 #FFD700, 28px 24px 0 #FFD700,
+    12px 28px 0 #FFD700, 16px 28px 0 #FFD700, 20px 28px 0 #FFD700, 24px 28px 0 #FFD700, 28px 28px 0 #FFD700,
+    8px 32px 0 #FFD700, 12px 32px 0 #FFD700, 16px 32px 0 #FFF8DC, 20px 32px 0 #FFF8DC, 24px 32px 0 #FFF8DC, 28px 32px 0 #FFD700, 32px 32px 0 #FFD700,
+    8px 36px 0 #FFD700, 12px 36px 0 #FFD700, 16px 36px 0 #FFF8DC, 20px 36px 0 #FFF8DC, 24px 36px 0 #FFF8DC, 28px 36px 0 #FFD700, 32px 36px 0 #FFD700,
+    32px 28px 0 #B8860B, 36px 24px 0 #FFD700, 40px 20px 0 #FFD700, 40px 24px 0 #FFD700,
+    8px 40px 0 #FFD700, 12px 40px 0 #FFD700, 28px 40px 0 #FFD700, 32px 40px 0 #FFD700,
+    4px 44px 0 #B8860B, 8px 44px 0 #B8860B, 32px 44px 0 #B8860B, 36px 44px 0 #B8860B;
 }
 
-@keyframes floatBubble {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0); }
+/* â”€â”€ FRAME 2: Walk B â”€â”€ */
+.pika-sprite[data-frame="2"] .pika-body {
+  box-shadow:
+    4px 0 0 #1a1a1a, 36px 0 0 #1a1a1a,
+    4px 4px 0 #1a1a1a, 8px 4px 0 #1a1a1a, 32px 4px 0 #1a1a1a, 36px 4px 0 #1a1a1a,
+    8px 8px 0 #FFD700, 12px 8px 0 #FFD700, 28px 8px 0 #FFD700, 32px 8px 0 #FFD700,
+    12px 12px 0 #FFD700, 16px 12px 0 #FFD700, 20px 12px 0 #FFD700, 24px 12px 0 #FFD700, 28px 12px 0 #FFD700,
+    8px 16px 0 #FFD700, 12px 16px 0 #FFD700, 16px 16px 0 #1a1a1a, 20px 16px 0 #FFD700, 24px 16px 0 #1a1a1a, 28px 16px 0 #FFD700, 32px 16px 0 #FFD700,
+    8px 20px 0 #FFD700, 12px 20px 0 #F62440, 16px 20px 0 #FFD700, 20px 20px 0 #FFD700, 24px 20px 0 #FFD700, 28px 20px 0 #F62440, 32px 20px 0 #FFD700,
+    12px 24px 0 #FFD700, 16px 24px 0 #FFD700, 20px 24px 0 #2a1b3d, 24px 24px 0 #FFD700, 28px 24px 0 #FFD700,
+    12px 28px 0 #FFD700, 16px 28px 0 #FFD700, 20px 28px 0 #FFD700, 24px 28px 0 #FFD700, 28px 28px 0 #FFD700,
+    8px 32px 0 #FFD700, 12px 32px 0 #FFD700, 16px 32px 0 #FFF8DC, 20px 32px 0 #FFF8DC, 24px 32px 0 #FFF8DC, 28px 32px 0 #FFD700, 32px 32px 0 #FFD700,
+    8px 36px 0 #FFD700, 12px 36px 0 #FFD700, 16px 36px 0 #FFF8DC, 20px 36px 0 #FFF8DC, 24px 36px 0 #FFF8DC, 28px 36px 0 #FFD700, 32px 36px 0 #FFD700,
+    32px 28px 0 #B8860B, 36px 24px 0 #FFD700, 40px 20px 0 #FFD700, 40px 24px 0 #FFD700,
+    16px 40px 0 #FFD700, 20px 40px 0 #FFD700, 20px 40px 0 #FFD700, 24px 40px 0 #FFD700,
+    16px 44px 0 #B8860B, 20px 44px 0 #B8860B, 20px 44px 0 #B8860B, 24px 44px 0 #B8860B;
 }
 
-@media (max-width: 768px) {
-  .guide-character { bottom: 16px; left: 16px; }
-  .guide-avatar { width: 55px; height: 55px; }
-  .guide-speech-bubble { font-size: 0.75rem; padding: 12px 16px; max-width: 200px; }
+.pika-sprite.idle { animation: pikaBreathe 2.5s ease-in-out infinite; }
+@keyframes pikaBreathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+.pika-sprite.sleeping { animation: pikaSleep 3s ease-in-out infinite; }
+@keyframes pikaSleep { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-4deg); } }
+
+.pika-pet.jumping .pika-sprite { animation: pikaJump 0.45s ease-out; }
+@keyframes pikaJump { 0% { transform: translateY(0); } 35% { transform: translateY(-30px) scale(1.1); } 100% { transform: translateY(0); } }
+
+/* â”€â”€ Electric sparks â”€â”€ */
+.pika-sparks { position: absolute; top: 0; left: 50%; width: 0; height: 0; pointer-events: none; }
+.pika-spark { position: absolute; width: 5px; height: 5px; background: #FFD700; border-radius: 50%; opacity: 0; box-shadow: 0 0 8px #FFD700, 0 0 14px rgba(255,215,0,0.5); }
+.pika-pet.sparking .pika-spark:nth-child(1) { animation: sp1 .5s ease-out forwards; }
+.pika-pet.sparking .pika-spark:nth-child(2) { animation: sp2 .5s ease-out .04s forwards; }
+.pika-pet.sparking .pika-spark:nth-child(3) { animation: sp3 .5s ease-out .08s forwards; }
+.pika-pet.sparking .pika-spark:nth-child(4) { animation: sp4 .5s ease-out .06s forwards; }
+.pika-pet.sparking .pika-spark:nth-child(5) { animation: sp5 .5s ease-out .1s forwards; }
+@keyframes sp1 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(-18px,-28px); } }
+@keyframes sp2 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(20px,-22px); } }
+@keyframes sp3 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(-10px,-36px); } }
+@keyframes sp4 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(26px,-14px); } }
+@keyframes sp5 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(4px,-40px); } }
+
+/* â”€â”€ Zzz â”€â”€ */
+.pika-zzz { position: absolute; top: -14px; right: -8px; font-family: var(--mono); font-size: 0.55rem; color: #FFD700; opacity: 0; pointer-events: none; }
+.pika-pet.sleeping .pika-zzz { animation: zzzUp 2s ease-in-out infinite; }
+@keyframes zzzUp { 0% { opacity:0; transform:translate(0,0); } 30% { opacity:1; } 100% { opacity:0; transform:translate(6px,-16px); } }
+
+/* â”€â”€ Bubble â”€â”€ */
+.pika-bubble {
+  position: absolute; bottom: 72px; left: 50%;
+  transform: translateX(-50%) translateY(6px) scale(0.9);
+  background: #1a1a1a; border: 2px solid #FFD700;
+  border-radius: 12px; padding: 8px 12px;
+  white-space: nowrap;
+  font-family: var(--mono); font-size: 0.6rem; line-height: 1.4; color: #FFE5BF;
+  box-shadow: 0 4px 16px rgba(255,215,0,0.2);
+  opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
 }
+.pika-bubble.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+.pika-bubble::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid #FFD700; }
+.pika-bubble::before { content:''; position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); border-left:4px solid transparent; border-right:4px solid transparent; border-top:4px solid #1a1a1a; z-index:1; }
+.pika-bubble-section { color: #FFD700; font-weight: 700; margin-right: 6px; }
+
+.pika-shadow { position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:30px; height:5px; background:rgba(0,0,0,0.12); border-radius:50%; filter:blur(2px); }
+
+@media (max-width: 768px) { .pika-bubble { font-size: 0.5rem; padding: 5px 8px; } }
+
