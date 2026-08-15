@@ -366,7 +366,7 @@ function Hero() {
     const tl = gsap.timeline({ delay: 2.6 });
     tl.fromTo(el.querySelectorAll('.line-inner'), { yPercent: 120 }, { yPercent: 0, duration: 1.1, stagger: 0.12, ease: 'power4.out' });
     tl.fromTo(el.querySelector('.hero-pre span'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, '-=0.5');
-    tl.fromTo(el.querySelector('.hero-bottom'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
+    tl.fromTo(el.querySelector('.hero-action'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
   }, []);
 
   return (
@@ -378,25 +378,20 @@ function Hero() {
         <span className="line"><span className="line-inner"><span className="italic">digital</span> experiences</span></span>
         <span className="line"><span className="line-inner">that <span className="outline">matter</span></span></span>
       </h1>
-      <div className="hero-bottom" style={{ opacity: 0, position: 'relative', zIndex: 1 }}>
-        <p className="hero-bio">
-          <strong>Full-Stack Developer</strong> with expertise in React, Next.js, Node.js & AI integrations.
-          Crafting <strong>responsive UIs</strong>, secure APIs, and data-driven dashboards from <strong>Mangalore, India</strong>.
-        </p>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <Magnetic>
-            <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
-              <span className="btn-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-              </span>
-              <span>Download Résumé</span>
-            </a>
-          </Magnetic>
-        </div>
+
+      <div className="hero-action" style={{ opacity: 0, position: 'absolute', bottom: '48px', right: '100px', zIndex: 10 }}>
+        <Magnetic>
+          <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
+            <span className="btn-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </span>
+            <span>Download Résumé</span>
+          </a>
+        </Magnetic>
       </div>
       <div className="hero-location" style={{ position: 'relative', zIndex: 1 }}>27.4505° N — Mangalore</div>
     </section>
@@ -412,7 +407,23 @@ function About() {
   const charsRef = useRef([]);
   const cursorRef = useRef(null);
 
-  const paragraph = "I'm Sujith, a software engineer who transforms complex problems into elegant, production-ready web applications. I build with React, Next.js, and Node.js — creating AI-integrated platforms, secure REST APIs, and data-driven dashboards that deliver real business value. Currently seeking to contribute to a product-focused engineering team.";
+  const content = [
+    { text: "I'm " },
+    { text: "Sujith,", highlight: true },
+    { text: " a " },
+    { text: "software engineer", highlight: true },
+    { text: " who transforms complex problems into elegant, production-ready web applications. I build with " },
+    { text: "React, Next.js,", highlight: true },
+    { text: " and " },
+    { text: "Node.js", highlight: true },
+    { text: " — creating " },
+    { text: "AI-integrated", highlight: true },
+    { text: " platforms, secure " },
+    { text: "REST APIs,", highlight: true },
+    { text: " and data-driven dashboards that deliver real business value. Currently seeking to contribute to a " },
+    { text: "product-focused", highlight: true },
+    { text: " engineering team." }
+  ];
 
   useEffect(() => {
     // Only select elements that are actually in the document (avoids HMR/unmount bugs)
@@ -439,7 +450,7 @@ function About() {
           if (progress === 1 || i < targetIdx - 2) {
             // Fully typed and cooled down
             char.style.opacity = '1';
-            char.style.color = '#1a1a1a';
+            char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#1a1a1a';
             char.style.textShadow = 'none';
           } else if (i <= targetIdx) {
             // Actively typing - heat trail
@@ -470,29 +481,36 @@ function About() {
     return () => ScrollTrigger.getAll().forEach(st => st.kill());
   }, []);
 
-  // Split paragraph into characters, preserving spaces
+  // Split content into characters, preserving spaces
   let charIdx = 0;
-  const rendered = paragraph.split(' ').map((word, wi) => (
-    <span key={wi} className="typewriter-word">
-      {word.split('').map((ch) => {
-        const idx = charIdx++;
-        return (
-          <span
-            key={idx}
-            className="typewriter-char"
-            ref={(el) => { charsRef.current[idx] = el; }}
-          >
-            {ch}
-          </span>
-        );
-      })}
-      <span
-        className="typewriter-char"
-        ref={(el) => { charsRef.current[charIdx] = el; }}
-      >
-        {' '}
-      </span>
-      {(() => { charIdx++; return null; })()}
+  const rendered = content.map((segment, si) => (
+    <span key={si} className={segment.highlight ? 'highlight-segment' : ''}>
+      {segment.text.split(' ').map((word, wi, arr) => (
+        <span key={wi} className="typewriter-word">
+          {word.split('').map((ch) => {
+            const idx = charIdx++;
+            return (
+              <span
+                key={idx}
+                className="typewriter-char"
+                data-highlight={segment.highlight ? 'true' : 'false'}
+                ref={(el) => { charsRef.current[idx] = el; }}
+              >
+                {ch}
+              </span>
+            );
+          })}
+          {wi < arr.length - 1 && (
+            <span
+              className="typewriter-char"
+              data-highlight={segment.highlight ? 'true' : 'false'}
+              ref={(el) => { charsRef.current[charIdx++] = el; }}
+            >
+              {' '}
+            </span>
+          )}
+        </span>
+      ))}
     </span>
   ));
 
@@ -884,8 +902,14 @@ function ExperienceEditorial() {
     if (!listWrapRef.current) return;
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
     gsap.fromTo(rows, 
-      { y: 40, opacity: 0 }, 
-      { y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power3.out' }
+      { x: -40, opacity: 0 }, 
+      { x: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: 'power3.out' }
+    );
+    
+    // Animate timeline line filling up
+    gsap.fromTo('.exp-list-line-fill',
+      { height: '0%' },
+      { height: '100%', duration: 1.5, ease: 'power2.inOut', delay: 0.2 }
     );
   }, [activeTab]);
 
@@ -895,10 +919,10 @@ function ExperienceEditorial() {
     
     // Animate out with stagger
     gsap.to(rows, {
-      y: -30,
+      x: 40,
       opacity: 0,
       stagger: 0.05,
-      duration: 0.3,
+      duration: 0.4,
       ease: 'power2.in',
       onComplete: () => {
         setActiveIdx(null); // Reset accordion
@@ -930,57 +954,51 @@ function ExperienceEditorial() {
 
   return (
     <section className="exp-editorial" id="experience" ref={sectionRef}>
+      <div className="exp-bg-glow"></div>
       <div className="exp-header-top">
         <span className="typewriter-terminal-tag" style={{ background: 'transparent', borderColor: 'rgba(255,229,191,0.2)', color: 'var(--bg)' }}>{'>'}_ timeline.log</span>
         
-        <div style={{ display: 'flex', gap: '40px', marginTop: '32px', position: 'relative' }}>
+        <div className="exp-tabs-pill">
+          <div 
+            className="exp-tab-highlighter" 
+            style={{ 
+              transform: `translateX(${activeTab === 'experience' ? '0%' : '100%'})` 
+            }} 
+          />
           {['experience', 'education'].map(tab => (
             <button 
               key={tab}
               onClick={() => handleTabSwitch(tab)}
               data-hover
-              style={{ 
-                background: 'transparent', border: 'none', 
-                fontFamily: 'var(--serif)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', 
-                fontWeight: 900, color: '#FFE5BF', 
-                padding: '8px 0',
-                opacity: activeTab === tab ? 1 : 0.3,
-                transform: activeTab === tab ? 'scale(1)' : 'scale(0.85)',
-                transformOrigin: 'left bottom',
-                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}
+              className={`exp-tab-btn-pill ${activeTab === tab ? 'active' : ''}`}
             >
-              {activeTab === tab && (
-                <span style={{ 
-                  width: '10px', height: '10px', 
-                  backgroundColor: 'var(--accent)', 
-                  borderRadius: '50%', 
-                  display: 'inline-block',
-                  boxShadow: '0 0 12px var(--accent)'
-                }} />
-              )}
               {tab === 'experience' ? 'WORK EXPERIENCE' : 'EDUCATION'}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="exp-list" onMouseLeave={handleMouseLeaveList} ref={listWrapRef} style={{ minHeight: '400px' }}>
+      <div className="exp-list-container" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="exp-list" onMouseLeave={handleMouseLeaveList} ref={listWrapRef} style={{ minHeight: '400px', position: 'relative' }}>
+          <div className="exp-list-line">
+            <div className="exp-list-line-fill"></div>
+          </div>
         {currentList.map((item, i) => (
           <div 
             key={`${activeTab}-${i}`} 
             className={`exp-row ${activeIdx === i ? 'active' : ''}`}
             onMouseEnter={() => handleMouseEnter(i)}
             onClick={() => handleMouseEnter(i)}
-          >
-            <div className="exp-row-visible">
-              <div className="exp-row-left">
-                <span className="exp-num">({item.num})</span>
+            >
+              <div className="exp-timeline-node">
+                <div className="exp-timeline-dot-inner"></div>
               </div>
+
+              <div className="exp-row-visible">
+                <div className="exp-row-left">
+                  <span className="exp-num">({item.num})</span>
+                  <span className="exp-company-sm">{item.company}</span>
+                </div>
               
               <div className="exp-title-wrap">
                 <h3 className="exp-title">
@@ -988,15 +1006,9 @@ function ExperienceEditorial() {
                 </h3>
               </div>
               
-              <div className="exp-row-right" style={{ flexDirection: 'row', alignItems: 'center', gap: '24px', justifyContent: 'flex-end', width: '20%' }}>
+              <div className="exp-row-right">
                 <span className="exp-period">{item.period}</span>
-                <div className="exp-hover-indicator" style={{
-                  width: '48px', height: '48px', borderRadius: '50%', 
-                  border: '1px solid rgba(255,229,191,0.2)', display: 'flex', flexShrink: 0,
-                  alignItems: 'center', justifyContent: 'center', color: '#FFE5BF',
-                  transform: activeIdx === i ? 'rotate(45deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.4s var(--ease), background 0.4s var(--ease)'
-                }}>
+                <div className="exp-hover-indicator">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1010,41 +1022,23 @@ function ExperienceEditorial() {
               ref={el => contentRefs.current[i] = el}
               style={{ height: 0, opacity: 0, overflow: 'hidden' }}
             >
-              <div className="exp-accordion-inner">
+              <div className="exp-accordion-inner creative-accordion">
                 <div className="exp-acc-left">
-                  <div className="exp-acc-company">{item.company}</div>
+                  <div className="exp-acc-company-large">{item.company}</div>
                 </div>
                 <div className="exp-acc-right">
                   <p className="exp-acc-desc">{item.desc}</p>
                   <div className="exp-acc-tags">
-                    {item.tags.map((t, j) => <span key={j}>{t}</span>)}
+                    {item.tags.map((t, j) => <span key={j} className="creative-tag">{t}</span>)}
                   </div>
                 </div>
               </div>
             </div>
           </div>
         ))}
+        </div>
       </div>
     </section>
-  );
-}
-
-/* ════════ STATS ════════ */
-function Stats() {
-  return (
-    <div className="stats-strip">
-      {[
-        { val: '3+', desc: 'Years Experience' },
-        { val: '10+', desc: 'Projects Shipped' },
-        { val: '~30%', desc: 'Query Optimization' },
-        { val: 'MCA', desc: 'NMAM Institute of Tech' },
-      ].map((s, i) => (
-        <div key={i} className="stat-box reveal-up">
-          <div className="stat-value">{s.val}</div>
-          <div className="stat-desc">{s.desc}</div>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -1055,11 +1049,64 @@ function Contact() {
       <div className="contact-eyebrow reveal-up">Get In Touch</div>
       <h2 className="contact-heading reveal-up">Let's create<br />something <em>great</em></h2>
       <div className="contact-links reveal-up">
-        <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>✉ sujith7344@gmail.com</a>
+        <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>Email ↗</a>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer" className="contact-btn" data-hover>GitHub ↗</a>
-        <a href="tel:+918217615895" className="contact-btn" data-hover>+91 82176 15895</a>
+        <a href="tel:+918217615895" className="contact-btn" data-hover>Phone ↗</a>
       </div>
     </section>
+  );
+}
+/* ════════ GUIDE CHARACTER ════════ */
+function GuideCharacter() {
+  const [dialogue, setDialogue] = useState("Hey there! Welcome to my digital space.");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Show character after 2.5s initial load
+    const timer = setTimeout(() => setVisible(true), 2500);
+    
+    // Set up ScrollTrigger for each section
+    const sections = [
+      { id: '#home', text: "Hey there! Welcome to my digital space. I'm your portfolio guide." },
+      { id: '#about', text: "Here is a little about me. I transform complex problems into elegant web apps!" },
+      { id: '#experience', text: "Check out my timeline! Click to expand my work and education history." },
+      { id: '#projects', text: "These are some of my best creations. Check out the tech stacks!" },
+      { id: '#skills', text: "Look at all these technologies I work with daily." },
+      { id: '#contact', text: "Ready to collaborate? Let's build something great together!" }
+    ];
+
+    const triggers = [];
+
+    sections.forEach((sec) => {
+      const el = document.querySelector(sec.id);
+      if (el) {
+        const st = ScrollTrigger.create({
+          trigger: el,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => setDialogue(sec.text),
+          onEnterBack: () => setDialogue(sec.text),
+        });
+        triggers.push(st);
+      }
+    });
+
+    return () => {
+      clearTimeout(timer);
+      triggers.forEach(t => t.kill());
+    };
+  }, []);
+
+  return (
+    <div className={`guide-character ${visible ? 'visible' : ''}`}>
+      <div className="guide-avatar" onClick={() => setVisible(!visible)}>
+        <img src="/pixel-girl.png" alt="Pixel Guide" />
+      </div>
+      <div className="guide-speech-bubble">
+        <p>{dialogue}</p>
+        <button className="guide-close" onClick={() => setVisible(false)} aria-label="Dismiss guide">×</button>
+      </div>
+    </div>
   );
 }
 
@@ -1101,10 +1148,10 @@ export default function App() {
         <About />
         <ExperienceEditorial />
         <ProjectsDeck />
-        <Stats />
         <Skills />
         <Contact />
       </main>
+      <GuideCharacter />
       <footer className="footer">
         <span>© 2026 Sujith</span>
         <span>Designed & Built with React + GSAP</span>
