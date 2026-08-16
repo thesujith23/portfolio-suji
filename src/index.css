@@ -1,14 +1,14 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #FFE5BF;
-  --surface: #FFF2DB;
-  --border: rgba(246, 36, 64, 0.35);
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --border: rgba(246, 36, 64, 0.2);
   --accent: #F62440;
   --accent-rgb: 246, 36, 64;
-  --text: #1a1a1a;
-  --muted: #666666;
-  --dim: #999999;
+  --text: #090A0F;
+  --muted: #6B7280;
+  --dim: #9CA3AF;
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'Inter', system-ui, sans-serif;
   --mono: 'Space Mono', monospace;
@@ -188,120 +188,205 @@ button { cursor: none; }
   transition: color 0.4s;
 }
 .hero-title .outline:hover { color: var(--text); }
-.hero-location {
-  position: absolute; right: 48px; bottom: 48px;
-  font-family: var(--mono); font-size: 0.55rem; color: var(--dim);
-  letter-spacing: 0.2em; text-transform: uppercase;
-  writing-mode: vertical-rl;
+
+/* ─────────── CREATIVE RESUME BUTTON ─────────── */
+.resume-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• CREATIVE RESUME BUTTON â•â•â•â•â•â•â•â•â•â•â• */
-@keyframes spin-gradient {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+.resume-btn-tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.9;
+  transition: opacity 0.3s var(--ease);
+  pointer-events: none;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.resume-btn-tag::before,
+.resume-btn-tag::after {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.resume-btn-wrap:hover .resume-btn-tag {
+  opacity: 0;
+}
+
+/* Pulsing ring behind the button */
+.resume-btn-wrap::before {
+  content: '';
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--text);
+  opacity: 0;
+  animation: pulseRing 2.5s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Orbiting dots */
+.resume-orbit {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  animation: orbitSpin 6s linear infinite;
+  pointer-events: none;
+  transition: all 0.6s var(--ease);
+}
+
+.resume-btn-wrap:hover .resume-orbit {
+  width: 110%;
+  height: 110%;
+  border-radius: 100px;
+}
+
+.resume-orbit-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text);
+}
+
+.resume-orbit-dot:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+.resume-orbit-dot:nth-child(2) { bottom: 0; left: 50%; transform: translateX(-50%); opacity: 0.5; }
+.resume-orbit-dot:nth-child(3) { left: 0; top: 50%; transform: translateY(-50%); opacity: 0.3; }
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* The actual button */
 .resume-btn-creative {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 18px 48px;
-  font-family: var(--sans);
-  font-size: 0.85rem;
+  gap: 0px;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-weight: 800;
-  color: #fff;
-  border-radius: 100px;
+  font-weight: 700;
+  color: var(--bg);
+  border-radius: 50%;
   text-decoration: none;
   z-index: 1;
-  background: transparent;
+  background: var(--text);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* The spinning background layer */
-.resume-btn-creative::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 250%;
-  height: 250%;
-  background: conic-gradient(
-    transparent,
-    rgba(246, 36, 64, 0.1),
-    var(--accent),
-    #ff6b81,
-    var(--accent),
-    rgba(246, 36, 64, 0.1),
-    transparent
-  );
-  animation: spin-gradient 4s linear infinite;
-  z-index: -2;
-  opacity: 0.8;
-  transition: opacity 0.4s;
-}
-
-/* The inner dark pill */
-.resume-btn-creative::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  background: #111; /* Extremely dark pill interior */
-  border-radius: 100px;
-  z-index: -1;
-  transition: background 0.4s, inset 0.4s;
-}
-
-/* Hover effects */
-.resume-btn-creative:hover::before {
-  opacity: 1;
-  animation-duration: 2s; /* Spins much faster on hover */
-}
-
-.resume-btn-creative:hover::after {
-  background: #1a1a1a;
-  inset: 3px; /* Border gets slightly thicker */
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(26, 26, 26, 0.2);
 }
 
 .resume-btn-creative:hover {
-  box-shadow: 0 15px 40px rgba(246, 36, 64, 0.5);
-  transform: translateY(-3px) scale(1.02);
-  color: #FFE5BF;
+  width: 260px;
+  border-radius: 100px;
+  gap: 12px;
+  padding: 0 32px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 40px rgba(246, 36, 64, 0.5), 0 0 60px rgba(246, 36, 64, 0.15);
 }
 
-.resume-btn-creative span,
-.resume-btn-creative svg {
+.resume-btn-creative .btn-label {
   position: relative;
   z-index: 2;
-  transition: transform 0.4s var(--ease);
+  white-space: nowrap;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resume-btn-creative:hover .btn-label {
+  max-width: 200px;
+  opacity: 1;
+  transition: max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
+              opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
 }
 
 .resume-btn-creative .btn-icon {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  color: var(--accent);
+  color: var(--bg);
+  flex-shrink: 0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .resume-btn-creative:hover .btn-icon {
-  transform: translateX(4px) scale(1.1);
-  color: #ff6b81;
+  color: #fff;
+  animation: iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconBounce {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(6px); }
+  60% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+/* Shimmer sweep on hover */
+.resume-btn-creative::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: none;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.resume-btn-creative:hover::after {
+  animation: shimmerSweep 0.8s ease-out 0.2s;
+}
+
+@keyframes shimmerSweep {
+  0% { left: -60%; }
+  100% { left: 120%; }
 }
 
 .resume-btn-creative:active {
-  transform: scale(0.98);
+  transform: scale(0.95);
+  box-shadow: 0 2px 10px rgba(26, 26, 26, 0.2);
 }
 
 @media (max-width: 768px) {
   .hero { padding: 0 24px; }
-  .hero-location { display: none; }
-  .resume-btn-creative { padding: 16px 32px; width: 100%; justify-content: center; }
+  .resume-btn-wrap { transform: scale(0.9); }
 }
 
 
@@ -602,7 +687,7 @@ button { cursor: none; }
   z-index: 2;
   background: transparent;
   border: none;
-  font-family: var(--sans);
+  font-family: var(--mono);
   font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -744,7 +829,7 @@ button { cursor: none; }
 }
 
 .exp-company-sm {
-  font-family: var(--sans);
+  font-family: var(--mono);
   font-size: 1rem;
   font-weight: 500;
   color: rgba(255, 229, 191, 0.9);
@@ -1113,7 +1198,7 @@ button { cursor: none; }
 .pika-pet.jumping .pika-sprite { animation: pikaJump 0.45s ease-out; }
 @keyframes pikaJump { 0% { transform: translateY(0); } 35% { transform: translateY(-30px) scale(1.1); } 100% { transform: translateY(0); } }
 
-/* â”€â”€ Electric sparks â”€â”€ */
+/* ── Electric sparks ── */
 .pika-sparks { position: absolute; top: 0; left: 50%; width: 0; height: 0; pointer-events: none; }
 .pika-spark { position: absolute; width: 5px; height: 5px; background: #FFD700; border-radius: 50%; opacity: 0; box-shadow: 0 0 8px #FFD700, 0 0 14px rgba(255,215,0,0.5); }
 .pika-pet.sparking .pika-spark:nth-child(1) { animation: sp1 .5s ease-out forwards; }
@@ -1127,12 +1212,12 @@ button { cursor: none; }
 @keyframes sp4 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(26px,-14px); } }
 @keyframes sp5 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(4px,-40px); } }
 
-/* â”€â”€ Zzz â”€â”€ */
+/* ── Zzz ── */
 .pika-zzz { position: absolute; top: -14px; right: -8px; font-family: var(--mono); font-size: 0.55rem; color: #FFD700; opacity: 0; pointer-events: none; }
 .pika-pet.sleeping .pika-zzz { animation: zzzUp 2s ease-in-out infinite; }
 @keyframes zzzUp { 0% { opacity:0; transform:translate(0,0); } 30% { opacity:1; } 100% { opacity:0; transform:translate(6px,-16px); } }
 
-/* â”€â”€ Bubble â”€â”€ */
+/* ── Bubble ── */
 .pika-bubble {
   position: absolute; bottom: 72px; left: 50%;
   transform: translateX(-50%) translateY(6px) scale(0.9);

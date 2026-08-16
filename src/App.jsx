@@ -150,7 +150,7 @@ const playHoverSound = () => {
   }
 };
 
-function Magnetic({ children }) {
+function Magnetic({ children, strength = 0.4 }) {
   const magneticRef = useRef(null);
   
   useEffect(() => {
@@ -165,8 +165,8 @@ function Magnetic({ children }) {
       const { height, width, left, top } = el.getBoundingClientRect();
       const x = clientX - (left + width/2);
       const y = clientY - (top + height/2);
-      xTo(x * 0.4);
-      yTo(y * 0.4);
+      xTo(x * strength);
+      yTo(y * strength);
     };
 
     const handleMouseLeave = () => {
@@ -196,7 +196,7 @@ function Magnetic({ children }) {
   );
 }
 
-/* â•â•â•â•â•â•â•â• HERO CANVAS â•â•â•â•â•â•â•â• */
+/* ════════ HERO CANVAS ════════ */
 function HeroCanvas() {
   const canvasRef = useRef(null);
 
@@ -207,90 +207,128 @@ function HeroCanvas() {
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
     
-    let particles = [];
-    const particleCount = Math.floor((width * height) / 45000);
-    const mouse = { x: -1000, y: -1000, radius: 150 };
+    const numStars = 600;
+    const stars = [];
+    let speed = 0.5; // Base idle speed
+    let targetSpeed = 0.5;
+    
+    // Camera steering and rotation
+    const camera = { x: width/2, y: height/2, targetX: width/2, targetY: height/2 };
+    let rotation = 0;
 
-    class Particle {
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 1.5 + 0.5;
-      }
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        
-        if (this.x < 0 || this.x > width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > height) this.vy = -this.vy;
-
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < mouse.radius) {
-          const forceDirectionX = dx / distance;
-          const forceDirectionY = dy / distance;
-          const force = (mouse.radius - distance) / mouse.radius;
-          const directionX = forceDirectionX * force * 1.5;
-          const directionY = forceDirectionY * force * 1.5;
-          this.x -= directionX;
-          this.y -= directionY;
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 229, 191, 0.4)';
-        ctx.fill();
-      }
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: (Math.random() - 0.5) * width * 3, // Wider universe for steering
+        y: (Math.random() - 0.5) * height * 3,
+        z: Math.random() * width,
+        pz: Math.random() * width 
+      });
     }
-
-    const init = () => {
-      particles = [];
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-      }
-    };
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        for (let j = i; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 229, 191, ${(1 - dist / 120) * 0.2})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
+      
+      // Smoothly interpolate speed and camera steering
+      speed += (targetSpeed - speed) * 0.05;
+      camera.x += (camera.targetX - camera.x) * 0.05;
+      camera.y += (camera.targetY - camera.y) * 0.05;
+      
+      // Add a cool spiral rotation during warp speed
+      rotation += speed * 0.0002;
+      const cosR = Math.cos(rotation);
+      const sinR = Math.sin(rotation);
+
+      for (let i = 0; i < numStars; i++) {
+        let star = stars[i];
+        
+        star.z -= speed;
+        
+        if (star.z < 1) {
+          star.x = (Math.random() - 0.5) * width * 3;
+          star.y = (Math.random() - 0.5) * height * 3;
+          star.z = width;
+          star.pz = width;
+        }
+        
+        // Apply 3D rotation (Spiral effect)
+        const rx = star.x * cosR - star.y * sinR;
+        const ry = star.x * sinR + star.y * cosR;
+        
+        // 3D projection with steering camera
+        const sx = (rx / star.z) * width + camera.x;
+        const sy = (ry / star.z) * width + camera.y;
+        
+        const px = (rx / star.pz) * width + camera.x;
+        const py = (ry / star.pz) * width + camera.y;
+        
+        star.pz = star.z;
+        
+        if (sx >= 0 && sx <= width && sy >= 0 && sy <= height) {
+          ctx.beginPath();
+          
+          const brightness = 1 - (star.z / width);
+          
+          if (speed > 10) {
+            // White-hot plasma tips fading into red tails
+            const dx = sx - px;
+            const dy = sy - py;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist > 0.1) {
+              const gradient = ctx.createLinearGradient(px, py, sx, sy);
+              gradient.addColorStop(0, `rgba(246, 36, 64, 0)`); // Tail fades out
+              gradient.addColorStop(0.7, `rgba(246, 36, 64, ${brightness})`); // Red body
+              gradient.addColorStop(1, `rgba(255, 255, 255, ${brightness})`); // White-hot head
+              ctx.strokeStyle = gradient;
+            } else {
+               ctx.strokeStyle = `rgba(246, 36, 64, ${brightness})`;
+            }
+          } else {
+            // Subtle dark dots during idle
+            ctx.strokeStyle = `rgba(9, 10, 15, ${brightness * 0.5})`;
           }
+          
+          ctx.lineWidth = Math.max(0.5, brightness * (speed > 5 ? 4 : 2));
+          ctx.lineCap = "round";
+          ctx.moveTo(px, py);
+          ctx.lineTo(sx, sy);
+          ctx.stroke();
         }
       }
     };
 
-    init();
     gsap.ticker.add(animate);
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      init();
+      camera.x = camera.targetX = width / 2;
+      camera.y = camera.targetY = height / 2;
+      for (let i = 0; i < numStars; i++) {
+        stars[i].z = Math.random() * width;
+        stars[i].pz = stars[i].z;
+      }
     };
     
+    let timeout;
     const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      camera.targetX = e.clientX - rect.left;
+      camera.targetY = e.clientY - rect.top;
+      targetSpeed = 28; // Engage Hyperdrive!
+      
+      clearTimeout(timeout);
+      timeout = setTimeout(() => { 
+        targetSpeed = 0.5; // Decelerate
+        camera.targetX = width / 2;
+        camera.targetY = height / 2;
+      }, 200);
     };
-    const handleMouseLeave = () => { mouse.x = -1000; mouse.y = -1000; };
+    const handleMouseLeave = () => { 
+      targetSpeed = 0.5; 
+      camera.targetX = width / 2;
+      camera.targetY = height / 2;
+    };
 
     window.addEventListener('resize', handleResize);
     window.addEventListener('mousemove', handleMouseMove);
@@ -307,7 +345,7 @@ function HeroCanvas() {
   return <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />;
 }
 
-/* â•â•â•â•â•â•â•â• NAV â•â•â•â•â•â•â•â• */
+/* ════════ NAV ════════ */
 function Nav() {
   const [time, setTime] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
@@ -357,6 +395,21 @@ function Nav() {
 }
 
 /* â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• */
+const MagneticText = ({ text, strength = 0.8 }) => {
+  return (
+    <>
+      {text.split('').map((char, index) => {
+        if (char === ' ') return <span key={index}>&nbsp;</span>;
+        return (
+          <Magnetic key={index} strength={strength}>
+            <span style={{ display: 'inline-block', whiteSpace: 'pre' }}>{char}</span>
+          </Magnetic>
+        );
+      })}
+    </>
+  );
+};
+
 function Hero() {
   const ref = useRef(null);
 
@@ -373,27 +426,35 @@ function Hero() {
     <section className="hero" id="home" ref={ref} style={{ position: 'relative' }}>
       <HeroCanvas />
       <div className="hero-pre" style={{ position: 'relative', zIndex: 1 }}><span style={{ opacity: 0 }}>Software Engineer — Full Stack Developer</span></div>
-      <h1 className="hero-title" style={{ position: 'relative', zIndex: 1 }}>
-        <span className="line"><span className="line-inner">Building</span></span>
-        <span className="line"><span className="line-inner"><span className="italic">digital</span> experiences</span></span>
-        <span className="line"><span className="line-inner">that <span className="outline">matter</span></span></span>
+      <h1 className="hero-title" style={{ position: 'relative', zIndex: 1, pointerEvents: 'auto' }}>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="Building" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span className="italic" style={{ whiteSpace: 'nowrap' }}><MagneticText text="digital" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="experiences" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="that" strength={0.8} /></span>&nbsp;<span className="outline" style={{ whiteSpace: 'nowrap' }}><MagneticText text="matter" strength={0.8} /></span></span></span>
       </h1>
 
       <div className="hero-action" style={{ opacity: 0, position: 'absolute', bottom: '48px', right: '100px', zIndex: 10 }}>
         <Magnetic>
-          <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
-            <span className="btn-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </span>
-            <span>Download Résumé</span>
-          </a>
+          <div className="resume-btn-wrap">
+            <div className="resume-orbit">
+              <span className="resume-orbit-dot"></span>
+              <span className="resume-orbit-dot"></span>
+              <span className="resume-orbit-dot"></span>
+            </div>
+            <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
+              <span className="btn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </span>
+              <span className="btn-label">Résumé</span>
+            </a>
+            <span className="resume-btn-tag">Résumé</span>
+          </div>
         </Magnetic>
       </div>
-      <div className="hero-location" style={{ position: 'relative', zIndex: 1 }}>27.4505° N — Mangalore</div>
     </section>
   );
 }
@@ -598,6 +659,7 @@ function ProjectsDeck() {
             end: `+=${cards.length * 100}%`,
             pin: true,
             scrub: 1,
+            anticipatePin: 1,
             invalidateOnRefresh: true
           }
         });
@@ -646,8 +708,9 @@ function ProjectsDeck() {
         </div>
       </section>
 
-      <div ref={containerRef} style={{ backgroundColor: 'var(--bg-base)', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
-        <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
+      <div ref={containerRef} style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
+          <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
           {projects.map((p, i) => (
             <div
               key={i}
@@ -761,6 +824,7 @@ function ProjectsDeck() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </>
   );
@@ -1206,13 +1270,29 @@ function PikaPet() {
 
       const mouse = mouseRef.current;
       const distToMouse = Math.hypot(mouse.x - pos.x, mouse.y - pos.y);
-      const followTarget = distToMouse < 180 ? { x: mouse.x - 40, y: mouse.y - 40 } : targetRef.current;
+      let followTarget = targetRef.current;
+      let bookHovered = false;
+      const bookEl = document.querySelector('.resume-btn-wrap');
+
+      if (bookEl) {
+        const rect = bookEl.getBoundingClientRect();
+        if (mouse.x >= rect.left && mouse.x <= rect.right && mouse.y >= rect.top && mouse.y <= rect.bottom) {
+          bookHovered = true;
+          // Place Pikachu to the left of the book
+          followTarget = { x: rect.left - 100, y: rect.bottom - 80 };
+        }
+      }
+
+      if (!bookHovered && distToMouse < 180) {
+        followTarget = { x: mouse.x - 40, y: mouse.y - 40 };
+      }
+
       const dx = followTarget.x - pos.x;
       const dy = followTarget.y - pos.y;
       const dist = Math.hypot(dx, dy);
 
       if (dist > 5) {
-        const speed = distToMouse < 150 ? 1.8 : 2.5;
+        const speed = (distToMouse < 150 || bookHovered) ? 1.8 : 2.5;
         pos.x += (dx / dist) * speed;
         pos.y += (dy / dist) * speed;
         pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
@@ -1224,7 +1304,12 @@ function PikaPet() {
         lastMoveRef.current = Date.now();
       } else {
         setFrame(0);
-        setPetState(Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle');
+        if (bookHovered) {
+          setFacingLeft(false); // Make sure Pikachu faces the book (right)
+          setPetState('idle');
+        } else {
+          setPetState(Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle');
+        }
       }
 
       if (petRef.current) {
