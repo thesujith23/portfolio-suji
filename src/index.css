@@ -1028,51 +1028,35 @@ button { cursor: none; }
 }
 
 @media (max-width: 900px) {
+  .exp-editorial { padding: 100px 0; }
+  .exp-header-top { padding: 0 24px; }
+  
   .exp-row-visible {
     flex-direction: column;
     align-items: flex-start;
-    padding: 40px 24px 40px 60px;
-    gap: 16px;
+    padding: 32px 24px 32px 64px;
+    gap: 12px;
   }
-  .exp-list-line {
-    left: 30px;
-  }
-  .exp-timeline-node {
-    left: 30px;
-    top: 60px;
-  }
+  .exp-list-line { left: 32px; }
+  .exp-timeline-node { left: 32px; top: 52px; }
+  
   .exp-row-left, .exp-row-right {
     width: 100%;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     padding: 0;
+    flex-direction: row;
   }
-  .exp-row-right {
-    justify-content: flex-start;
-  }
-  .exp-title-wrap {
-    text-align: left;
-  }
-  .creative-accordion {
-    flex-direction: column;
-    padding: 0 24px 40px 60px;
-    gap: 24px;
-  }
-  .creative-accordion::before {
-    left: 60px;
-    right: 24px;
-  }
-}
-
-
-@media (max-width: 900px) {
-  .exp-editorial { padding: 100px 0; }
-  .exp-header-top { padding: 0 24px; }
-  .exp-row-visible { flex-direction: column; align-items: flex-start; padding: 32px 24px; gap: 16px; }
-  .exp-row-left, .exp-row-right { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
-  .exp-title-wrap { text-align: left; margin: 16px 0; }
-  .exp-title { font-size: clamp(1.5rem, 6vw, 2.5rem); }
-  .exp-accordion-inner { padding: 0 24px 32px 24px; flex-direction: column; gap: 24px; }
+  .exp-title-wrap { text-align: left; margin: 8px 0; }
+  .exp-title { font-size: clamp(1.2rem, 5vw, 2rem); }
+  .exp-company-sm { font-size: 0.85rem; }
+  .exp-role, .exp-period { font-size: 0.75rem; }
+  
+  .exp-accordion-inner { padding: 0 24px 32px 64px; flex-direction: column; gap: 24px; }
   .exp-acc-right { max-width: 100%; }
+
+  .creative-accordion { flex-direction: column; padding: 0 24px 40px 64px; gap: 24px; }
+  .creative-accordion::before { left: 64px; right: 24px; }
 }
 
 
@@ -1299,15 +1283,46 @@ button { cursor: none; }
 .pika-shadow { position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:30px; height:5px; background:rgba(0,0,0,0.12); border-radius:50%; filter:blur(2px); }
 
 @media (max-width: 768px) {
+  /* Cursor Removal */
+  body, a, button, * { cursor: auto !important; }
+  .cursor-dot, .cursor-symbol { display: none !important; }
+  
+  /* Nav Overlap Fix */
+  .nav-container {
+    background: rgba(17, 17, 17, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    padding: 12px 24px !important;
+  }
+  .nav-container > div { mix-blend-mode: normal !important; }
+
+  /* Pikachu Bubble */
   .pika-bubble { font-size: 0.5rem; padding: 5px 8px; }
-  .hero-title { font-size: clamp(3.2rem, 15vw, 6rem) !important; }
-  .proj-bg-text { font-size: clamp(3rem, 15vw, 6rem) !important; }
+
+  /* Section Spacing */
+  .hero-title { font-size: clamp(4.5rem, 21vw, 8rem) !important; line-height: 0.8 !important; }
+  .proj-bg-text { font-size: clamp(4rem, 20vw, 7rem) !important; }
   #work > section { padding-left: 24px !important; padding-right: 24px !important; }
-  .deck-card-inner { padding: 1.5rem !important; }
-  .deck-card-inner > div:first-child { flex-direction: column !important; gap: 0.5rem !important; }
+
+  /* Deck Reference CSS from Portfolio */
+  .deck-viewport { height: 85vh !important; align-items: center !important; }
+  .deck-card { border-radius: 12px !important; height: 65vh !important; }
+  .deck-card-inner { padding: 1.5rem !important; overflow-y: hidden !important; }
   .deck-card-inner > div:first-child h3 { font-size: 2rem !important; }
-  .deck-bottom-section { flex-direction: column !important; align-items: flex-start !important; padding-top: 1rem !important; }
-  .mobile-mockup-wrapper { height: 160px !important; }
-  .side-phones { display: none !important; }
-  .deck-viewport { width: 95vw !important; height: 75vh !important; }
+  .deck-card-inner p { font-size: 0.95rem !important; margin-top: 1rem !important; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .deck-quote { display: none !important; }
+  .deck-bottom-section { margin-top: 2rem !important; padding-top: 0 !important; }
+  
+  .mobile-mockup-wrapper { height: 22vh !important; width: 100% !important; flex: none !important; justify-content: center !important; gap: 0 !important; }
+  .landscape-mockup-wrapper { height: 18vh !important; width: 100% !important; flex: none !important; justify-content: center !important; gap: 0.5rem !important; }
+  
+  /* Timeline buttons */
+  .exp-tab-btn-pill { padding: 8px 16px !important; font-size: 0.65rem !important; width: 140px !important; }
+  .exp-tabs-pill { margin-bottom: 24px !important; padding: 4px !important; }
+
+  /* Skills Header */
+  .skills-header { flex-direction: column !important; align-items: center !important; text-align: center !important; justify-content: center !important; }
+  
+  .side-phones { display: flex !important; gap: 0 !important; }
+  .side-phones > div { border-radius: 6px !important; }
+  .main-phone { transform: scale(1) !important; box-shadow: 0 5px 15px rgba(0,0,0,0.5) !important; border-radius: 8px !important; }
 }

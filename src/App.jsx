@@ -258,13 +258,30 @@ function Nav() {
 
 /* â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• */
 const MagneticText = ({ text, strength = 0.8 }) => {
+  const triggerPiano = (e) => {
+    const el = e.currentTarget;
+    el.style.transform = 'translateY(-20px)';
+    el.style.color = 'var(--accent)';
+    setTimeout(() => {
+      el.style.transform = 'translateY(0)';
+      el.style.color = '';
+    }, 200);
+  };
+
   return (
     <>
       {text.split('').map((char, index) => {
         if (char === ' ') return <span key={index}>&nbsp;</span>;
         return (
           <Magnetic key={index} strength={strength}>
-            <span style={{ display: 'inline-block', whiteSpace: 'pre' }}>{char}</span>
+            <span 
+              className="piano-char"
+              style={{ display: 'inline-block', whiteSpace: 'pre', transition: 'transform 0.2s, color 0.2s' }}
+              onTouchStart={triggerPiano}
+              onClick={triggerPiano}
+            >
+              {char}
+            </span>
           </Magnetic>
         );
       })}
@@ -499,7 +516,7 @@ function ProjectsDeck() {
     
     let ctx = gsap.context(() => {
       let mm = gsap.matchMedia();
-      mm.add("(min-width: 800px)", () => {
+      mm.add("all", () => {
         const deckContainer = section.querySelector('.deck-container');
         const cards = gsap.utils.toArray('.deck-card');
         
@@ -1085,10 +1102,31 @@ function PikaPet() {
     const wanderInterval = setInterval(() => {
       if (draggingRef.current) return;
       const pad = 80;
-      targetRef.current = {
-        x: pad + Math.random() * (window.innerWidth - pad * 2),
-        y: pad + Math.random() * (window.innerHeight - pad * 2),
-      };
+      let newY = pad + Math.random() * (window.innerHeight - pad * 2);
+      let newX = pad + Math.random() * (window.innerWidth - pad * 2);
+
+      if (window.innerWidth <= 768) {
+         // Guide mobile user to tap timeline buttons if visible
+         const indicators = document.querySelectorAll('.exp-hover-indicator');
+         let guided = false;
+         for (let i = 0; i < indicators.length; i++) {
+           const rect = indicators[i].getBoundingClientRect();
+           // Find the first indicator that is well within the screen
+           if (rect.top > 100 && rect.bottom < window.innerHeight - 100) {
+             newX = rect.left - 50;
+             newY = rect.top - 10;
+             guided = true;
+             window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '👆', msg: 'Tap to expand!' } }));
+             break;
+           }
+         }
+         
+         if (!guided) {
+           newY = window.innerHeight - 150 + Math.random() * 50; // Keep at bottom
+         }
+      }
+      
+      targetRef.current = { x: newX, y: newY };
     }, 3000 + Math.random() * 3000);
 
     // Section guide
@@ -1324,7 +1362,7 @@ function PikaPet() {
         }
       }
 
-      if (!bookHovered && distToMouse < 180) {
+      if (window.innerWidth > 768 && !bookHovered && distToMouse < 180) {
         followTarget = { x: mouse.x - 40, y: mouse.y - 40 };
       }
 
