@@ -93,6 +93,9 @@ button { cursor: none; }
   75% { transform: translate(-2%, -2%); }
   100% { transform: translate(2%, 2%); }
 }
+@media (max-width: 768px) {
+  .grain { animation: none; opacity: 0.02; }
+}
 
 /* â•â•â•â•â•â•â•â•â•â•â• NAV â•â•â•â•â•â•â•â•â•â•â• */
 .nav {
@@ -154,6 +157,7 @@ button { cursor: none; }
   letter-spacing: 0.1em;
 }
 @media (max-width: 768px) {
+  .nav { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(17, 17, 17, 0.98); }
   .nav.nav-scrolled {
     top: 16px;
   }
@@ -161,6 +165,41 @@ button { cursor: none; }
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â•â•â•â• */
+/* ════════ HERO AURORA ════════ */
+.aurora-blob {
+  position: absolute;
+  filter: blur(140px);
+  opacity: 0.5;
+  border-radius: 50%;
+  animation: drift 20s infinite alternate ease-in-out;
+}
+.aurora-1 {
+  width: 500px; height: 500px;
+  background: rgba(246, 36, 64, 0.4);
+  top: -10%; left: -5%;
+  animation-duration: 25s;
+}
+.aurora-2 {
+  width: 450px; height: 450px;
+  background: rgba(0, 68, 255, 0.25);
+  bottom: -15%; right: -5%;
+  animation-duration: 22s;
+  animation-delay: -5s;
+}
+.aurora-3 {
+  width: 600px; height: 600px;
+  background: rgba(246, 36, 64, 0.2);
+  top: 30%; left: 30%;
+  animation-duration: 30s;
+  animation-delay: -10s;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15vw, 10vh) scale(1.1); }
+  100% { transform: translate(-10vw, 15vh) scale(0.9); }
+}
+
 .hero {
   height: 100svh;
   max-height: 100vh;
@@ -441,7 +480,8 @@ button { cursor: none; }
 /* â•â•â•â•â•â•â•â•â•â•â• PROJECTS (HORIZONTAL SCROLL) â•â•â•â•â•â•â•â•â•â•â• */
 .projects-horizontal {
   position: relative;
-  height: 100vh;
+  height: 100svh;
+  max-height: 100vh;
   width: 100%;
   overflow: hidden;
   background: var(--bg);
@@ -1083,6 +1123,7 @@ button { cursor: none; }
   opacity: 0;
   transition: opacity 0.5s ease;
   user-select: none;
+  will-change: left, top, transform;
 }
 .pika-pet.visible { opacity: 1; }
 .pika-pet.dragging { cursor: grabbing; }

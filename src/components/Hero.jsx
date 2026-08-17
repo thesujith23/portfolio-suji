@@ -74,7 +74,7 @@ export default function Hero() {
           <a href="#projects" className="btn-primary">
             View Work ↓
           </a>
-          <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="btn-ghost">
+          <a href="/SujithResume(2).pdf" target="_blank" rel="noopener noreferrer" className="btn-ghost">
             Résumé 📄
           </a>
           <a href="#contact" className="btn-ghost">

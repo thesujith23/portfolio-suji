@@ -196,153 +196,15 @@ function Magnetic({ children, strength = 0.4 }) {
   );
 }
 
-/* ════════ HERO CANVAS ════════ */
+/* ════════ HERO CANVAS (CSS Aurora) ════════ */
 function HeroCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    
-    const numStars = 600;
-    const stars = [];
-    let speed = 0.5; // Base idle speed
-    let targetSpeed = 0.5;
-    
-    // Camera steering and rotation
-    const camera = { x: width/2, y: height/2, targetX: width/2, targetY: height/2 };
-    let rotation = 0;
-
-    for (let i = 0; i < numStars; i++) {
-      stars.push({
-        x: (Math.random() - 0.5) * width * 3, // Wider universe for steering
-        y: (Math.random() - 0.5) * height * 3,
-        z: Math.random() * width,
-        pz: Math.random() * width 
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      
-      // Smoothly interpolate speed and camera steering
-      speed += (targetSpeed - speed) * 0.05;
-      camera.x += (camera.targetX - camera.x) * 0.05;
-      camera.y += (camera.targetY - camera.y) * 0.05;
-      
-      // Add a cool spiral rotation during warp speed
-      rotation += speed * 0.0002;
-      const cosR = Math.cos(rotation);
-      const sinR = Math.sin(rotation);
-
-      for (let i = 0; i < numStars; i++) {
-        let star = stars[i];
-        
-        star.z -= speed;
-        
-        if (star.z < 1) {
-          star.x = (Math.random() - 0.5) * width * 3;
-          star.y = (Math.random() - 0.5) * height * 3;
-          star.z = width;
-          star.pz = width;
-        }
-        
-        // Apply 3D rotation (Spiral effect)
-        const rx = star.x * cosR - star.y * sinR;
-        const ry = star.x * sinR + star.y * cosR;
-        
-        // 3D projection with steering camera
-        const sx = (rx / star.z) * width + camera.x;
-        const sy = (ry / star.z) * width + camera.y;
-        
-        const px = (rx / star.pz) * width + camera.x;
-        const py = (ry / star.pz) * width + camera.y;
-        
-        star.pz = star.z;
-        
-        if (sx >= 0 && sx <= width && sy >= 0 && sy <= height) {
-          ctx.beginPath();
-          
-          const brightness = 1 - (star.z / width);
-          
-          if (speed > 10) {
-            // White-hot plasma tips fading into red tails
-            const dx = sx - px;
-            const dy = sy - py;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            
-            if (dist > 0.1) {
-              const gradient = ctx.createLinearGradient(px, py, sx, sy);
-              gradient.addColorStop(0, `rgba(246, 36, 64, 0)`); // Tail fades out
-              gradient.addColorStop(0.7, `rgba(246, 36, 64, ${brightness})`); // Red body
-              gradient.addColorStop(1, `rgba(255, 255, 255, ${brightness})`); // White-hot head
-              ctx.strokeStyle = gradient;
-            } else {
-               ctx.strokeStyle = `rgba(246, 36, 64, ${brightness})`;
-            }
-          } else {
-            // Subtle dark dots during idle
-            ctx.strokeStyle = `rgba(9, 10, 15, ${brightness * 0.5})`;
-          }
-          
-          ctx.lineWidth = Math.max(0.5, brightness * (speed > 5 ? 4 : 2));
-          ctx.lineCap = "round";
-          ctx.moveTo(px, py);
-          ctx.lineTo(sx, sy);
-          ctx.stroke();
-        }
-      }
-    };
-
-    gsap.ticker.add(animate);
-
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      camera.x = camera.targetX = width / 2;
-      camera.y = camera.targetY = height / 2;
-      for (let i = 0; i < numStars; i++) {
-        stars[i].z = Math.random() * width;
-        stars[i].pz = stars[i].z;
-      }
-    };
-    
-    let timeout;
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      camera.targetX = e.clientX - rect.left;
-      camera.targetY = e.clientY - rect.top;
-      targetSpeed = 28; // Engage Hyperdrive!
-      
-      clearTimeout(timeout);
-      timeout = setTimeout(() => { 
-        targetSpeed = 0.5; // Decelerate
-        camera.targetX = width / 2;
-        camera.targetY = height / 2;
-      }, 200);
-    };
-    const handleMouseLeave = () => { 
-      targetSpeed = 0.5; 
-      camera.targetX = width / 2;
-      camera.targetY = height / 2;
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      gsap.ticker.remove(animate);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />;
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+       <div className="aurora-blob aurora-1"></div>
+       <div className="aurora-blob aurora-2"></div>
+       <div className="aurora-blob aurora-3"></div>
+    </div>
+  );
 }
 
 /* ════════ NAV ════════ */
@@ -441,7 +303,7 @@ function Hero() {
               <span className="resume-orbit-dot"></span>
               <span className="resume-orbit-dot"></span>
             </div>
-            <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
+            <a href="/SujithResume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
               <span className="btn-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -697,19 +559,17 @@ function ProjectsDeck() {
 
   return (
     <>
-      <section id="work" style={{ position: 'relative', backgroundColor: 'var(--bg-base)', paddingTop: '120px' }}>
-        <div style={{ marginBottom: '4rem', padding: '0 48px' }}>
+      <div ref={containerRef} id="work" style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
+        <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px' }}>
           <div className="reveal-up">
             <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
               Selected<br/><em>Projects</em>
             </h2>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <div ref={containerRef} style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
-        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
+        <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
           <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
           {projects.map((p, i) => (
             <div
@@ -898,25 +758,25 @@ function ExperienceEditorial() {
       num: '01',
       roleHtml: <>Software <span className="italic">Engineer</span></>,
       company: 'Trikon Software Labs',
-      period: '2026',
-      desc: 'Engineered an AI-powered voice call agent integrated with healthcare APIs for real-time appointment management.',
-      tags: ['Retell AI', 'Supabase', 'Next.js', 'Plivo'],
+      period: 'Apr 2026 – Present',
+      desc: 'Architected a real-time AI voice platform using Next.js, React, and LiveKit. Built DigitizedHealth for AI appointment booking via Retell AI and nexHealth APIs. Integrated Plivo, Supabase, Xano, and Stitch.',
+      tags: ['Next.js', 'Retell AI', 'Supabase', 'LiveKit', 'Xano'],
     },
     {
       num: '02',
-      roleHtml: <>Full Stack <span className="italic">Intern</span></>,
-      company: 'MBL Technologies',
-      period: '2025',
-      desc: 'Developed responsive web applications using the MERN stack. Optimized MongoDB queries by ~30% and implemented JWT-secured routes.',
-      tags: ['React', 'Node.js', 'MongoDB', 'Express'],
+      roleHtml: <>Web App Dev <span className="italic">Intern</span></>,
+      company: 'MBL Technologies Pvt Ltd',
+      period: 'Jan 2025 – Mar 2025',
+      desc: 'Built "Asare," a full-featured animal trust care platform using React.js. Reduced component re-renders by 20% through structured state management and integrated multiple third-party APIs.',
+      tags: ['React.js', 'State Management', 'REST APIs'],
     },
     {
       num: '03',
       roleHtml: <>Software Dev <span className="italic">Intern</span></>,
-      company: 'Accolade Tech Solutions',
-      period: '2023',
-      desc: 'Built and maintained REST APIs, implemented data validation layers, and contributed to front-end performance modules.',
-      tags: ['Python', 'Flask', 'MySQL', 'REST APIs'],
+      company: 'Accolade Tech Solutions Pvt Ltd',
+      period: 'Mar 2023 – Aug 2023',
+      desc: 'Developed internal web applications using .NET and C#, delivering secure backend services. Optimized SQL Server schemas, reducing average query execution time by ~30%.',
+      tags: ['.NET', 'C#', 'SQL Server', 'Backend'],
     },
   ];
 
@@ -925,15 +785,15 @@ function ExperienceEditorial() {
       num: '01',
       roleHtml: <>Master of <span className="italic">Computer Applications</span></>,
       company: 'NMAM Institute of Technology',
-      period: 'Graduated 2026',
+      period: 'Aug 2025',
       desc: 'Focused on advanced software engineering, data structures, and full-stack web technologies.',
       tags: ['Computer Science', 'Web Tech', 'Data Structures'],
     },
     {
       num: '02',
       roleHtml: <>Bachelor of <span className="italic">Computer Applications</span></>,
-      company: 'St. Aloysius College',
-      period: 'Graduated 2024',
+      company: 'SDM College of Business Management',
+      period: 'July 2023',
       desc: 'Foundation in computer science, programming languages, and database management.',
       tags: ['Programming', 'Databases', 'Networking'],
     }
@@ -1065,7 +925,6 @@ function ExperienceEditorial() {
               <div className="exp-row-visible">
                 <div className="exp-row-left">
                   <span className="exp-num">({item.num})</span>
-                  <span className="exp-company-sm">{item.company}</span>
                 </div>
               
               <div className="exp-title-wrap">
