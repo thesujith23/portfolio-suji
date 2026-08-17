@@ -228,6 +228,23 @@ button { cursor: none; }
 }
 .hero-title .outline:hover { color: var(--text); }
 
+#matter-word { 
+  opacity: 1; 
+  -webkit-text-stroke: 1.5px #000 !important; 
+  color: transparent !important; 
+  transition: all 0.3s ease; 
+}
+#matter-word.matter-charged {
+  animation: matterFlicker 0.15s infinite alternate;
+  color: #FFD700 !important;
+  -webkit-text-stroke: 2px #000 !important;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+}
+@keyframes matterFlicker {
+  0% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(0.98); opacity: 0.6; }
+}
+
 /* ─────────── CREATIVE RESUME BUTTON ─────────── */
 .resume-btn-wrap {
   position: relative;
@@ -1240,13 +1257,17 @@ button { cursor: none; }
 @keyframes pikaJump { 0% { transform: translateY(0); } 35% { transform: translateY(-30px) scale(1.1); } 100% { transform: translateY(0); } }
 
 /* ── Electric sparks ── */
+#pika-lightning-path {
+  opacity: 0;
+  transition: opacity 0.05s;
+}
 .pika-sparks { position: absolute; top: 0; left: 50%; width: 0; height: 0; pointer-events: none; }
 .pika-spark { position: absolute; width: 5px; height: 5px; background: #FFD700; border-radius: 50%; opacity: 0; box-shadow: 0 0 8px #FFD700, 0 0 14px rgba(255,215,0,0.5); }
-.pika-pet.sparking .pika-spark:nth-child(1) { animation: sp1 .5s ease-out forwards; }
-.pika-pet.sparking .pika-spark:nth-child(2) { animation: sp2 .5s ease-out .04s forwards; }
-.pika-pet.sparking .pika-spark:nth-child(3) { animation: sp3 .5s ease-out .08s forwards; }
-.pika-pet.sparking .pika-spark:nth-child(4) { animation: sp4 .5s ease-out .06s forwards; }
-.pika-pet.sparking .pika-spark:nth-child(5) { animation: sp5 .5s ease-out .1s forwards; }
+.pika-pet.sparking .pika-spark:nth-child(1) { animation: sp1 .5s ease-out infinite; }
+.pika-pet.sparking .pika-spark:nth-child(2) { animation: sp2 .5s ease-out .04s infinite; }
+.pika-pet.sparking .pika-spark:nth-child(3) { animation: sp3 .5s ease-out .08s infinite; }
+.pika-pet.sparking .pika-spark:nth-child(4) { animation: sp4 .5s ease-out .06s infinite; }
+.pika-pet.sparking .pika-spark:nth-child(5) { animation: sp5 .5s ease-out .1s infinite; }
 @keyframes sp1 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(-18px,-28px); } }
 @keyframes sp2 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(20px,-22px); } }
 @keyframes sp3 { 0% { opacity:1; transform:translate(0,0); } 100% { opacity:0; transform:translate(-10px,-36px); } }
@@ -1277,5 +1298,16 @@ button { cursor: none; }
 
 .pika-shadow { position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:30px; height:5px; background:rgba(0,0,0,0.12); border-radius:50%; filter:blur(2px); }
 
-@media (max-width: 768px) { .pika-bubble { font-size: 0.5rem; padding: 5px 8px; } }
-
+@media (max-width: 768px) {
+  .pika-bubble { font-size: 0.5rem; padding: 5px 8px; }
+  .hero-title { font-size: clamp(3.2rem, 15vw, 6rem) !important; }
+  .proj-bg-text { font-size: clamp(3rem, 15vw, 6rem) !important; }
+  #work > section { padding-left: 24px !important; padding-right: 24px !important; }
+  .deck-card-inner { padding: 1.5rem !important; }
+  .deck-card-inner > div:first-child { flex-direction: column !important; gap: 0.5rem !important; }
+  .deck-card-inner > div:first-child h3 { font-size: 2rem !important; }
+  .deck-bottom-section { flex-direction: column !important; align-items: flex-start !important; padding-top: 1rem !important; }
+  .mobile-mockup-wrapper { height: 160px !important; }
+  .side-phones { display: none !important; }
+  .deck-viewport { width: 95vw !important; height: 75vh !important; }
+}

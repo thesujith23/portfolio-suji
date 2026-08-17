@@ -292,7 +292,7 @@ function Hero() {
         <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="Building" strength={0.8} /></span></span></span>
         <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span className="italic" style={{ whiteSpace: 'nowrap' }}><MagneticText text="digital" strength={0.8} /></span></span></span>
         <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="experiences" strength={0.8} /></span></span></span>
-        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="that" strength={0.8} /></span>&nbsp;<span className="outline" style={{ whiteSpace: 'nowrap' }}><MagneticText text="matter" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="that" strength={0.8} /></span>&nbsp;<span className="outline" id="matter-word" style={{ whiteSpace: 'nowrap' }}><MagneticText text="matter" strength={0.8} /></span></span></span>
       </h1>
 
       <div className="hero-action" style={{ opacity: 0, position: 'absolute', bottom: '48px', right: '100px', zIndex: 10 }}>
@@ -500,6 +500,7 @@ function ProjectsDeck() {
     let ctx = gsap.context(() => {
       let mm = gsap.matchMedia();
       mm.add("(min-width: 800px)", () => {
+        const deckContainer = section.querySelector('.deck-container');
         const cards = gsap.utils.toArray('.deck-card');
         
         // Initial setup for the stack
@@ -516,7 +517,7 @@ function ProjectsDeck() {
 
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: section,
+            trigger: deckContainer || section,
             start: "top top",
             end: `+=${cards.length * 100}%`,
             pin: true,
@@ -560,7 +561,7 @@ function ProjectsDeck() {
   return (
     <>
       <div ref={containerRef} id="work" style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
-        <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px' }}>
+        <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px', paddingBottom: '20px' }}>
           <div className="reveal-up">
             <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
@@ -569,7 +570,7 @@ function ProjectsDeck() {
           </div>
         </section>
 
-        <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
+        <div className="deck-container" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
           <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
           {projects.map((p, i) => (
             <div
@@ -983,6 +984,73 @@ function Contact() {
     </section>
   );
 }
+/* ════════ SOUND HELPERS ════════ */
+const initAudio = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!window.audioCtx && AudioContext) window.audioCtx = new AudioContext();
+    if (window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
+  } catch(e) {}
+};
+
+const playChargeSound = () => {
+  if (!window.audioCtx) return;
+  try {
+    const ctx = window.audioCtx;
+    const osc = ctx.createOscillator();
+    osc.type = 'square'; // 8-bit style
+    
+    const now = ctx.currentTime;
+    // Classic retro power-up arpeggio (rising major chord)
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.setValueAtTime(277, now + 0.1);
+    osc.frequency.setValueAtTime(330, now + 0.2);
+    osc.frequency.setValueAtTime(440, now + 0.3);
+    osc.frequency.setValueAtTime(554, now + 0.4);
+    
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
+    gain.gain.setValueAtTime(0.05, now + 0.4);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.5);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(now + 0.5);
+  } catch(e) {}
+};
+
+const playZapSound = () => {
+  if (!window.audioCtx) return;
+  try {
+    const ctx = window.audioCtx;
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    osc1.type = 'square';
+    osc2.type = 'sawtooth';
+    
+    // Classic retro descending zap ("pew" sound)
+    const now = ctx.currentTime;
+    osc1.frequency.setValueAtTime(1200, now);
+    osc1.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+    
+    osc2.frequency.setValueAtTime(1200, now);
+    osc2.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+    
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+    osc1.start(); osc2.start();
+    osc1.stop(now + 0.2); osc2.stop(now + 0.2);
+  } catch(e) {}
+};
+
 /* ════════ PIKACHU PET ════════ */
 function PikaPet() {
   const petRef = useRef(null);
@@ -1005,6 +1073,10 @@ function PikaPet() {
   const lastMoveRef = useRef(Date.now());
 
   useEffect(() => {
+    // Unlock Audio Context on first interaction
+    const unlock = () => { initAudio(); window.removeEventListener('click', unlock); window.removeEventListener('keydown', unlock); window.removeEventListener('touchstart', unlock); };
+    window.addEventListener('click', unlock); window.addEventListener('keydown', unlock); window.addEventListener('touchstart', unlock);
+
     const showTimer = setTimeout(() => setVisible(true), 2500);
     const onMouse = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', onMouse, { passive: true });
@@ -1088,6 +1160,8 @@ function PikaPet() {
     // Main animation loop
     let walkFrame = 0;
     let fc = 0;
+    window._zapping = false;
+    window._lastZap = Date.now();
     const loop = () => {
       const pos = posRef.current;
       
@@ -1123,6 +1197,114 @@ function PikaPet() {
           petRef.current.style.top = `${pos.y}px`;
         }
         lastPosRef.current = { ...pos };
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const now = Date.now();
+      if (!window._lastZap) window._lastZap = now;
+      const matterEl = document.querySelector('#matter-word');
+      const pathEl = document.querySelector('#pika-lightning-path');
+
+      if (window._zapping) {
+        const zapElapsed = Date.now() - window._lastZap;
+
+        if (window._zapPhase === 'just-charging') {
+            if (petRef.current) {
+              petRef.current.style.left = `${pos.x}px`;
+              petRef.current.style.top = `${pos.y}px`;
+            }
+            rafRef.current = requestAnimationFrame(loop);
+            return;
+        }
+
+        if (zapElapsed > 500 && window._zapPhase === 'charging') {
+            window._zapPhase = 'shooting';
+            if (pathEl) pathEl.style.opacity = 1;
+            playZapSound();
+        }
+
+        if (matterEl && pathEl && window._zapPhase === 'shooting') {
+          const shootElapsed = zapElapsed - 500;
+          let progress = Math.min(1, shootElapsed / 150); // Takes 150ms to shoot
+          
+          const rect = matterEl.getBoundingClientRect();
+          const targetEndX = rect.left + rect.width / 2;
+          const targetEndY = rect.top + rect.height / 2;
+          const startX = pos.x + 45;
+          const startY = pos.y + 45;
+          
+          const endX = startX + (targetEndX - startX) * progress;
+          const endY = startY + (targetEndY - startY) * progress;
+
+          let pathStr = `M ${startX} ${startY} `;
+          const steps = 8;
+          for (let i = 1; i < steps; i++) {
+            const t = i / steps;
+            const px = startX + (endX - startX) * t + (Math.random() - 0.5) * (80 * progress);
+            const py = startY + (endY - startY) * t + (Math.random() - 0.5) * (80 * progress);
+            pathStr += `L ${px} ${py} `;
+          }
+          pathStr += `L ${endX} ${endY}`;
+          pathEl.setAttribute('d', pathStr);
+          
+          if (progress >= 1 && !window._matterCharged) {
+              window._matterCharged = true;
+              matterEl.classList.add('matter-charged');
+          }
+        }
+        if (petRef.current) {
+          petRef.current.style.left = `${pos.x}px`;
+          petRef.current.style.top = `${pos.y}px`;
+        }
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      let isMatterVisible = false;
+      if (matterEl) {
+         const rect = matterEl.getBoundingClientRect();
+         // Element is visible if its top is above the viewport bottom AND its bottom is below the viewport top.
+         isMatterVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      }
+      
+      const zapInterval = isMatterVisible ? 3000 : 10000;
+
+      if (now - window._lastZap > zapInterval && !draggingRef.current && !thrownRef.current) {
+        window._lastZap = now;
+        window._zapping = true;
+
+        if (isMatterVisible) {
+            window._zapPhase = 'charging';
+            window._matterCharged = false;
+            
+            playChargeSound();
+
+            const rect = matterEl.getBoundingClientRect();
+            setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+            setFacingLeft((rect.left + rect.width / 2) < pos.x + 45);
+            
+            if (pathEl) pathEl.style.opacity = 0;
+            
+            setTimeout(() => {
+              if (pathEl) pathEl.style.opacity = 0;
+              if (matterEl) matterEl.classList.remove('matter-charged');
+              window._zapping = false;
+              setPetState('idle');
+              window._lastZap = Date.now();
+            }, 1500);
+        } else {
+            window._zapPhase = 'just-charging';
+            playChargeSound();
+            setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+            
+            setTimeout(() => {
+              window._zapping = false;
+              setPetState('idle');
+              window._lastZap = Date.now();
+            }, 500);
+        }
+        
         rafRef.current = requestAnimationFrame(loop);
         return;
       }
@@ -1165,9 +1347,10 @@ function PikaPet() {
         setFrame(0);
         if (bookHovered) {
           setFacingLeft(false); // Make sure Pikachu faces the book (right)
-          setPetState('idle');
+          setPetState(prev => prev !== 'idle' ? 'idle' : prev);
         } else {
-          setPetState(Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle');
+          const newState = Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle';
+          setPetState(prev => prev !== newState ? newState : prev);
         }
       }
 
@@ -1211,19 +1394,24 @@ function PikaPet() {
   const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : 'idle';
 
   return (
-    <div className={cls} ref={petRef} style={{ left: posRef.current.x, top: posRef.current.y }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
-      <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
-        <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
+    <>
+      <svg id="pika-lightning-svg" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
+        <path id="pika-lightning-path" fill="none" stroke="#FFD700" strokeWidth="3" filter="drop-shadow(0 0 8px #FFD700)" />
+      </svg>
+      <div className={cls} ref={petRef} style={{ left: posRef.current.x, top: posRef.current.y }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+        <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
+          <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
+        </div>
+        <div className="pika-zzz">zzZ</div>
+        <div className={`pika-sprite ${sprCls}`} data-frame={frame}>
+          <div className="pika-body" />
+          <div className="pika-shadow" />
+        </div>
+        <div className="pika-sparks">
+          <div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" />
+        </div>
       </div>
-      <div className="pika-zzz">zzZ</div>
-      <div className={`pika-sprite ${sprCls}`} data-frame={frame}>
-        <div className="pika-body" />
-        <div className="pika-shadow" />
-      </div>
-      <div className="pika-sparks">
-        <div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" />
-      </div>
-    </div>
+    </>
   );
 }
 
