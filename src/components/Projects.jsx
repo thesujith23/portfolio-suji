@@ -11,9 +11,10 @@ const projects = [
   {
     num: '02',
     title: 'Book Store Management System',
-    desc: 'Full CRUD inventory management with secure REST APIs built on Node.js/Express and JWT authentication. Features a responsive React UI with reusable components for adding, updating, and viewing book records.',
-    stack: ['MongoDB', 'Express.js', 'React', 'Node.js'],
-    link: '#',
+    desc: 'Full CRUD inventory management with secure REST APIs built on Node.js/Express and JWT authentication. Features a responsive React UI with reusable components for adding, updating, and viewing book records. Fully deployed via Vercel and Render.',
+    stack: ['React (Vercel)', 'Node.js (Render)', 'MongoDB Atlas', 'JWT'],
+    link: 'https://book-store-mgt.vercel.app/',
+    live: true,
   },
   {
     num: '03',
