@@ -494,7 +494,10 @@ function ProjectsDeck() {
       tags: ['MediaPipe', 'OpenCV', 'Python', 'Flask'],
       color: '#3d2fa9',
       isMobile: false,
-      github: 'https://github.com/thesujith23/BodySyncAI-Intelligent-Pose-Detection-and-Fitness-Tracker'
+      github: 'https://github.com/thesujith23/BodySyncAI-Intelligent-Pose-Detection-and-Fitness-Tracker',
+      quote: '"Revolutionizing home fitness with real-time AI pose estimation and form correction. The computer vision pipeline achieves remarkable accuracy."',
+      quoteAuthor: 'Research & CV Pipeline',
+      quoteRole: 'MediaPipe & Python'
     },
     {
       idx: '02', name: 'Expense Tracker & Analytics',
@@ -510,7 +513,10 @@ function ProjectsDeck() {
       github: 'https://github.com/thesujith23/Expense-Tracker-And-Financial-Analytics-Dashboard.git',
       mainVideo: '/exptrackvdo.mp4',
       sideImg1: '/exp1.png',
-      sideImg2: '/exp2.png'
+      sideImg2: '/exp2.png',
+      quote: '"A seamless, enterprise-grade financial dashboard with lightning-fast data aggregation. Provides deep insights into personal finance seamlessly."',
+      quoteAuthor: 'Full-Stack Architecture',
+      quoteRole: 'MERN Stack'
     },
     {
       idx: '03', name: 'Book Store Management',
@@ -522,7 +528,10 @@ function ProjectsDeck() {
       github: 'https://github.com/thesujith23/Book-Store-Mgt.git',
       mainVideo: '/Bookvideo.mp4',
       sideImg1: '/book1.png',
-      sideImg2: '/book2.png'
+      sideImg2: '/book2.png',
+      quote: '"Robust inventory management powered by secure, scalable, and responsive web technologies. Fully automated CI/CD pipeline integrated."',
+      quoteAuthor: 'Backend & Database',
+      quoteRole: 'Node.js & MongoDB'
     },
     {
       idx: '04', name: 'TechHire — Job Portal',
@@ -531,7 +540,10 @@ function ProjectsDeck() {
       color: '#0055ff',
       isMobile: false,
       live: true,
-      github: 'https://github.com/thesujith23/HireReady-Ai.git'
+      github: 'https://github.com/thesujith23/HireReady-Ai.git',
+      quote: '"A modern, high-performance job board delivering sub-2s loads and seamless UX. The Next.js app router makes navigation instant."',
+      quoteAuthor: 'Frontend & Routing',
+      quoteRole: 'Next.js App Router'
     },
     {
       idx: '05', name: 'AI Food Recommendation',
@@ -542,7 +554,10 @@ function ProjectsDeck() {
       github: 'https://github.com/thesujith23/FoodRecommend',
       mainVideo: '/foodrecmdvdo.mp4',
       sideImg1: '/food1.png',
-      sideImg2: '/food2.png'
+      sideImg2: '/food2.png',
+      quote: '"Personalizing nutrition through intelligent algorithms and real-time dietary analysis. A brilliant intersection of health and machine learning."',
+      quoteAuthor: 'Machine Learning Core',
+      quoteRole: 'Python & Scikit-Learn'
     }
   ];
 
@@ -718,53 +733,39 @@ function ProjectsDeck() {
                   </div>
                 </div>
 
-                <div className="deck-bottom-section" style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', gap: '1.5rem', alignItems: 'center', flex: 1, minHeight: 0 }}>
-                  {p.isMobile ? (
-                    <div className="mobile-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1.5rem', height: '100%', justifyContent: 'flex-start' }}>
-                      <div className="main-phone" style={{ height: '100%', aspectRatio: '9/18', backgroundColor: '#000', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: '0 0 0 2px #4a4a4a, 0 0 0 7px #111, 0 20px 50px rgba(0,0,0,0.6)', transform: 'scale(1.05)', zIndex: 2 }}>
-                        {p.mainVideo ? (
-                          <video src={p.mainVideo} autoPlay loop muted playsInline style={{ maxWidth: '90%', maxHeight: '90%', width: 'auto', height: 'auto', objectFit: 'contain', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
-                        ) : p.mainImg ? (
-                          <img src={p.mainImg} style={{ maxWidth: '90%', maxHeight: '90%', width: 'auto', height: 'auto', objectFit: 'contain', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Mobile app preview" />
-                        ) : (
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textTransform: 'uppercase' }}>[ Main UI ]</span>
-                        )}
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 30%)', zIndex: 5, pointerEvents: 'none' }}></div>
-                      </div>
-                      <div className="side-phones" style={{ display: 'flex', gap: '1.5rem', height: '90%', alignItems: 'center' }}>
-                        <div style={{ height: '100%', aspectRatio: '9/18', backgroundColor: '#000', borderRadius: '20px', overflow: 'hidden', position: 'relative', boxShadow: '0 0 0 1px #4a4a4a, 0 0 0 5px #111, 0 10px 25px rgba(0,0,0,0.5)', opacity: 0.9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {p.sideImg1 ? <img src={p.sideImg1} style={{ maxWidth: '90%', maxHeight: '90%', width: 'auto', height: 'auto', objectFit: 'contain', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Secondary view" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textTransform: 'uppercase', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>[ Side UI ]</span>}
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 35%)', zIndex: 5, pointerEvents: 'none' }}></div>
-                        </div>
-                        {p.sideImg2 && (
-                          <div style={{ height: '100%', aspectRatio: '9/18', backgroundColor: '#000', borderRadius: '20px', overflow: 'hidden', position: 'relative', boxShadow: '0 0 0 1px #4a4a4a, 0 0 0 5px #111, 0 10px 25px rgba(0,0,0,0.5)', opacity: 0.7, transform: 'scale(0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src={p.sideImg2} style={{ maxWidth: '90%', maxHeight: '90%', width: 'auto', height: 'auto', objectFit: 'contain', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Third view" />
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 35%)', zIndex: 5, pointerEvents: 'none' }}></div>
-                          </div>
-                        )}
+                <div className="deck-bottom-section" style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', gap: '2rem', alignItems: 'flex-end', flex: 1, minHeight: 0 }}>
+                  <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '1rem' }}>
+                    <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
+                      {p.quote || '"A brilliant intersection of design and engineering."'}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                      <div>
+                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="landscape-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1rem', height: '100%', width: '100%' }}>
-                      <div style={{ flex: 2, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', padding: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.3)' }}>
-                        {p.mainVideo ? (
-                          <video src={p.mainVideo} autoPlay loop muted playsInline style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
-                        ) : p.mainImg ? (
-                          <img src={p.mainImg} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
-                        ) : (
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main UI View or Video ]</span>
-                        )}
+                  </div>
+
+                  <div className="landscape-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1rem', height: '100%', alignItems: 'center' }}>
+                    <div style={{ flex: 2.2, height: '90%', backgroundColor: '#0a0a0a', borderRadius: '20px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                      {p.mainVideo ? (
+                        <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
+                      ) : p.mainImg ? (
+                        <img src={p.mainImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
+                      ) : (
+                        <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
+                      )}
+                    </div>
+                    <div className="landscape-side-images" style={{ flex: 1, height: '90%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ flex: 1, backgroundColor: '#0a0a0a', borderRadius: '16px', padding: '8px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                        {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
                       </div>
-                      <div className="landscape-side-images" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', padding: '1.5rem', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {p.sideImg1 ? <img src={p.sideImg1} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Image 1 ]</span>}
-                        </div>
-                        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', padding: '1.5rem', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {p.sideImg2 ? <img src={p.sideImg2} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Image 2 ]</span>}
-                        </div>
+                      <div style={{ flex: 1, backgroundColor: '#0a0a0a', borderRadius: '16px', padding: '8px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                        {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
