@@ -498,7 +498,10 @@ function ProjectsDeck() {
       quote: '"Revolutionizing home fitness with real-time AI pose estimation and form correction. The computer vision pipeline achieves remarkable accuracy."',
       quoteAuthor: 'Research & CV Pipeline',
       quoteRole: 'MediaPipe & Python',
-      icon: 'python/python-original.svg'
+      icon: 'python/python-original.svg',
+      mainImg: '/body1.png',
+      sideImg1: '/body2.png',
+      sideImg2: '/body3.png'
     },
     {
       idx: '02', name: 'Expense Tracker & Analytics',
