@@ -497,7 +497,8 @@ function ProjectsDeck() {
       github: 'https://github.com/thesujith23/BodySyncAI-Intelligent-Pose-Detection-and-Fitness-Tracker',
       quote: '"Revolutionizing home fitness with real-time AI pose estimation and form correction. The computer vision pipeline achieves remarkable accuracy."',
       quoteAuthor: 'Research & CV Pipeline',
-      quoteRole: 'MediaPipe & Python'
+      quoteRole: 'MediaPipe & Python',
+      icon: 'python/python-original.svg'
     },
     {
       idx: '02', name: 'Expense Tracker & Analytics',
@@ -516,7 +517,8 @@ function ProjectsDeck() {
       sideImg2: '/exp2.png',
       quote: '"A seamless, enterprise-grade financial dashboard with lightning-fast data aggregation. Provides deep insights into personal finance seamlessly."',
       quoteAuthor: 'Full-Stack Architecture',
-      quoteRole: 'MERN Stack'
+      quoteRole: 'MERN Stack',
+      icon: 'react/react-original.svg'
     },
     {
       idx: '03', name: 'Book Store Management',
@@ -531,7 +533,8 @@ function ProjectsDeck() {
       sideImg2: '/book2.png',
       quote: '"Robust inventory management powered by secure, scalable, and responsive web technologies. Fully automated CI/CD pipeline integrated."',
       quoteAuthor: 'Backend & Database',
-      quoteRole: 'Node.js & MongoDB'
+      quoteRole: 'Node.js & MongoDB',
+      icon: 'nodejs/nodejs-original.svg'
     },
     {
       idx: '04', name: 'TechHire — Job Portal',
@@ -543,7 +546,9 @@ function ProjectsDeck() {
       github: 'https://github.com/thesujith23/HireReady-Ai.git',
       quote: '"A modern, high-performance job board delivering sub-2s loads and seamless UX. The Next.js app router makes navigation instant."',
       quoteAuthor: 'Frontend & Routing',
-      quoteRole: 'Next.js App Router'
+      quoteRole: 'Next.js App Router',
+      icon: 'nextjs/nextjs-original.svg',
+      invertIcon: true
     },
     {
       idx: '05', name: 'AI Food Recommendation',
@@ -557,7 +562,8 @@ function ProjectsDeck() {
       sideImg2: '/food2.png',
       quote: '"Personalizing nutrition through intelligent algorithms and real-time dietary analysis. A brilliant intersection of health and machine learning."',
       quoteAuthor: 'Machine Learning Core',
-      quoteRole: 'Python & Scikit-Learn'
+      quoteRole: 'Python & Scikit-Learn',
+      icon: 'python/python-original.svg'
     }
   ];
 
@@ -587,7 +593,7 @@ function ProjectsDeck() {
           scrollTrigger: {
             trigger: deckContainer || section,
             start: "top top",
-            end: `+=${(cards.length + 1) * 100}%`,
+            end: `+=${(cards.length - 1) * 100}%`,
             pin: true,
             scrub: 1,
             anticipatePin: 1,
@@ -620,10 +626,6 @@ function ProjectsDeck() {
             }
           }
         });
-        
-        // Add a buffer at the end so the user can actually read the final card
-        // before the section unpins and scrolls away
-        tl.to({}, { duration: 1.5 });
       });
     }, section);
 
@@ -739,7 +741,11 @@ function ProjectsDeck() {
                       {p.quote || '"A brilliant intersection of design and engineering."'}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
+                        {p.icon ? (
+                          <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${p.icon}`} alt="tech-icon" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: p.invertIcon ? 'invert(1)' : 'none' }} />
+                        ) : null}
+                      </div>
                       <div>
                         <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
                         <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
