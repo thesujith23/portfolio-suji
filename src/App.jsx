@@ -21,8 +21,8 @@ function Cursor() {
     const move = (e) => { tx = e.clientX; ty = e.clientY; };
     const tick = () => {
       x += (tx - x) * 0.15; y += (ty - y) * 0.15;
-      if (dot) { dot.style.left = x + 'px'; dot.style.top = y + 'px'; }
-      if (sym) { sym.style.left = x + 'px'; sym.style.top = y + 'px'; }
+      if (dot) { dot.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
+      if (sym) { sym.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
       reqId = requestAnimationFrame(tick);
     };
 
@@ -91,20 +91,20 @@ function Loader({ onDone }) {
     const tl = gsap.timeline({
       onComplete: () => {
         gsap.to(wrapRef.current, {
-          yPercent: -100, duration: 0.8, ease: 'power4.inOut',
+          yPercent: -100, duration: 1.2, ease: 'power3.inOut',
           onComplete: onDone,
         });
       },
     });
 
     tl.to(barRef.current, {
-      width: '100%', duration: 2.2, ease: 'power2.inOut',
+      scaleX: 1, duration: 4.5, ease: 'power1.inOut',
     });
 
     // Counter
     const obj = { val: 0 };
     tl.to(obj, {
-      val: 100, duration: 2.2, ease: 'power2.inOut',
+      val: 100, duration: 4.5, ease: 'power1.inOut',
       onUpdate: () => {
         if (counterRef.current) counterRef.current.textContent = Math.round(obj.val);
       },
@@ -385,23 +385,32 @@ function About() {
         const progress = self.progress;
         const targetIdx = Math.min(Math.floor(progress * chars.length), chars.length - 1);
         
-        // Update every character synchronously
+        // Update characters only if their state changes
         chars.forEach((char, i) => {
+          let state = 0; // 0: untyped, 1: actively typing, 2: fully typed
           if (progress === 1 || i < targetIdx - 2) {
-            // Fully typed and cooled down
-            char.style.opacity = '1';
-            char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#1a1a1a';
-            char.style.textShadow = 'none';
+            state = 2;
           } else if (i <= targetIdx) {
-            // Actively typing - heat trail
-            char.style.opacity = '1';
-            char.style.color = '#F62440';
-            char.style.textShadow = '0 0 12px #F62440';
+            state = 1;
           } else {
-            // Untyped future text
-            char.style.opacity = '0.15';
-            char.style.color = '#999999';
-            char.style.textShadow = 'none';
+            state = 0;
+          }
+          
+          if (char.dataset.state != state) {
+            char.dataset.state = state;
+            if (state === 2) {
+              char.style.opacity = '1';
+              char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#1a1a1a';
+              char.style.textShadow = 'none';
+            } else if (state === 1) {
+              char.style.opacity = '1';
+              char.style.color = '#F62440';
+              char.style.textShadow = '0 0 12px #F62440';
+            } else {
+              char.style.opacity = '0.15';
+              char.style.color = '#999999';
+              char.style.textShadow = 'none';
+            }
           }
         });
 
@@ -498,7 +507,10 @@ function ProjectsDeck() {
       liveBtnText: '#ffffff',
       liveBtnShadow: '0 4px 15px rgba(0,0,0,0.4)',
       liveBtnBorder: 'rgba(255,255,255,0.3)',
-      github: 'https://github.com/thesujith23/Expense-Tracker-And-Financial-Analytics-Dashboard.git'
+      github: 'https://github.com/thesujith23/Expense-Tracker-And-Financial-Analytics-Dashboard.git',
+      mainVideo: '/exptrackvdo.mp4',
+      sideImg1: '/exp1.png',
+      sideImg2: '/exp2.png'
     },
     {
       idx: '03', name: 'Book Store Management',
@@ -507,7 +519,10 @@ function ProjectsDeck() {
       color: '#1a1a1a',
       isMobile: false,
       liveUrl: 'https://book-store-mgt.vercel.app/',
-      github: 'https://github.com/thesujith23/Book-Store-Mgt.git'
+      github: 'https://github.com/thesujith23/Book-Store-Mgt.git',
+      mainVideo: '/Bookvideo.mp4',
+      sideImg1: '/book1.png',
+      sideImg2: '/book2.png'
     },
     {
       idx: '04', name: 'TechHire — Job Portal',
@@ -917,8 +932,8 @@ function ExperienceEditorial() {
     
     // Animate timeline line filling up
     gsap.fromTo('.exp-list-line-fill',
-      { height: '0%' },
-      { height: '100%', duration: 1.5, ease: 'power2.inOut', delay: 0.2 }
+      { scaleY: 0 },
+      { scaleY: 1, duration: 1.5, ease: 'power2.inOut', delay: 0.2 }
     );
   }, [activeTab]);
 
@@ -1231,8 +1246,7 @@ function PikaPet() {
       posRef.current.y = cy - dragOffsetRef.current.y;
       targetRef.current = { ...posRef.current };
       if (petRef.current) {
-        petRef.current.style.left = `${posRef.current.x}px`;
-        petRef.current.style.top = `${posRef.current.y}px`;
+        petRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`;
       }
     };
     const onDragEnd = (e) => {
@@ -1298,8 +1312,7 @@ function PikaPet() {
         }
         
         if (petRef.current) {
-          petRef.current.style.left = `${pos.x}px`;
-          petRef.current.style.top = `${pos.y}px`;
+          petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
         }
         lastPosRef.current = { ...pos };
         rafRef.current = requestAnimationFrame(loop);
@@ -1316,8 +1329,7 @@ function PikaPet() {
 
         if (window._zapPhase === 'just-charging') {
             if (petRef.current) {
-              petRef.current.style.left = `${pos.x}px`;
-              petRef.current.style.top = `${pos.y}px`;
+              petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
             }
             rafRef.current = requestAnimationFrame(loop);
             return;
@@ -1359,8 +1371,7 @@ function PikaPet() {
           }
         }
         if (petRef.current) {
-          petRef.current.style.left = `${pos.x}px`;
-          petRef.current.style.top = `${pos.y}px`;
+          petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
         }
         rafRef.current = requestAnimationFrame(loop);
         return;
@@ -1460,8 +1471,7 @@ function PikaPet() {
       }
 
       if (petRef.current) {
-        petRef.current.style.left = `${pos.x}px`;
-        petRef.current.style.top = `${pos.y}px`;
+        petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
       }
       lastPosRef.current = { ...pos };
       rafRef.current = requestAnimationFrame(loop);
@@ -1503,7 +1513,7 @@ function PikaPet() {
       <svg id="pika-lightning-svg" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
         <path id="pika-lightning-path" fill="none" stroke="#FFD700" strokeWidth="3" filter="drop-shadow(0 0 8px #FFD700)" />
       </svg>
-      <div className={cls} ref={petRef} style={{ left: posRef.current.x, top: posRef.current.y }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+      <div className={cls} ref={petRef} style={{ transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`, left: 0, top: 0 }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
         <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
           <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
         </div>

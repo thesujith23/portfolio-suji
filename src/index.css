@@ -45,7 +45,7 @@ button { cursor: none; }
   width: min(80vw, 400px); height: 2px; background: var(--dim);
   border-radius: 2px; overflow: hidden;
 }
-.loader-bar { height: 100%; background: var(--accent); width: 0%; border-radius: 2px; }
+.loader-bar { height: 100%; background: var(--accent); width: 100%; transform-origin: left; transform: scaleX(0); will-change: transform; border-radius: 2px; }
 .loader-text {
   font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
   letter-spacing: 0.3em; text-transform: uppercase;
@@ -85,13 +85,14 @@ button { cursor: none; }
   width: 200%; height: 200%; opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grainShift 0.5s steps(4) infinite;
+  will-change: transform;
 }
 @keyframes grainShift {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-2%, 2%); }
-  50% { transform: translate(2%, -2%); }
-  75% { transform: translate(-2%, -2%); }
-  100% { transform: translate(2%, 2%); }
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-2%, 2%, 0); }
+  50% { transform: translate3d(2%, -2%, 0); }
+  75% { transform: translate3d(-2%, -2%, 0); }
+  100% { transform: translate3d(2%, 2%, 0); }
 }
 @media (max-width: 768px) {
   .grain { animation: none; opacity: 0.02; }
@@ -172,6 +173,7 @@ button { cursor: none; }
   opacity: 0.5;
   border-radius: 50%;
   animation: drift 20s infinite alternate ease-in-out;
+  will-change: transform;
 }
 .aurora-1 {
   width: 500px; height: 500px;
@@ -195,9 +197,9 @@ button { cursor: none; }
 }
 
 @keyframes drift {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(15vw, 10vh) scale(1.1); }
-  100% { transform: translate(-10vw, 15vh) scale(0.9); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(15vw, 10vh, 0) scale(1.1); }
+  100% { transform: translate3d(-10vw, 15vh, 0) scale(0.9); }
 }
 
 .hero {
@@ -788,7 +790,10 @@ button { cursor: none; }
   width: 100%;
   background: linear-gradient(to bottom, var(--accent), #ff6b81);
   box-shadow: 0 0 15px var(--accent);
-  height: 0%; /* Animated via JS */
+  height: 100%;
+  transform-origin: top;
+  transform: scaleY(0);
+  will-change: transform;
   border-radius: 2px;
 }
 
