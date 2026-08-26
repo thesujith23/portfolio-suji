@@ -501,7 +501,7 @@ function ProjectsDeck() {
       meta: 'Secure multi-user financial tracking with JWT auth, role-protected routes, and MongoDB aggregation-powered real-time analytics dashboard.',
       tags: ['MERN', 'Recharts', 'JWT', 'Aggregation'],
       color: '#ff3c34',
-      isMobile: true,
+      isMobile: false,
       liveUrl: 'https://expense-tracker-and-financial-analy-five.vercel.app/',
       liveBtnColor: '#111111',
       liveBtnText: '#ffffff',
