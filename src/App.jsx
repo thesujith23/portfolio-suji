@@ -1071,7 +1071,7 @@ function Contact() {
       <div className="contact-links reveal-up">
         <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>Email ↗</a>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer" className="contact-btn" data-hover>GitHub ↗</a>
-        <a href="tel:+918217615895" className="contact-btn" data-hover>Phone ↗</a>
+        <a href="https://www.linkedin.com/in/sujith-s-625846397/" target="_blank" rel="noreferrer" className="contact-btn" data-hover>LinkedIn ↗</a>
       </div>
     </section>
   );
