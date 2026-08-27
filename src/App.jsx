@@ -539,7 +539,7 @@ function ProjectsDeck() {
       quoteRole: 'Node.js & MongoDB',
       icon: 'nodejs/nodejs-original.svg'
     },
-    {
+    /* {
       idx: '04', name: 'TechHire — Job Portal',
       meta: 'Job portal with 20+ listings, real-time filtering, dynamic routing, file-upload flow. Deployed on Vercel with CI/CD, sub-2s loads via Next.js App Router.',
       tags: ['Next.js', 'Tailwind', 'Vercel', 'CI/CD'],
@@ -552,7 +552,7 @@ function ProjectsDeck() {
       quoteRole: 'Next.js App Router',
       icon: 'nextjs/nextjs-original.svg',
       invertIcon: true
-    },
+    }, */
     {
       idx: '05', name: 'AI Food Recommendation',
       meta: 'A personalized smart food discovery platform that suggests optimal meals based on dietary preferences, health goals, and real-time nutritional analysis.',
@@ -576,13 +576,18 @@ function ProjectsDeck() {
     
     let ctx = gsap.context(() => {
       let mm = gsap.matchMedia();
-      mm.add("all", () => {
+      mm.add("(min-width: 1024px)", () => {
         const deckContainer = section.querySelector('.deck-container');
         const cards = gsap.utils.toArray('.deck-card');
         
         // Initial setup for the stack
         cards.forEach((card, i) => {
           gsap.set(card, {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
             transformOrigin: 'left center',
             scale: i > 0 ? 1 - (i * 0.03) : 1,
             rotationZ: i * 2.5,
@@ -647,8 +652,8 @@ function ProjectsDeck() {
           </div>
         </section>
 
-        <div className="deck-container" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
-          <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
+        <div className="deck-container">
+          <div className="deck-viewport">
           {projects.map((p, i) => (
             <div
               key={i}
@@ -673,33 +678,11 @@ function ProjectsDeck() {
                 });
               }}
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: p.color,
-                backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.3) 100%)',
-                borderRadius: '40px',
-                border: '1px solid rgba(255,255,255,0.15)',
-                overflow: 'hidden',
-                boxShadow: '0 30px 80px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                backfaceVisibility: 'hidden',
-                willChange: 'transform'
+                backgroundColor: p.color
               }}
             >
-              <div 
-                className="deck-card-inner" 
-                style={{ 
-                  padding: 'clamp(1.5rem, 3vw, 2.5rem)', 
-                  flex: 1, 
-                  display: 'flex', 
-                  flexDirection: 'column'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1.5rem' }}>
+              <div className="deck-card-inner">
+                <div className="deck-card-header">
                   <div style={{ maxWidth: '750px' }}>
                     <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
                       {p.name}
@@ -738,8 +721,8 @@ function ProjectsDeck() {
                   </div>
                 </div>
 
-                <div className="deck-bottom-section" style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', gap: '2rem', alignItems: 'flex-end', flex: 1, minHeight: 0 }}>
-                  <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '1rem' }}>
+                <div className="deck-bottom-section">
+                  <div className="quote-column">
                     <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
                       {p.quote || '"A brilliant intersection of design and engineering."'}
                     </p>
@@ -756,8 +739,8 @@ function ProjectsDeck() {
                     </div>
                   </div>
 
-                  <div className="landscape-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1rem', height: '100%', alignItems: 'center' }}>
-                    <div style={{ flex: 2.2, height: '90%', backgroundColor: '#0a0a0a', borderRadius: '20px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                  <div className="landscape-mockup-wrapper">
+                    <div className="mockup-main">
                       {p.mainVideo ? (
                         <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
                       ) : p.mainImg ? (
@@ -766,11 +749,11 @@ function ProjectsDeck() {
                         <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
                       )}
                     </div>
-                    <div className="landscape-side-images" style={{ flex: 1, height: '90%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div style={{ flex: 1, backgroundColor: '#0a0a0a', borderRadius: '16px', padding: '8px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                    <div className="landscape-side-images">
+                      <div className="mockup-side">
                         {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
                       </div>
-                      <div style={{ flex: 1, backgroundColor: '#0a0a0a', borderRadius: '16px', padding: '8px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1)' }}>
+                      <div className="mockup-side">
                         {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
                       </div>
                     </div>
