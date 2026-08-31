@@ -575,65 +575,62 @@ function ProjectsDeck() {
     if (!section) return;
     
     let ctx = gsap.context(() => {
-      let mm = gsap.matchMedia();
-      mm.add("(min-width: 1024px)", () => {
-        const deckContainer = section.querySelector('.deck-container');
-        const cards = gsap.utils.toArray('.deck-card');
-        
-        // Initial setup for the stack
-        cards.forEach((card, i) => {
-          gsap.set(card, {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            transformOrigin: 'left center',
-            scale: i > 0 ? 1 - (i * 0.03) : 1,
-            rotationZ: i * 2.5,
-            y: i * 25,
-            x: i * 15,
-            zIndex: cards.length - i
-          });
+      const deckContainer = section.querySelector('.deck-container');
+      const cards = gsap.utils.toArray('.deck-card');
+      
+      // Initial setup for the stack
+      cards.forEach((card, i) => {
+        gsap.set(card, {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          transformOrigin: 'left center',
+          scale: i > 0 ? 1 - (i * 0.03) : 1,
+          rotationZ: i * 2.5,
+          y: i * 25,
+          x: i * 15,
+          zIndex: cards.length - i
         });
+      });
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: deckContainer || section,
-            start: "top top",
-            end: `+=${(cards.length - 1) * 100}%`,
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true
-          }
-        });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: deckContainer || section,
+          start: "top top",
+          end: `+=${(cards.length - 1) * 100}%`,
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true
+        }
+      });
 
-        cards.forEach((card, i) => {
-          if (i < cards.length - 1) {
-            // Flip current card out to the left
-            tl.to(card, {
-              rotationY: -110,
-              scale: 0.9,
-              x: '-4vw',
+      cards.forEach((card, i) => {
+        if (i < cards.length - 1) {
+          // Flip current card out to the left
+          tl.to(card, {
+            rotationY: -110,
+            scale: 0.9,
+            x: '-4vw',
+            ease: "power2.inOut",
+            duration: 1
+          }, i);
+          
+          // Move remaining cards up the stack
+          for (let j = i + 1; j < cards.length; j++) {
+            let depth = j - i - 1;
+            tl.to(cards[j], {
+              scale: depth > 0 ? 1 - (depth * 0.03) : 1,
+              rotationZ: depth * 2.5,
+              y: depth * 25,
+              x: depth * 15,
               ease: "power2.inOut",
               duration: 1
             }, i);
-            
-            // Move remaining cards up the stack
-            for (let j = i + 1; j < cards.length; j++) {
-              let depth = j - i - 1;
-              tl.to(cards[j], {
-                scale: depth > 0 ? 1 - (depth * 0.03) : 1,
-                rotationZ: depth * 2.5,
-                y: depth * 25,
-                x: depth * 15,
-                ease: "power2.inOut",
-                duration: 1
-              }, i);
-            }
           }
-        });
+        }
       });
     }, section);
 
