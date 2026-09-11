@@ -5,7 +5,7 @@ import Lenis from 'lenis';
 import './index.css';
 
 gsap.registerPlugin(ScrollTrigger);
-
+ScrollTrigger.config({ ignoreMobileResize: true });
 /* â•â•â•â•â•â•â•â• CURSOR â•â•â•â•â•â•â•â• */
 function Cursor() {
   const dotRef = useRef(null);
@@ -952,18 +952,18 @@ function ExperienceEditorial() {
   const handleMouseEnter = (idx) => {
     if (activeIdx === idx) return;
     if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut' });
+      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
     }
     gsap.fromTo(contentRefs.current[idx], 
       { height: 0, opacity: 0 }, 
-      { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut' }
+      { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() }
     );
     setActiveIdx(idx);
   };
 
   const handleMouseLeaveList = () => {
     if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut' });
+      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
       setActiveIdx(null);
     }
   };
