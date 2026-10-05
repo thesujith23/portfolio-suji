@@ -1,12 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function Cursor() {
   const dotRef = useRef(null);
   const ringRef = useRef(null);
   const cursorRef = useRef(null);
+  const textRef = useRef(null);
   const pos = useRef({ x: 0, y: 0 });
   const ringPos = useRef({ x: 0, y: 0 });
   const raf = useRef(null);
+  const [hoverText, setHoverText] = useState('');
 
   useEffect(() => {
     const move = (e) => {
@@ -14,6 +16,10 @@ export default function Cursor() {
       if (dotRef.current) {
         dotRef.current.style.left = e.clientX + 'px';
         dotRef.current.style.top = e.clientY + 'px';
+      }
+      if (textRef.current) {
+        textRef.current.style.left = e.clientX + 'px';
+        textRef.current.style.top = e.clientY + 'px';
       }
     };
 
@@ -30,11 +36,21 @@ export default function Cursor() {
     };
 
     const handleOver = (e) => {
-      const el = e.target.closest('a, button, [data-cursor]');
-      if (el && cursorRef.current) cursorRef.current.classList.add('hovering');
+      const expCard = e.target.closest('.timeline-content');
+      if (expCard) {
+        setHoverText('Click to View');
+        if (cursorRef.current) cursorRef.current.classList.add('hovering-exp');
+      } else {
+        const el = e.target.closest('a, button, [data-cursor]');
+        if (el && cursorRef.current) cursorRef.current.classList.add('hovering');
+      }
     };
-    const handleOut = () => {
-      if (cursorRef.current) cursorRef.current.classList.remove('hovering');
+    const handleOut = (e) => {
+      if (cursorRef.current) {
+        cursorRef.current.classList.remove('hovering');
+        cursorRef.current.classList.remove('hovering-exp');
+      }
+      setHoverText('');
     };
 
     window.addEventListener('mousemove', move);
@@ -54,6 +70,7 @@ export default function Cursor() {
     <div className="cursor" ref={cursorRef}>
       <div className="cursor-dot" ref={dotRef} />
       <div className="cursor-ring" ref={ringRef} />
+      <div className="cursor-text" ref={textRef}>{hoverText}</div>
     </div>
   );
 }

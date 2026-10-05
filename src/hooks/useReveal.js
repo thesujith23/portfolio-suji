@@ -8,7 +8,7 @@ export default function useReveal() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.querySelectorAll('.reveal').forEach((el) => {
+            entry.target.querySelectorAll('.reveal-up').forEach((el) => {
               el.classList.add('visible');
             });
           }

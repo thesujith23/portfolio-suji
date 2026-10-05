@@ -4,9 +4,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import './index.css';
 
-gsap.registerPlugin(ScrollTrigger);
+import ExperienceTimeline from './components/ExperienceTimeline';
 
-/* ════════ CURSOR ════════ */
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
+/* â•â•â•â•â•â•â•â• CURSOR â•â•â•â•â•â•â•â• */
 function Cursor() {
   const dotRef = useRef(null);
   const symbolRef = useRef(null);
@@ -21,15 +23,15 @@ function Cursor() {
     const move = (e) => { tx = e.clientX; ty = e.clientY; };
     const tick = () => {
       x += (tx - x) * 0.15; y += (ty - y) * 0.15;
-      if (dot) { dot.style.left = x + 'px'; dot.style.top = y + 'px'; }
-      if (sym) { sym.style.left = x + 'px'; sym.style.top = y + 'px'; }
+      if (dot) { dot.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
+      if (sym) { sym.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
       reqId = requestAnimationFrame(tick);
     };
 
-    const over = (e) => { 
+    const over = (e) => {
       const target = e.target.closest('a,button,[data-hover]');
-      if (target === currentHover) return; 
-      
+      if (target === currentHover) return;
+
       currentHover = target;
       if (target) {
         dot?.classList.add('expand');
@@ -42,13 +44,13 @@ function Cursor() {
           if (sym) { sym.innerHTML = ''; sym.classList.remove('visible'); }
           dot?.classList.remove('hide');
         }
-      } 
+      }
     };
-    
-    const out = (e) => { 
+
+    const out = (e) => {
       const target = e.relatedTarget?.closest('a,button,[data-hover]');
-      if (target) return; 
-      
+      if (target) return;
+
       currentHover = null;
       if (dot) {
         dot.classList.remove('expand');
@@ -59,20 +61,20 @@ function Cursor() {
         sym.innerHTML = '';
       }
     };
-    
+
     window.addEventListener('mousemove', move);
     document.addEventListener('mouseover', over);
     document.addEventListener('mouseout', out);
     reqId = requestAnimationFrame(tick);
-    
-    return () => { 
-      window.removeEventListener('mousemove', move); 
-      document.removeEventListener('mouseover', over); 
+
+    return () => {
+      window.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseover', over);
       document.removeEventListener('mouseout', out);
       cancelAnimationFrame(reqId);
     };
   }, []);
-  
+
   return (
     <>
       <div className="cursor-dot" ref={dotRef} />
@@ -81,7 +83,7 @@ function Cursor() {
   );
 }
 
-/* ════════ LOADER ════════ */
+/* â•â•â•â•â•â•â•â• LOADER â•â•â•â•â•â•â•â• */
 function Loader({ onDone }) {
   const counterRef = useRef(null);
   const barRef = useRef(null);
@@ -91,20 +93,20 @@ function Loader({ onDone }) {
     const tl = gsap.timeline({
       onComplete: () => {
         gsap.to(wrapRef.current, {
-          yPercent: -100, duration: 0.8, ease: 'power4.inOut',
+          yPercent: -100, duration: 1.2, ease: 'power3.inOut',
           onComplete: onDone,
         });
       },
     });
 
     tl.to(barRef.current, {
-      width: '100%', duration: 2.2, ease: 'power2.inOut',
+      scaleX: 1, duration: 4.5, ease: 'power1.inOut',
     });
 
     // Counter
     const obj = { val: 0 };
     tl.to(obj, {
-      val: 100, duration: 2.2, ease: 'power2.inOut',
+      val: 100, duration: 4.5, ease: 'power1.inOut',
       onUpdate: () => {
         if (counterRef.current) counterRef.current.textContent = Math.round(obj.val);
       },
@@ -120,7 +122,7 @@ function Loader({ onDone }) {
   );
 }
 
-/* ════════ MAGNETIC ════════ */
+/* â•â•â•â•â•â•â•â• MAGNETIC â•â•â•â•â•â•â•â• */
 let audioCtx;
 const playHoverSound = () => {
   try {
@@ -128,21 +130,21 @@ const playHoverSound = () => {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
+
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
+
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    
+
     osc.type = 'sine';
     osc.frequency.setValueAtTime(800, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-    
+
     gain.gain.setValueAtTime(0, audioCtx.currentTime);
     gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-    
+
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 0.06);
   } catch (e) {
@@ -150,23 +152,23 @@ const playHoverSound = () => {
   }
 };
 
-function Magnetic({ children }) {
+function Magnetic({ children, strength = 0.4 }) {
   const magneticRef = useRef(null);
-  
+
   useEffect(() => {
     const el = magneticRef.current;
     if (!el) return;
-    
-    const xTo = gsap.quickTo(el, "x", {duration: 1, ease: "elastic.out(1, 0.3)"});
-    const yTo = gsap.quickTo(el, "y", {duration: 1, ease: "elastic.out(1, 0.3)"});
+
+    const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "elastic.out(1, 0.3)" });
+    const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "elastic.out(1, 0.3)" });
 
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
       const { height, width, left, top } = el.getBoundingClientRect();
-      const x = clientX - (left + width/2);
-      const y = clientY - (top + height/2);
-      xTo(x * 0.4);
-      yTo(y * 0.4);
+      const x = clientX - (left + width / 2);
+      const y = clientY - (top + height / 2);
+      xTo(x * strength);
+      yTo(y * strength);
     };
 
     const handleMouseLeave = () => {
@@ -196,115 +198,15 @@ function Magnetic({ children }) {
   );
 }
 
-/* ════════ HERO CANVAS ════════ */
+/* ════════ HERO CANVAS (CSS Aurora) ════════ */
 function HeroCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    
-    let particles = [];
-    const particleCount = Math.floor((width * height) / 45000);
-    const mouse = { x: -1000, y: -1000, radius: 150 };
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 1.5 + 0.5;
-      }
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        
-        if (this.x < 0 || this.x > width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > height) this.vy = -this.vy;
-
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < mouse.radius) {
-          const forceDirectionX = dx / distance;
-          const forceDirectionY = dy / distance;
-          const force = (mouse.radius - distance) / mouse.radius;
-          const directionX = forceDirectionX * force * 1.5;
-          const directionY = forceDirectionY * force * 1.5;
-          this.x -= directionX;
-          this.y -= directionY;
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 229, 191, 0.4)';
-        ctx.fill();
-      }
-    }
-
-    const init = () => {
-      particles = [];
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-      }
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        for (let j = i; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 229, 191, ${(1 - dist / 120) * 0.2})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-    };
-
-    init();
-    gsap.ticker.add(animate);
-
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      init();
-    };
-    
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    };
-    const handleMouseLeave = () => { mouse.x = -1000; mouse.y = -1000; };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      gsap.ticker.remove(animate);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />;
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+      <div className="aurora-blob aurora-1"></div>
+      <div className="aurora-blob aurora-2"></div>
+      <div className="aurora-blob aurora-3"></div>
+    </div>
+  );
 }
 
 /* ════════ NAV ════════ */
@@ -340,7 +242,7 @@ function Nav() {
     <nav className={`nav ${isScrolled ? 'nav-scrolled' : ''}`}>
       <a href="#home" className="nav-brand" onClick={(e) => handleLinkClick(e, '#home')}>Sujith.</a>
       <div className="nav-links">
-        {['About','Skills','Work','Contact'].map(l => {
+        {['About', 'Skills', 'Work', 'Contact'].map(l => {
           const targetId = `#${l.toLowerCase()}`;
           return (
             <Magnetic key={l}>
@@ -356,7 +258,39 @@ function Nav() {
   );
 }
 
-/* ════════ HERO ════════ */
+/* â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• */
+const MagneticText = ({ text, strength = 0.8 }) => {
+  const triggerPiano = (e) => {
+    const el = e.currentTarget;
+    el.style.transform = 'translateY(-20px)';
+    el.style.color = 'var(--accent)';
+    setTimeout(() => {
+      el.style.transform = 'translateY(0)';
+      el.style.color = '';
+    }, 200);
+  };
+
+  return (
+    <>
+      {text.split('').map((char, index) => {
+        if (char === ' ') return <span key={index}>&nbsp;</span>;
+        return (
+          <Magnetic key={index} strength={strength}>
+            <span
+              className="piano-char"
+              style={{ display: 'inline-block', whiteSpace: 'pre', transition: 'transform 0.2s, color 0.2s' }}
+              onTouchStart={triggerPiano}
+              onClick={triggerPiano}
+            >
+              {char}
+            </span>
+          </Magnetic>
+        );
+      })}
+    </>
+  );
+};
+
 function Hero() {
   const ref = useRef(null);
 
@@ -366,53 +300,72 @@ function Hero() {
     const tl = gsap.timeline({ delay: 2.6 });
     tl.fromTo(el.querySelectorAll('.line-inner'), { yPercent: 120 }, { yPercent: 0, duration: 1.1, stagger: 0.12, ease: 'power4.out' });
     tl.fromTo(el.querySelector('.hero-pre span'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, '-=0.5');
-    tl.fromTo(el.querySelector('.hero-bottom'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
+    tl.fromTo(el.querySelector('.hero-action'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
   }, []);
 
   return (
     <section className="hero" id="home" ref={ref} style={{ position: 'relative' }}>
       <HeroCanvas />
       <div className="hero-pre" style={{ position: 'relative', zIndex: 1 }}><span style={{ opacity: 0 }}>Software Engineer — Full Stack Developer</span></div>
-      <h1 className="hero-title" style={{ position: 'relative', zIndex: 1 }}>
-        <span className="line"><span className="line-inner">Building</span></span>
-        <span className="line"><span className="line-inner"><span className="italic">digital</span> experiences</span></span>
-        <span className="line"><span className="line-inner">that <span className="outline">matter</span></span></span>
+      <h1 className="hero-title" style={{ position: 'relative', zIndex: 1, pointerEvents: 'auto' }}>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="Building" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span className="italic" style={{ whiteSpace: 'nowrap' }}><MagneticText text="digital" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="experiences" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="that" strength={0.8} /></span>&nbsp;<span className="outline" id="matter-word" style={{ whiteSpace: 'nowrap' }}><MagneticText text="matter" strength={0.8} /></span></span></span>
       </h1>
-      <div className="hero-bottom" style={{ opacity: 0, position: 'relative', zIndex: 1 }}>
-        <p className="hero-bio">
-          <strong>Full-Stack Developer</strong> with expertise in React, Next.js, Node.js & AI integrations.
-          Crafting <strong>responsive UIs</strong>, secure APIs, and data-driven dashboards from <strong>Mangalore, India</strong>.
-        </p>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <Magnetic>
-            <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
+
+      <div className="hero-action" style={{ opacity: 0, position: 'absolute', bottom: '48px', right: '100px', zIndex: 10 }}>
+        <Magnetic>
+          <div className="resume-btn-wrap">
+            <div className="resume-orbit">
+              <span className="resume-orbit-dot"></span>
+              <span className="resume-orbit-dot"></span>
+              <span className="resume-orbit-dot"></span>
+            </div>
+            <a href="/SujithResume.pdf" target="_blank" rel="noopener noreferrer" className="resume-btn-creative" data-hover>
               <span className="btn-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
               </span>
-              <span>Download Résumé</span>
+              <span className="btn-label">Résumé</span>
             </a>
-          </Magnetic>
-        </div>
+            <span className="resume-btn-tag">Résumé</span>
+          </div>
+        </Magnetic>
       </div>
-      <div className="hero-location" style={{ position: 'relative', zIndex: 1 }}>27.4505° N — Mangalore</div>
     </section>
   );
 }
 
 
 
-/* ════════ ABOUT ════════ */
+/* â•â•â•â•â•â•â•â• ABOUT â•â•â•â•â•â•â•â• */
 function About() {
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
   const charsRef = useRef([]);
   const cursorRef = useRef(null);
 
-  const paragraph = "I'm Sujith, a software engineer who transforms complex problems into elegant, production-ready web applications. I build with React, Next.js, and Node.js — creating AI-integrated platforms, secure REST APIs, and data-driven dashboards that deliver real business value. Currently seeking to contribute to a product-focused engineering team.";
+  const content = [
+    { text: "I'm " },
+    { text: "Sujith,", highlight: true },
+    { text: " a " },
+    { text: "software engineer", highlight: true },
+    { text: " who transforms complex problems into elegant, production-ready web applications. I build with " },
+    { text: "React, Next.js,", highlight: true },
+    { text: " and " },
+    { text: "Node.js", highlight: true },
+    { text: " — creating " },
+    { text: "AI-integrated", highlight: true },
+    { text: " platforms, secure " },
+    { text: "REST APIs,", highlight: true },
+    { text: " and data-driven dashboards that deliver real business value. Currently seeking to contribute to a " },
+    { text: "product-focused", highlight: true },
+    { text: " engineering team." }
+  ];
 
   useEffect(() => {
     // Only select elements that are actually in the document (avoids HMR/unmount bugs)
@@ -433,24 +386,33 @@ function About() {
       onUpdate: (self) => {
         const progress = self.progress;
         const targetIdx = Math.min(Math.floor(progress * chars.length), chars.length - 1);
-        
-        // Update every character synchronously
+
+        // Update characters only if their state changes
         chars.forEach((char, i) => {
+          let state = 0; // 0: untyped, 1: actively typing, 2: fully typed
           if (progress === 1 || i < targetIdx - 2) {
-            // Fully typed and cooled down
-            char.style.opacity = '1';
-            char.style.color = '#1a1a1a';
-            char.style.textShadow = 'none';
+            state = 2;
           } else if (i <= targetIdx) {
-            // Actively typing - heat trail
-            char.style.opacity = '1';
-            char.style.color = '#F62440';
-            char.style.textShadow = '0 0 12px #F62440';
+            state = 1;
           } else {
-            // Untyped future text
-            char.style.opacity = '0.15';
-            char.style.color = '#999999';
-            char.style.textShadow = 'none';
+            state = 0;
+          }
+
+          if (char.dataset.state != state) {
+            char.dataset.state = state;
+            if (state === 2) {
+              char.style.opacity = '1';
+              char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#ffffff';
+              char.style.textShadow = 'none';
+            } else if (state === 1) {
+              char.style.opacity = '1';
+              char.style.color = '#F62440';
+              char.style.textShadow = '0 0 12px #F62440';
+            } else {
+              char.style.opacity = '0.15';
+              char.style.color = '#999999';
+              char.style.textShadow = 'none';
+            }
           }
         });
 
@@ -470,29 +432,36 @@ function About() {
     return () => ScrollTrigger.getAll().forEach(st => st.kill());
   }, []);
 
-  // Split paragraph into characters, preserving spaces
+  // Split content into characters, preserving spaces
   let charIdx = 0;
-  const rendered = paragraph.split(' ').map((word, wi) => (
-    <span key={wi} className="typewriter-word">
-      {word.split('').map((ch) => {
-        const idx = charIdx++;
-        return (
-          <span
-            key={idx}
-            className="typewriter-char"
-            ref={(el) => { charsRef.current[idx] = el; }}
-          >
-            {ch}
-          </span>
-        );
-      })}
-      <span
-        className="typewriter-char"
-        ref={(el) => { charsRef.current[charIdx] = el; }}
-      >
-        {' '}
-      </span>
-      {(() => { charIdx++; return null; })()}
+  const rendered = content.map((segment, si) => (
+    <span key={si} className={segment.highlight ? 'highlight-segment' : ''}>
+      {segment.text.split(' ').map((word, wi, arr) => (
+        <span key={wi} className="typewriter-word">
+          {word.split('').map((ch) => {
+            const idx = charIdx++;
+            return (
+              <span
+                key={idx}
+                className="typewriter-char"
+                data-highlight={segment.highlight ? 'true' : 'false'}
+                ref={(el) => { charsRef.current[idx] = el; }}
+              >
+                {ch}
+              </span>
+            );
+          })}
+          {wi < arr.length - 1 && (
+            <span
+              className="typewriter-char"
+              data-highlight={segment.highlight ? 'true' : 'false'}
+              ref={(el) => { charsRef.current[charIdx++] = el; }}
+            >
+              {' '}
+            </span>
+          )}
+        </span>
+      ))}
     </span>
   ));
 
@@ -513,102 +482,173 @@ function About() {
   );
 }
 
-/* ════════ EXPERIENCE (HORIZONTAL SCROLL) ════════ */
+/* â•â•â•â•â•â•â•â• EXPERIENCE (HORIZONTAL SCROLL) â•â•â•â•â•â•â•â• */
 
-/* ════════ PROJECTS (3D DECK) ════════ */
+/* â•â•â•â•â•â•â•â• PROJECTS (3D DECK) â•â•â•â•â•â•â•â• */
 function ProjectsDeck() {
   const containerRef = useRef(null);
+  const [zoomedMedia, setZoomedMedia] = useState(null);
 
   const projects = [
     {
-      idx: '01', name: 'BodySync-AI',
+      idx: '01', name: 'AI Research Assistant (RAG)',
+      meta: 'An intelligent document assistant using Retrieval-Augmented Generation (RAG). Features hybrid search (FAISS + BM25) and cross-encoder reranking to extract precise insights from raw PDFs.',
+      tags: ['Python', 'Streamlit', 'FAISS', 'OpenAI'],
+      color: '#0ea5e9',
+      isMobile: false,
+      liveUrl: 'https://nexus-research-document-assist.streamlit.app/',
+      github: 'https://github.com/thesujith23/AI-Research-Document-assistance',
+      quote: '"A robust AI pipeline combining semantic search with keyword precision for highly accurate document QA and retrieval."',
+      quoteAuthor: 'AI & Backend',
+      quoteRole: 'Python & LangChain',
+      icon: 'python/python-original.svg',
+      mainImg: 'nexus1.png',
+      sideImg1: 'nexus2.png',
+      sideImg2: 'nexus3.png'
+    },
+    {
+      idx: '02', name: 'BodySync-AI',
       meta: 'Intelligent Pose Detection & Fitness Tracker. An AI fitness assistant that uses pose estimation for real-time exercise tracking, form feedback, and performance analytics.',
       tags: ['MediaPipe', 'OpenCV', 'Python', 'Flask'],
       color: '#3d2fa9',
       isMobile: false,
-      github: 'https://github.com/thesujith23/BodySync-AI---Intelligent-Pose-Detection-and-Fitness-Tracker.git'
+      github: 'https://github.com/thesujith23/BodySyncAI-Intelligent-Pose-Detection-and-Fitness-Tracker',
+      quote: '"Revolutionizing home fitness with real-time AI pose estimation and form correction. The computer vision pipeline achieves remarkable accuracy."',
+      quoteAuthor: 'Research & CV Pipeline',
+      quoteRole: 'MediaPipe & Python',
+      icon: 'python/python-original.svg',
+      mainImg: '/body1.png',
+      sideImg1: '/body2.png',
+      sideImg2: '/body3.png'
     },
     {
-      idx: '02', name: 'Expense Tracker & Analytics',
+      idx: '03', name: 'Expense Tracker & Analytics',
       meta: 'Secure multi-user financial tracking with JWT auth, role-protected routes, and MongoDB aggregation-powered real-time analytics dashboard.',
       tags: ['MERN', 'Recharts', 'JWT', 'Aggregation'],
       color: '#ff3c34',
-      isMobile: true,
+      isMobile: false,
+      liveUrl: 'https://expense-tracker-and-financial-analy-five.vercel.app/',
+      liveBtnColor: '#111111',
+      liveBtnText: '#ffffff',
+      liveBtnShadow: '0 4px 15px rgba(0,0,0,0.4)',
+      liveBtnBorder: 'rgba(255,255,255,0.3)',
+      github: 'https://github.com/thesujith23/Expense-Tracker-And-Financial-Analytics-Dashboard.git',
+      mainVideo: '/exptrackvdo.mp4',
+      sideImg1: '/exp1.png',
+      sideImg2: '/exp2.png',
+      quote: '"A seamless, enterprise-grade financial dashboard with lightning-fast data aggregation. Provides deep insights into personal finance seamlessly."',
+      quoteAuthor: 'Full-Stack Architecture',
+      quoteRole: 'MERN Stack',
+      icon: 'react/react-original.svg'
     },
     {
-      idx: '03', name: 'Book Store Management',
-      meta: 'Full CRUD inventory system with secure REST APIs, input validation, JWT authentication, and a responsive React UI with reusable components.',
-      tags: ['MongoDB', 'Express', 'React', 'Node.js'],
+      idx: '04', name: 'Book Store Management',
+      meta: 'Full CRUD inventory system with secure REST APIs, input validation, JWT authentication, and a responsive React UI with reusable components. Fully deployed via Vercel and Render.',
+      tags: ['React (Vercel)', 'Node.js (Render)', 'MongoDB Atlas', 'JWT'],
       color: '#1a1a1a',
       isMobile: false,
+      liveUrl: 'https://book-store-mgt.vercel.app/',
+      github: 'https://github.com/thesujith23/Book-Store-Mgt.git',
+      mainVideo: '/Bookvideo.mp4',
+      sideImg1: '/book1.png',
+      sideImg2: '/book2.png',
+      quote: '"Robust inventory management powered by secure, scalable, and responsive web technologies. Fully automated CI/CD pipeline integrated."',
+      quoteAuthor: 'Backend & Database',
+      quoteRole: 'Node.js & MongoDB',
+      icon: 'nodejs/nodejs-original.svg'
     },
-    {
-      idx: '04', name: 'TechHire — Job Portal',
+    /* {
+      idx: '05', name: 'TechHire — Job Portal',
       meta: 'Job portal with 20+ listings, real-time filtering, dynamic routing, file-upload flow. Deployed on Vercel with CI/CD, sub-2s loads via Next.js App Router.',
       tags: ['Next.js', 'Tailwind', 'Vercel', 'CI/CD'],
       color: '#0055ff',
       isMobile: false,
       live: true,
-    },
+      github: 'https://github.com/thesujith23/HireReady-Ai.git',
+      quote: '"A modern, high-performance job board delivering sub-2s loads and seamless UX. The Next.js app router makes navigation instant."',
+      quoteAuthor: 'Frontend & Routing',
+      quoteRole: 'Next.js App Router',
+      icon: 'nextjs/nextjs-original.svg',
+      invertIcon: true
+    }, */
+    {
+      idx: '06', name: 'AI Food Recommendation',
+      meta: 'A personalized smart food discovery platform that suggests optimal meals based on dietary preferences, health goals, and real-time nutritional analysis.',
+      tags: ['React', 'Python', 'Machine Learning', 'API'],
+      color: '#F97316',
+      isMobile: false,
+      github: 'https://github.com/thesujith23/FoodRecommend',
+      mainVideo: '/foodrecmdvdo.mp4',
+      sideImg1: '/food1.png',
+      sideImg2: '/food2.png',
+      quote: '"Personalizing nutrition through intelligent algorithms and real-time dietary analysis. A brilliant intersection of health and machine learning."',
+      quoteAuthor: 'Machine Learning Core',
+      quoteRole: 'Python & Scikit-Learn',
+      icon: 'python/python-original.svg'
+    }
   ];
 
   useEffect(() => {
     const section = containerRef.current;
     if (!section) return;
-    
+
     let ctx = gsap.context(() => {
-      let mm = gsap.matchMedia();
-      mm.add("(min-width: 800px)", () => {
-        const cards = gsap.utils.toArray('.deck-card');
-        
-        // Initial setup for the stack
-        cards.forEach((card, i) => {
-          gsap.set(card, {
-            transformOrigin: 'left center',
-            scale: i > 0 ? 1 - (i * 0.03) : 1,
-            rotationZ: i * 2.5,
-            y: i * 25,
-            x: i * 15,
-            zIndex: cards.length - i
-          });
-        });
+      const deckContainer = section.querySelector('.deck-container');
+      const cards = gsap.utils.toArray('.deck-card');
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: `+=${cards.length * 100}%`,
-            pin: true,
-            scrub: 1,
-            invalidateOnRefresh: true
-          }
+      // Initial setup for the stack
+      cards.forEach((card, i) => {
+        gsap.set(card, {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          transformOrigin: 'left center',
+          scale: i > 0 ? 1 - (i * 0.03) : 1,
+          rotationZ: i * 2.5,
+          y: i * 25,
+          x: i * 15,
+          zIndex: cards.length - i
         });
+      });
 
-        cards.forEach((card, i) => {
-          if (i < cards.length - 1) {
-            // Flip current card out to the left
-            tl.to(card, {
-              rotationY: -110,
-              scale: 0.9,
-              x: '-4vw',
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: deckContainer || section,
+          start: "top top",
+          end: `+=${(cards.length - 1) * 100}%`,
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true
+        }
+      });
+
+      cards.forEach((card, i) => {
+        if (i < cards.length - 1) {
+          // Flip current card out to the left
+          tl.to(card, {
+            rotationY: -110,
+            scale: 0.9,
+            x: '-4vw',
+            ease: "power2.inOut",
+            duration: 1
+          }, i);
+
+          // Move remaining cards up the stack
+          for (let j = i + 1; j < cards.length; j++) {
+            let depth = j - i - 1;
+            tl.to(cards[j], {
+              scale: depth > 0 ? 1 - (depth * 0.03) : 1,
+              rotationZ: depth * 2.5,
+              y: depth * 25,
+              x: depth * 15,
               ease: "power2.inOut",
               duration: 1
             }, i);
-            
-            // Move remaining cards up the stack
-            for (let j = i + 1; j < cards.length; j++) {
-              let depth = j - i - 1;
-              tl.to(cards[j], {
-                scale: depth > 0 ? 1 - (depth * 0.03) : 1,
-                rotationZ: depth * 2.5,
-                y: depth * 25,
-                x: depth * 15,
-                ease: "power2.inOut",
-                duration: 1
-              }, i);
-            }
           }
-        });
+        }
       });
     }, section);
 
@@ -617,168 +657,178 @@ function ProjectsDeck() {
 
   return (
     <>
-      <section id="work" style={{ position: 'relative', backgroundColor: 'var(--bg-base)', paddingTop: '120px' }}>
-        <div style={{ marginBottom: '4rem', padding: '0 48px' }}>
+      <div ref={containerRef} id="work" style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
+        <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px', paddingBottom: '20px' }}>
           <div className="reveal-up">
             <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
-              Selected<br/><em>Projects</em>
+              Selected<br /><em>Projects</em>
             </h2>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <div ref={containerRef} style={{ backgroundColor: 'var(--bg-base)', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: '100%', perspective: '2500px' }}>
-        <div className="deck-viewport" style={{ position: 'relative', width: '90vw', maxWidth: '1100px', height: '80vh', transformStyle: 'preserve-3d', margin: '0 auto' }}>
-          {projects.map((p, i) => (
-            <div
-              key={i}
-              className="deck-card"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                  rotateY: x * 12,
-                  rotateX: -y * 12,
-                  duration: 0.5,
-                  ease: "power2.out"
-                });
-              }}
-              onMouseLeave={(e) => {
-                gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                  rotateY: 0,
-                  rotateX: 0,
-                  duration: 0.8,
-                  ease: "power2.out"
-                });
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: p.color,
-                backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.3) 100%)',
-                borderRadius: '40px',
-                border: '1px solid rgba(255,255,255,0.15)',
-                overflow: 'hidden',
-                boxShadow: '0 30px 80px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                backfaceVisibility: 'hidden',
-                willChange: 'transform'
-              }}
-            >
-              <div 
-                className="deck-card-inner" 
-                style={{ 
-                  padding: 'clamp(2rem, 4vw, 3rem)', 
-                  flex: 1, 
-                  display: 'flex', 
-                  flexDirection: 'column'
+        <div className="deck-container">
+          <div className="deck-viewport">
+            {projects.map((p, i) => (
+              <div
+                key={i}
+                className="deck-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = (e.clientX - rect.left) / rect.width - 0.5;
+                  const y = (e.clientY - rect.top) / rect.height - 0.5;
+                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
+                    rotateY: x * 12,
+                    rotateX: -y * 12,
+                    duration: 0.5,
+                    ease: "power2.out"
+                  });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
+                    rotateY: 0,
+                    rotateX: 0,
+                    duration: 0.8,
+                    ease: "power2.out"
+                  });
+                }}
+                style={{
+                  backgroundColor: p.color
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
-                  <div style={{ maxWidth: '750px' }}>
-                    <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(2.2rem, 3.5vw, 4rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
-                      {p.name}
-                    </h3>
-                    <p style={{ fontFamily: 'var(--mono)', fontSize: '1rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, marginTop: '1.5rem', maxWidth: '90%' }}>
-                      {p.meta}
-                    </p>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                      {p.tags.map((t, j) => (
-                        <span key={j} style={{ padding: '6px 12px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '20px', color: '#fff', fontSize: '0.8rem', fontFamily: 'var(--mono)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                    {p.github && (
-                      <div style={{ marginTop: '2rem' }}>
-                        <a href={p.github} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#111', color: '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s, transform 0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#111'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                          View Repository
-                        </a>
+                <div className="deck-card-inner">
+                  <div className="deck-card-header">
+                    <div style={{ maxWidth: '750px' }}>
+                      <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
+                        {p.name}
+                      </h3>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, marginTop: '1rem', maxWidth: '95%' }}>
+                        {p.meta}
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                        {p.tags.map((t, j) => (
+                          <span key={j} style={{ padding: '4px 12px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '20px', color: '#fff', fontSize: '0.75rem', fontFamily: 'var(--mono)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                            {t}
+                          </span>
+                        ))}
                       </div>
-                    )}
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+                        {p.github && (
+                          <div>
+                            <a href={p.github} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#111', color: '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s, transform 0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#111'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                              View Repository
+                            </a>
+                          </div>
+                        )}
+                        {p.liveUrl && (
+                          <div>
+                            <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: p.liveBtnColor || 'var(--accent)', color: p.liveBtnText || '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: `1px solid ${p.liveBtnBorder || 'var(--accent)'}`, transition: 'background 0.3s, transform 0.3s', boxShadow: p.liveBtnShadow || '0 4px 10px rgba(246, 36, 64, 0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                              View Live Project
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mono" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.6)' }}>
+                      ({p.idx})
+                    </div>
                   </div>
-                  <div className="mono" style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.6)' }}>
-                    ({p.idx})
-                  </div>
-                </div>
 
-                <div className="deck-bottom-section" style={{ marginTop: 'auto', paddingTop: '1.5rem', display: 'flex', gap: '2rem', alignItems: 'flex-end', flex: 1, minHeight: 0 }}>
-                  {p.isMobile ? (
-                    <div className="mobile-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1.5rem', height: '100%', justifyContent: 'flex-start' }}>
-                      <div className="main-phone" style={{ height: '100%', aspectRatio: '9/18', backgroundColor: '#000', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: '0 0 0 2px #4a4a4a, 0 0 0 7px #111, 0 20px 50px rgba(0,0,0,0.6)', transform: 'scale(1.05)', zIndex: 2 }}>
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 30%)', zIndex: 5, pointerEvents: 'none' }}></div>
-                        <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textTransform: 'uppercase' }}>[ Main UI ]</span>
-                      </div>
-                      <div className="side-phones" style={{ display: 'flex', gap: '1.5rem', height: '90%', alignItems: 'center' }}>
-                        <div style={{ height: '100%', aspectRatio: '9/18', backgroundColor: '#000', borderRadius: '20px', overflow: 'hidden', position: 'relative', boxShadow: '0 0 0 1px #4a4a4a, 0 0 0 5px #111, 0 10px 25px rgba(0,0,0,0.5)', opacity: 0.9 }}>
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 35%)', zIndex: 5, pointerEvents: 'none' }}></div>
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textTransform: 'uppercase', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>[ Side UI ]</span>
+                  <div className="deck-bottom-section">
+                    <div className="quote-column">
+                      <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
+                        {p.quote || '"A brilliant intersection of design and engineering."'}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
+                          {p.icon ? (
+                            <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${p.icon}`} alt="tech-icon" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: p.invertIcon ? 'invert(1)' : 'none' }} />
+                          ) : null}
+                        </div>
+                        <div>
+                          <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="landscape-mockup-wrapper" style={{ flex: 1, display: 'flex', gap: '1rem', height: '100%', width: '100%' }}>
-                      <div style={{ flex: 2, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.3)' }}>
-                        <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main UI View or Video ]</span>
+
+                    <div className="landscape-mockup-wrapper">
+                      <div className="mockup-main">
+                        {p.mainVideo ? (
+                          <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
+                        ) : p.mainImg ? (
+                          <img src={p.mainImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
+                        ) : (
+                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
+                        )}
                       </div>
-                      <div className="landscape-side-images" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Image 1 ]</span>
+                      <div className="landscape-side-images">
+                        <div className="mockup-side">
+                          {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
                         </div>
-                        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Image 2 ]</span>
+                        <div className="mockup-side">
+                          {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
+
+      {zoomedMedia && (
+        <div
+          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out', backdropFilter: 'blur(10px)' }}
+          onClick={() => setZoomedMedia(null)}
+        >
+          {zoomedMedia.type === 'video' ? (
+            <video src={zoomedMedia.src} autoPlay loop controls style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={(e) => e.stopPropagation()} />
+          ) : (
+            <img src={zoomedMedia.src} style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', objectFit: 'contain' }} alt="Zoomed view" onClick={(e) => e.stopPropagation()} />
+          )}
+          <div style={{ position: 'absolute', top: '20px', right: '30px', color: '#fff', fontSize: '3rem', cursor: 'pointer', fontFamily: 'sans-serif', fontWeight: 200, opacity: 0.7 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}>&times;</div>
+        </div>
+      )}
     </>
   );
 }
 
-/* ════════ SKILLS ════════ */
+/* â•â•â•â•â•â•â•â• SKILLS â•â•â•â•â•â•â•â• */
 function Skills() {
   const getImg = (src, invert = false) => `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" style="width: 100%; height: 100%; object-fit: contain; ${invert ? 'filter: invert(1);' : ''}" />`;
 
   const allSkills = [
-    { name: 'React.js', featured: true, symbol: getImg('react/react-original.svg') }, 
-    { name: 'Next.js', featured: true, symbol: getImg('nextjs/nextjs-original.svg', true) }, 
+    { name: 'React.js', featured: true, symbol: getImg('react/react-original.svg') },
+    { name: 'Next.js', featured: true, symbol: getImg('nextjs/nextjs-original.svg', true) },
     { name: 'Node.js', featured: true, symbol: getImg('nodejs/nodejs-original.svg') },
-    { name: 'MongoDB', symbol: getImg('mongodb/mongodb-original.svg') }, 
-    { name: 'JavaScript (ES6+)', symbol: getImg('javascript/javascript-original.svg') }, 
-    { name: 'Python', symbol: getImg('python/python-original.svg') }, 
+    { name: 'MongoDB', symbol: getImg('mongodb/mongodb-original.svg') },
+    { name: 'JavaScript (ES6+)', symbol: getImg('javascript/javascript-original.svg') },
+    { name: 'Python', symbol: getImg('python/python-original.svg') },
     { name: 'Java', symbol: getImg('java/java-original.svg') },
-    { name: 'Express.js', symbol: getImg('express/express-original.svg', true) }, 
-    { name: 'Flask', symbol: getImg('flask/flask-original.svg', true) }, 
+    { name: 'Express.js', symbol: getImg('express/express-original.svg', true) },
+    { name: 'Flask', symbol: getImg('flask/flask-original.svg', true) },
     { name: 'HTML5 / CSS3', symbol: getImg('html5/html5-original.svg') },
-    { name: 'Tailwind CSS', symbol: getImg('tailwindcss/tailwindcss-original.svg') }, 
-    { name: 'RESTful APIs', featured: true, symbol: getImg('json/json-original.svg') }, 
+    { name: 'Tailwind CSS', symbol: getImg('tailwindcss/tailwindcss-original.svg') },
+    { name: 'RESTful APIs', featured: true, symbol: getImg('json/json-original.svg') },
     { name: 'MySQL', symbol: getImg('mysql/mysql-original.svg') },
-    { name: 'Supabase', symbol: getImg('supabase/supabase-original.svg') }, 
-    { name: 'Xano', symbol: '✖️' }, 
+    { name: 'Supabase', symbol: getImg('supabase/supabase-original.svg') },
+    { name: 'Xano', symbol: '✖️' },
     { name: 'Git / GitHub', symbol: getImg('github/github-original.svg', true) },
-    { name: 'Retell AI', symbol: '🤖' }, 
-    { name: 'Claude AI', symbol: '🧠' }, 
+    { name: 'Retell AI', symbol: '🤖' },
+    { name: 'Claude AI', symbol: '🧠' },
     { name: 'Plivo', symbol: '📞' },
-    { name: 'nexHealth APIs', symbol: '🏥' }, 
-    { name: 'OpenRouter', symbol: '🌐' }, 
+    { name: 'nexHealth APIs', symbol: '🦷' },
+    { name: 'OpenRouter', symbol: '🌐' },
     { name: 'MediaPipe', symbol: '👁️' },
-    { name: 'Power BI', symbol: '📊' }, 
-    { name: 'Recharts', symbol: '📈' }, 
+    { name: 'Power BI', symbol: '📊' },
+    { name: 'Recharts', symbol: '📈' },
     { name: 'Socket.io', symbol: getImg('socketio/socketio-original.svg', true) },
-    { name: 'Vercel', symbol: getImg('vercel/vercel-original.svg', true) }, 
+    { name: 'Vercel', symbol: getImg('vercel/vercel-original.svg', true) },
     { name: 'Bootstrap', symbol: getImg('bootstrap/bootstrap-original.svg') },
   ];
 
@@ -816,25 +866,25 @@ function ExperienceEditorial() {
       num: '01',
       roleHtml: <>Software <span className="italic">Engineer</span></>,
       company: 'Trikon Software Labs',
-      period: '2026',
-      desc: 'Engineered an AI-powered voice call agent integrated with healthcare APIs for real-time appointment management.',
-      tags: ['Retell AI', 'Supabase', 'Next.js', 'Plivo'],
+      period: 'Apr 2026 – Present',
+      desc: 'Architected a real-time AI voice platform using Next.js, React, and LiveKit. Built DigitizedHealth for AI appointment booking via Retell AI and nexHealth APIs. Integrated Plivo, Supabase, Xano, and Stitch.',
+      tags: ['Next.js', 'Retell AI', 'Supabase', 'LiveKit', 'Xano'],
     },
     {
       num: '02',
-      roleHtml: <>Full Stack <span className="italic">Intern</span></>,
-      company: 'MBL Technologies',
-      period: '2025',
-      desc: 'Developed responsive web applications using the MERN stack. Optimized MongoDB queries by ~30% and implemented JWT-secured routes.',
-      tags: ['React', 'Node.js', 'MongoDB', 'Express'],
+      roleHtml: <>Web App Dev <span className="italic">Intern</span></>,
+      company: 'MBL Technologies Pvt Ltd',
+      period: 'Jan 2025 – Mar 2025',
+      desc: 'Built "Asare," a full-featured animal trust care platform using React.js. Reduced component re-renders by 20% through structured state management and integrated multiple third-party APIs.',
+      tags: ['React.js', 'State Management', 'REST APIs'],
     },
     {
       num: '03',
       roleHtml: <>Software Dev <span className="italic">Intern</span></>,
-      company: 'Accolade Tech Solutions',
-      period: '2023',
-      desc: 'Built and maintained REST APIs, implemented data validation layers, and contributed to front-end performance modules.',
-      tags: ['Python', 'Flask', 'MySQL', 'REST APIs'],
+      company: 'Accolade Tech Solutions Pvt Ltd',
+      period: 'Mar 2023 – Aug 2023',
+      desc: 'Developed internal web applications using .NET and C#, delivering secure backend services. Optimized SQL Server schemas, reducing average query execution time by ~30%.',
+      tags: ['.NET', 'C#', 'SQL Server', 'Backend'],
     },
   ];
 
@@ -843,15 +893,15 @@ function ExperienceEditorial() {
       num: '01',
       roleHtml: <>Master of <span className="italic">Computer Applications</span></>,
       company: 'NMAM Institute of Technology',
-      period: 'Graduated 2026',
+      period: 'Aug 2025',
       desc: 'Focused on advanced software engineering, data structures, and full-stack web technologies.',
       tags: ['Computer Science', 'Web Tech', 'Data Structures'],
     },
     {
       num: '02',
       roleHtml: <>Bachelor of <span className="italic">Computer Applications</span></>,
-      company: 'St. Aloysius College',
-      period: 'Graduated 2024',
+      company: 'SDM College of Business Management',
+      period: 'July 2023',
       desc: 'Foundation in computer science, programming languages, and database management.',
       tags: ['Programming', 'Databases', 'Networking'],
     }
@@ -862,7 +912,7 @@ function ExperienceEditorial() {
     if (!section) return;
 
     let ctx = gsap.context(() => {
-      gsap.fromTo('.exp-title-inner', 
+      gsap.fromTo('.exp-title-inner',
         { yPercent: 120 },
         {
           yPercent: 0,
@@ -883,22 +933,32 @@ function ExperienceEditorial() {
   useEffect(() => {
     if (!listWrapRef.current) return;
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
-    gsap.fromTo(rows, 
-      { y: 40, opacity: 0 }, 
-      { y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power3.out' }
+    gsap.fromTo(rows,
+      { x: -40, opacity: 0 },
+      { x: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: 'power3.out' }
+    );
+
+    // Animate timeline line filling up
+    gsap.fromTo('.exp-list-line-fill',
+      { scaleY: 0 },
+      { scaleY: 1, duration: 1.5, ease: 'power2.inOut', delay: 0.2 }
     );
   }, [activeTab]);
 
   const handleTabSwitch = (tab) => {
     if (tab === activeTab) return;
+
+    const msg = tab === 'experience' ? 'Work history!' : 'Education history!';
+    window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '💼', msg } }));
+
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
-    
+
     // Animate out with stagger
     gsap.to(rows, {
-      y: -30,
+      x: 40,
       opacity: 0,
       stagger: 0.05,
-      duration: 0.3,
+      duration: 0.4,
       ease: 'power2.in',
       onComplete: () => {
         setActiveIdx(null); // Reset accordion
@@ -910,18 +970,18 @@ function ExperienceEditorial() {
   const handleMouseEnter = (idx) => {
     if (activeIdx === idx) return;
     if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut' });
+      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
     }
-    gsap.fromTo(contentRefs.current[idx], 
-      { height: 0, opacity: 0 }, 
-      { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut' }
+    gsap.fromTo(contentRefs.current[idx],
+      { height: 0, opacity: 0 },
+      { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() }
     );
     setActiveIdx(idx);
   };
 
   const handleMouseLeaveList = () => {
     if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut' });
+      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
       setActiveIdx(null);
     }
   };
@@ -930,121 +990,90 @@ function ExperienceEditorial() {
 
   return (
     <section className="exp-editorial" id="experience" ref={sectionRef}>
+      <div className="exp-bg-glow"></div>
       <div className="exp-header-top">
         <span className="typewriter-terminal-tag" style={{ background: 'transparent', borderColor: 'rgba(255,229,191,0.2)', color: 'var(--bg)' }}>{'>'}_ timeline.log</span>
-        
-        <div style={{ display: 'flex', gap: '40px', marginTop: '32px', position: 'relative' }}>
+
+        <div className="exp-tabs-pill">
+          <div
+            className="exp-tab-highlighter"
+            style={{
+              transform: `translateX(${activeTab === 'experience' ? '0%' : '100%'})`
+            }}
+          />
           {['experience', 'education'].map(tab => (
-            <button 
+            <button
               key={tab}
               onClick={() => handleTabSwitch(tab)}
               data-hover
-              style={{ 
-                background: 'transparent', border: 'none', 
-                fontFamily: 'var(--serif)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', 
-                fontWeight: 900, color: '#FFE5BF', 
-                padding: '8px 0',
-                opacity: activeTab === tab ? 1 : 0.3,
-                transform: activeTab === tab ? 'scale(1)' : 'scale(0.85)',
-                transformOrigin: 'left bottom',
-                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}
+              className={`exp-tab-btn-pill ${activeTab === tab ? 'active' : ''}`}
             >
-              {activeTab === tab && (
-                <span style={{ 
-                  width: '10px', height: '10px', 
-                  backgroundColor: 'var(--accent)', 
-                  borderRadius: '50%', 
-                  display: 'inline-block',
-                  boxShadow: '0 0 12px var(--accent)'
-                }} />
-              )}
               {tab === 'experience' ? 'WORK EXPERIENCE' : 'EDUCATION'}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="exp-list" onMouseLeave={handleMouseLeaveList} ref={listWrapRef} style={{ minHeight: '400px' }}>
-        {currentList.map((item, i) => (
-          <div 
-            key={`${activeTab}-${i}`} 
-            className={`exp-row ${activeIdx === i ? 'active' : ''}`}
-            onMouseEnter={() => handleMouseEnter(i)}
-            onClick={() => handleMouseEnter(i)}
-          >
-            <div className="exp-row-visible">
-              <div className="exp-row-left">
-                <span className="exp-num">({item.num})</span>
-              </div>
-              
-              <div className="exp-title-wrap">
-                <h3 className="exp-title">
-                  <span className="exp-title-inner">{item.roleHtml}</span>
-                </h3>
-              </div>
-              
-              <div className="exp-row-right" style={{ flexDirection: 'row', alignItems: 'center', gap: '24px', justifyContent: 'flex-end', width: '20%' }}>
-                <span className="exp-period">{item.period}</span>
-                <div className="exp-hover-indicator" style={{
-                  width: '48px', height: '48px', borderRadius: '50%', 
-                  border: '1px solid rgba(255,229,191,0.2)', display: 'flex', flexShrink: 0,
-                  alignItems: 'center', justifyContent: 'center', color: '#FFE5BF',
-                  transform: activeIdx === i ? 'rotate(45deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.4s var(--ease), background 0.4s var(--ease)'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="exp-accordion-content" 
-              ref={el => contentRefs.current[i] = el}
-              style={{ height: 0, opacity: 0, overflow: 'hidden' }}
+      <div className="exp-list-container" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="exp-list" onMouseLeave={handleMouseLeaveList} ref={listWrapRef} style={{ minHeight: '400px', position: 'relative' }}>
+          <div className="exp-list-line">
+            <div className="exp-list-line-fill"></div>
+          </div>
+          {currentList.map((item, i) => (
+            <div
+              key={`${activeTab}-${i}`}
+              className={`exp-row ${activeIdx === i ? 'active' : ''}`}
+              onMouseEnter={() => handleMouseEnter(i)}
+              onClick={() => handleMouseEnter(i)}
             >
-              <div className="exp-accordion-inner">
-                <div className="exp-acc-left">
-                  <div className="exp-acc-company">{item.company}</div>
+              <div className="exp-timeline-node">
+                <div className="exp-timeline-dot-inner"></div>
+              </div>
+
+              <div className="exp-row-visible">
+                <div className="exp-row-left">
+                  <span className="exp-num">({item.num})</span>
                 </div>
-                <div className="exp-acc-right">
-                  <p className="exp-acc-desc">{item.desc}</p>
-                  <div className="exp-acc-tags">
-                    {item.tags.map((t, j) => <span key={j}>{t}</span>)}
+
+                <div className="exp-title-wrap">
+                  <h3 className="exp-title">
+                    <span className="exp-title-inner">{item.roleHtml}</span>
+                  </h3>
+                </div>
+
+                <div className="exp-row-right">
+                  <span className="exp-period">{item.period}</span>
+                  <div className="exp-hover-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="exp-accordion-content"
+                ref={el => contentRefs.current[i] = el}
+                style={{ height: 0, opacity: 0, overflow: 'hidden' }}
+              >
+                <div className="exp-accordion-inner creative-accordion">
+                  <div className="exp-acc-left">
+                    <div className="exp-acc-company-large">{item.company}</div>
+                  </div>
+                  <div className="exp-acc-right">
+                    <p className="exp-acc-desc">{item.desc}</p>
+                    <div className="exp-acc-tags">
+                      {item.tags.map((t, j) => <span key={j} className="creative-tag">{t}</span>)}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
-  );
-}
-
-/* ════════ STATS ════════ */
-function Stats() {
-  return (
-    <div className="stats-strip">
-      {[
-        { val: '3+', desc: 'Years Experience' },
-        { val: '10+', desc: 'Projects Shipped' },
-        { val: '~30%', desc: 'Query Optimization' },
-        { val: 'MCA', desc: 'NMAM Institute of Tech' },
-      ].map((s, i) => (
-        <div key={i} className="stat-box reveal-up">
-          <div className="stat-value">{s.val}</div>
-          <div className="stat-desc">{s.desc}</div>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -1055,24 +1084,454 @@ function Contact() {
       <div className="contact-eyebrow reveal-up">Get In Touch</div>
       <h2 className="contact-heading reveal-up">Let's create<br />something <em>great</em></h2>
       <div className="contact-links reveal-up">
-        <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>✉ sujith7344@gmail.com</a>
+        <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>Email ↗</a>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer" className="contact-btn" data-hover>GitHub ↗</a>
-        <a href="tel:+918217615895" className="contact-btn" data-hover>+91 82176 15895</a>
+        <a href="https://www.linkedin.com/in/sujith-s-625846397/" target="_blank" rel="noreferrer" className="contact-btn" data-hover>LinkedIn ↗</a>
       </div>
     </section>
   );
 }
+/* ════════ SOUND HELPERS ════════ */
+const initAudio = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!window.audioCtx && AudioContext) window.audioCtx = new AudioContext();
+    if (window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
+  } catch (e) { }
+};
 
-/* ════════ APP ════════ */
+const playChargeSound = () => {
+  try {
+    const audio = new Audio('/pikaa-pikaa.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play failed', e));
+  } catch (e) { }
+};
+
+const playZapSound = () => {
+  try {
+    const audio = new Audio('/pikachu-thunderbolt.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(e => console.log('Audio play failed', e));
+  } catch (e) { }
+};
+
+/* ════════ PIKACHU PET ════════ */
+function PikaPet() {
+  const petRef = useRef(null);
+  const posRef = useRef({ x: typeof window !== 'undefined' ? window.innerWidth - 120 : 300, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 300 });
+  const targetRef = useRef({ ...posRef.current });
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+  const draggingRef = useRef(false);
+  const thrownRef = useRef(false);
+  const velocityRef = useRef({ x: 0, y: 0 });
+  const lastPosRef = useRef({ x: 300, y: 300 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const [frame, setFrame] = useState(0);
+  const [petState, setPetState] = useState('idle');
+  const [facingLeft, setFacingLeft] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [bubble, setBubble] = useState({ section: '⚡', msg: 'Pika pika!', show: true });
+  const [visible, setVisible] = useState(false);
+  const lastMoveRef = useRef(Date.now());
+
+  useEffect(() => {
+    // Unlock Audio Context on first interaction
+    const unlock = () => { initAudio(); window.removeEventListener('click', unlock); window.removeEventListener('keydown', unlock); window.removeEventListener('touchstart', unlock); };
+    window.addEventListener('click', unlock); window.addEventListener('keydown', unlock); window.addEventListener('touchstart', unlock);
+
+    const showTimer = setTimeout(() => setVisible(true), 2500);
+    const onMouse = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('mousemove', onMouse, { passive: true });
+
+    // Random wander
+    const wanderInterval = setInterval(() => {
+      if (draggingRef.current) return;
+      const pad = 80;
+      let newY = pad + Math.random() * (window.innerHeight - pad * 2);
+      let newX = pad + Math.random() * (window.innerWidth - pad * 2);
+
+      if (window.innerWidth <= 768) {
+        // Guide mobile user to tap timeline buttons if visible
+        const indicators = document.querySelectorAll('.exp-hover-indicator');
+        let guided = false;
+        for (let i = 0; i < indicators.length; i++) {
+          const rect = indicators[i].getBoundingClientRect();
+          // Find the first indicator that is well within the screen
+          if (rect.top > 100 && rect.bottom < window.innerHeight - 100) {
+            newX = rect.left - 50;
+            newY = rect.top - 10;
+            guided = true;
+            window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '👆', msg: 'Tap to expand!' } }));
+            break;
+          }
+        }
+
+        if (!guided) {
+          newY = window.innerHeight - 150 + Math.random() * 50; // Keep at bottom
+        }
+      }
+
+      targetRef.current = { x: newX, y: newY };
+    }, 3000 + Math.random() * 3000);
+
+    // Section guide
+    const sections = [
+      { id: '#home', section: '⚡', msg: 'Pika pika! Welcome!' },
+      { id: '#about', section: '👤', msg: 'About Sujith!' },
+      { id: '#experience', section: '💼', msg: 'Work & Education!' },
+      { id: '#work', section: '🚀', msg: 'These projects are so cool!' },
+      { id: '#skills', section: '🔧', msg: 'Tech stack!' },
+      { id: '#contact', section: '📬', msg: 'Say hello!' }
+    ];
+    const triggers = [];
+    sections.forEach((sec) => {
+      const el = document.querySelector(sec.id);
+      if (el) {
+        triggers.push(ScrollTrigger.create({
+          trigger: el, start: 'top center', end: 'bottom center',
+          onEnter: () => setBubble({ section: sec.section, msg: sec.msg, show: true }),
+          onEnterBack: () => setBubble({ section: sec.section, msg: sec.msg, show: true }),
+        }));
+      }
+    });
+
+    const onPikaSpeak = (e) => {
+      setBubble({ section: e.detail.section, msg: e.detail.msg, show: true });
+    };
+    window.addEventListener('pika-speak', onPikaSpeak);
+
+    // Drag handlers
+    const onDragMove = (e) => {
+      if (!draggingRef.current) return;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      posRef.current.x = cx - dragOffsetRef.current.x;
+      posRef.current.y = cy - dragOffsetRef.current.y;
+      targetRef.current = { ...posRef.current };
+      if (petRef.current) {
+        petRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`;
+      }
+    };
+    const onDragEnd = (e) => {
+      if (!draggingRef.current) return;
+      const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+      const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+      const movedDist = Math.hypot(cx - dragStartRef.current.x, cy - dragStartRef.current.y);
+      draggingRef.current = false;
+      setIsDragging(false);
+      targetRef.current = { ...posRef.current };
+      lastMoveRef.current = Date.now();
+      if (movedDist < 6) {
+        setPetState('jumping');
+        setBubble({ section: '\u26A1', msg: 'Pika pika!!', show: true });
+        setTimeout(() => {
+          setPetState('sparking');
+          setTimeout(() => { setPetState('idle'); lastMoveRef.current = Date.now(); }, 600);
+        }, 450);
+      } else {
+        thrownRef.current = true;
+        setPetState('tumbling');
+        setBubble({ section: '\u26A1', msg: 'Wheee!', show: true });
+      }
+    };
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('touchend', onDragEnd);
+
+    // Main animation loop
+    let walkFrame = 0;
+    let fc = 0;
+    window._zapping = false;
+    window._lastZap = Date.now();
+    const loop = () => {
+      const pos = posRef.current;
+
+      if (draggingRef.current) {
+        velocityRef.current.x = pos.x - lastPosRef.current.x;
+        velocityRef.current.y = pos.y - lastPosRef.current.y;
+        lastPosRef.current = { ...pos };
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      if (thrownRef.current) {
+        pos.x += velocityRef.current.x;
+        pos.y += velocityRef.current.y;
+        velocityRef.current.x *= 0.94;
+        velocityRef.current.y *= 0.94;
+
+        // Bounce off edges
+        if (pos.x <= 10) { pos.x = 10; velocityRef.current.x *= -0.8; setFacingLeft(false); }
+        if (pos.x >= window.innerWidth - 90) { pos.x = window.innerWidth - 90; velocityRef.current.x *= -0.8; setFacingLeft(true); }
+        if (pos.y <= 10) { pos.y = 10; velocityRef.current.y *= -0.8; }
+        if (pos.y >= window.innerHeight - 90) { pos.y = window.innerHeight - 90; velocityRef.current.y *= -0.8; }
+
+        if (Math.hypot(velocityRef.current.x, velocityRef.current.y) < 0.8) {
+          thrownRef.current = false;
+          targetRef.current = { ...pos };
+          setPetState('idle');
+          setBubble({ section: '\u26A1', msg: 'Oof! That was fun!', show: true });
+        }
+
+        if (petRef.current) {
+          petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+        }
+        lastPosRef.current = { ...pos };
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const now = Date.now();
+      if (!window._lastZap) window._lastZap = now;
+      const matterEl = document.querySelector('#matter-word');
+      const pathEl = document.querySelector('#pika-lightning-path');
+
+      if (window._zapping) {
+        const zapElapsed = Date.now() - window._lastZap;
+
+        if (window._zapPhase === 'just-charging') {
+          if (petRef.current) {
+            petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+          }
+          rafRef.current = requestAnimationFrame(loop);
+          return;
+        }
+
+        if (zapElapsed > 500 && window._zapPhase === 'charging') {
+          window._zapPhase = 'shooting';
+          if (pathEl) pathEl.style.opacity = 1;
+          playZapSound();
+        }
+
+        if (matterEl && pathEl && window._zapPhase === 'shooting') {
+          const shootElapsed = zapElapsed - 500;
+          let progress = Math.min(1, shootElapsed / 150); // Takes 150ms to shoot
+
+          const rect = matterEl.getBoundingClientRect();
+          const targetEndX = rect.left + rect.width / 2;
+          const targetEndY = rect.top + rect.height / 2;
+          const startX = pos.x + 45;
+          const startY = pos.y + 45;
+
+          const endX = startX + (targetEndX - startX) * progress;
+          const endY = startY + (targetEndY - startY) * progress;
+
+          let pathStr = `M ${startX} ${startY} `;
+          const steps = 8;
+          for (let i = 1; i < steps; i++) {
+            const t = i / steps;
+            const px = startX + (endX - startX) * t + (Math.random() - 0.5) * (80 * progress);
+            const py = startY + (endY - startY) * t + (Math.random() - 0.5) * (80 * progress);
+            pathStr += `L ${px} ${py} `;
+          }
+          pathStr += `L ${endX} ${endY}`;
+          pathEl.setAttribute('d', pathStr);
+
+          if (progress >= 1 && !window._matterCharged) {
+            window._matterCharged = true;
+            matterEl.classList.add('matter-charged');
+          }
+        }
+        if (petRef.current) {
+          petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+        }
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      let isMatterVisible = false;
+      if (matterEl) {
+        const rect = matterEl.getBoundingClientRect();
+        // Element is visible if its top is above the viewport bottom AND its bottom is below the viewport top.
+        isMatterVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      }
+
+      const zapInterval = isMatterVisible ? 3000 : 10000;
+
+      if (now - window._lastZap > zapInterval && !draggingRef.current && !thrownRef.current) {
+        window._lastZap = now;
+        window._zapping = true;
+
+        if (isMatterVisible) {
+          window._zapPhase = 'charging';
+          window._matterCharged = false;
+
+          playChargeSound();
+
+          const rect = matterEl.getBoundingClientRect();
+          setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+          setFacingLeft((rect.left + rect.width / 2) < pos.x + 45);
+
+          if (pathEl) pathEl.style.opacity = 0;
+
+          setTimeout(() => {
+            if (pathEl) pathEl.style.opacity = 0;
+            if (matterEl) matterEl.classList.remove('matter-charged');
+            window._zapping = false;
+            setPetState('idle');
+            window._lastZap = Date.now();
+          }, 1500);
+        } else {
+          window._zapPhase = 'just-charging';
+          playChargeSound();
+          setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+
+          setTimeout(() => {
+            window._zapping = false;
+            setPetState('idle');
+            window._lastZap = Date.now();
+          }, 500);
+        }
+
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      const mouse = mouseRef.current;
+      const distToMouse = Math.hypot(mouse.x - pos.x, mouse.y - pos.y);
+      let followTarget = targetRef.current;
+      let bookHovered = false;
+      let timelineHovered = false;
+
+      const timelineTarget = document.querySelector('#timeline-pika-target');
+      if (timelineTarget) {
+        const tRect = timelineTarget.getBoundingClientRect();
+        if (tRect.top > 0 && tRect.bottom < window.innerHeight) {
+          timelineHovered = true;
+          // Follow the target! (Subtract offset for Pikachu's center)
+          followTarget = { x: tRect.left - 32, y: tRect.top - 32 };
+        }
+      }
+
+      const bookEl = document.querySelector('.resume-btn-wrap');
+
+      if (bookEl && !timelineHovered) {
+        const rect = bookEl.getBoundingClientRect();
+        if (mouse.x >= rect.left && mouse.x <= rect.right && mouse.y >= rect.top && mouse.y <= rect.bottom) {
+          bookHovered = true;
+          // Place Pikachu to the left of the book
+          followTarget = { x: rect.left - 100, y: rect.bottom - 80 };
+        }
+      }
+
+      if (window.innerWidth > 768 && !bookHovered && !timelineHovered && distToMouse < 180) {
+        followTarget = { x: mouse.x - 40, y: mouse.y - 40 };
+      }
+
+      const dx = followTarget.x - pos.x;
+      const dy = followTarget.y - pos.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (timelineHovered) {
+        pos.x = followTarget.x;
+        pos.y = followTarget.y;
+        setFacingLeft(dx < 0);
+        setFrame(3);
+        setPetState('sliding');
+        lastMoveRef.current = Date.now();
+      } else if (dist > 5) {
+        let speed = (distToMouse < 150 || bookHovered) ? 1.8 : 2.5;
+        pos.x += (dx / dist) * speed;
+        pos.y += (dy / dist) * speed;
+        pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
+        pos.y = Math.max(10, Math.min(window.innerHeight - 90, pos.y));
+        setFacingLeft(dx < 0);
+        fc++;
+        if (fc % 8 === 0) { walkFrame = walkFrame === 1 ? 2 : 1; setFrame(walkFrame); }
+        setPetState('walking');
+        lastMoveRef.current = Date.now();
+      } else {
+        setFrame(0);
+        if (bookHovered) {
+          setFacingLeft(false); // Make sure Pikachu faces the book (right)
+          setPetState(prev => prev !== 'idle' ? 'idle' : prev);
+        } else {
+          const newState = Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle';
+          setPetState(prev => prev !== newState ? newState : prev);
+        }
+      }
+
+      if (petRef.current) {
+        petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      }
+      lastPosRef.current = { ...pos };
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearInterval(wanderInterval);
+      cancelAnimationFrame(rafRef.current);
+      triggers.forEach(t => t.kill());
+      window.removeEventListener('mousemove', onMouse);
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', onDragEnd);
+      window.removeEventListener('pika-speak', onPikaSpeak);
+    };
+  }, []);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    draggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: cx, y: cy };
+    dragOffsetRef.current = { x: cx - posRef.current.x, y: cy - posRef.current.y };
+    setPetState('idle');
+    setBubble({ section: '\u26A1', msg: 'Pika~?!', show: true });
+  };
+
+
+  const cls = ['pika-pet', visible && 'visible', facingLeft && 'face-left', isDragging && 'dragging', petState === 'jumping' && 'jumping', petState === 'tumbling' && 'tumbling', petState === 'sparking' && 'sparking', petState === 'sleeping' && 'sleeping'].filter(Boolean).join(' ');
+  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : petState === 'sliding' ? 'sliding' : 'idle';
+
+  return (
+    <>
+      <svg id="pika-lightning-svg" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
+        <path id="pika-lightning-path" fill="none" stroke="#FFD700" strokeWidth="3" filter="drop-shadow(0 0 8px #FFD700)" />
+      </svg>
+      <div className={cls} ref={petRef} style={{ transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`, left: 0, top: 0 }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+        <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
+          <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
+        </div>
+        <div className="pika-zzz">zzZ</div>
+        <div className={`pika-sprite ${sprCls}`} data-frame={frame}>
+          <div className="pika-body" />
+          <div className="pika-shadow" />
+        </div>
+        <div className="pika-sparks">
+          <div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+
+
+
+
+
+/* â•â•â•â•â•â•â•â• APP â•â•â•â•â•â•â•â• */
 export default function App() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     // Lenis smooth scroll
-    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), direction: 'vertical', gestureDirection: 'vertical', smooth: true, mouseMultiplier: 1, smoothTouch: false, touchMultiplier: 2, infinite: false });
     window.lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
-    
+
     const update = (time) => { lenis.raf(time * 1000); };
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);
@@ -1083,33 +1542,35 @@ export default function App() {
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal-up').forEach((el) => obs.observe(el));
 
-    return () => { 
+    return () => {
       gsap.ticker.remove(update);
-      lenis.destroy(); 
-      obs.disconnect(); 
+      lenis.destroy();
+      obs.disconnect();
     };
   }, [loaded]);
 
   return (
     <>
       <div className="grain" aria-hidden="true" />
+
       <Cursor />
       {!loaded && <Loader onDone={() => setLoaded(true)} />}
       <Nav />
       <main>
         <Hero />
         <About />
-        <ExperienceEditorial />
+        <ExperienceTimeline />
         <ProjectsDeck />
-        <Stats />
         <Skills />
         <Contact />
       </main>
+      <PikaPet />
       <footer className="footer">
-        <span>© 2026 Sujith</span>
+        <span>Â© 2026 Sujith</span>
         <span>Designed & Built with React + GSAP</span>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer">github.com/thesujith23</a>
       </footer>
     </>
   );
 }
+
