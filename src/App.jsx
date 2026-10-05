@@ -4,6 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import './index.css';
 
+import ExperienceTimeline from './components/ExperienceTimeline';
+
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
 /* â•â•â•â•â•â•â•â• CURSOR â•â•â•â•â•â•â•â• */
@@ -26,10 +28,10 @@ function Cursor() {
       reqId = requestAnimationFrame(tick);
     };
 
-    const over = (e) => { 
+    const over = (e) => {
       const target = e.target.closest('a,button,[data-hover]');
-      if (target === currentHover) return; 
-      
+      if (target === currentHover) return;
+
       currentHover = target;
       if (target) {
         dot?.classList.add('expand');
@@ -42,13 +44,13 @@ function Cursor() {
           if (sym) { sym.innerHTML = ''; sym.classList.remove('visible'); }
           dot?.classList.remove('hide');
         }
-      } 
+      }
     };
-    
-    const out = (e) => { 
+
+    const out = (e) => {
       const target = e.relatedTarget?.closest('a,button,[data-hover]');
-      if (target) return; 
-      
+      if (target) return;
+
       currentHover = null;
       if (dot) {
         dot.classList.remove('expand');
@@ -59,20 +61,20 @@ function Cursor() {
         sym.innerHTML = '';
       }
     };
-    
+
     window.addEventListener('mousemove', move);
     document.addEventListener('mouseover', over);
     document.addEventListener('mouseout', out);
     reqId = requestAnimationFrame(tick);
-    
-    return () => { 
-      window.removeEventListener('mousemove', move); 
-      document.removeEventListener('mouseover', over); 
+
+    return () => {
+      window.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseover', over);
       document.removeEventListener('mouseout', out);
       cancelAnimationFrame(reqId);
     };
   }, []);
-  
+
   return (
     <>
       <div className="cursor-dot" ref={dotRef} />
@@ -128,21 +130,21 @@ const playHoverSound = () => {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
+
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
+
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    
+
     osc.type = 'sine';
     osc.frequency.setValueAtTime(800, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-    
+
     gain.gain.setValueAtTime(0, audioCtx.currentTime);
     gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-    
+
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 0.06);
   } catch (e) {
@@ -152,19 +154,19 @@ const playHoverSound = () => {
 
 function Magnetic({ children, strength = 0.4 }) {
   const magneticRef = useRef(null);
-  
+
   useEffect(() => {
     const el = magneticRef.current;
     if (!el) return;
-    
-    const xTo = gsap.quickTo(el, "x", {duration: 1, ease: "elastic.out(1, 0.3)"});
-    const yTo = gsap.quickTo(el, "y", {duration: 1, ease: "elastic.out(1, 0.3)"});
+
+    const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "elastic.out(1, 0.3)" });
+    const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "elastic.out(1, 0.3)" });
 
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
       const { height, width, left, top } = el.getBoundingClientRect();
-      const x = clientX - (left + width/2);
-      const y = clientY - (top + height/2);
+      const x = clientX - (left + width / 2);
+      const y = clientY - (top + height / 2);
       xTo(x * strength);
       yTo(y * strength);
     };
@@ -200,9 +202,9 @@ function Magnetic({ children, strength = 0.4 }) {
 function HeroCanvas() {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-       <div className="aurora-blob aurora-1"></div>
-       <div className="aurora-blob aurora-2"></div>
-       <div className="aurora-blob aurora-3"></div>
+      <div className="aurora-blob aurora-1"></div>
+      <div className="aurora-blob aurora-2"></div>
+      <div className="aurora-blob aurora-3"></div>
     </div>
   );
 }
@@ -240,7 +242,7 @@ function Nav() {
     <nav className={`nav ${isScrolled ? 'nav-scrolled' : ''}`}>
       <a href="#home" className="nav-brand" onClick={(e) => handleLinkClick(e, '#home')}>Sujith.</a>
       <div className="nav-links">
-        {['About','Skills','Work','Contact'].map(l => {
+        {['About', 'Skills', 'Work', 'Contact'].map(l => {
           const targetId = `#${l.toLowerCase()}`;
           return (
             <Magnetic key={l}>
@@ -274,7 +276,7 @@ const MagneticText = ({ text, strength = 0.8 }) => {
         if (char === ' ') return <span key={index}>&nbsp;</span>;
         return (
           <Magnetic key={index} strength={strength}>
-            <span 
+            <span
               className="piano-char"
               style={{ display: 'inline-block', whiteSpace: 'pre', transition: 'transform 0.2s, color 0.2s' }}
               onTouchStart={triggerPiano}
@@ -384,7 +386,7 @@ function About() {
       onUpdate: (self) => {
         const progress = self.progress;
         const targetIdx = Math.min(Math.floor(progress * chars.length), chars.length - 1);
-        
+
         // Update characters only if their state changes
         chars.forEach((char, i) => {
           let state = 0; // 0: untyped, 1: actively typing, 2: fully typed
@@ -395,12 +397,12 @@ function About() {
           } else {
             state = 0;
           }
-          
+
           if (char.dataset.state != state) {
             char.dataset.state = state;
             if (state === 2) {
               char.style.opacity = '1';
-              char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#1a1a1a';
+              char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#ffffff';
               char.style.textShadow = 'none';
             } else if (state === 1) {
               char.style.opacity = '1';
@@ -489,7 +491,23 @@ function ProjectsDeck() {
 
   const projects = [
     {
-      idx: '01', name: 'BodySync-AI',
+      idx: '01', name: 'AI Research Assistant (RAG)',
+      meta: 'An intelligent document assistant using Retrieval-Augmented Generation (RAG). Features hybrid search (FAISS + BM25) and cross-encoder reranking to extract precise insights from raw PDFs.',
+      tags: ['Python', 'Streamlit', 'FAISS', 'OpenAI'],
+      color: '#0ea5e9',
+      isMobile: false,
+      liveUrl: 'https://nexus-research-document-assist.streamlit.app/',
+      github: 'https://github.com/thesujith23/AI-Research-Document-assistance',
+      quote: '"A robust AI pipeline combining semantic search with keyword precision for highly accurate document QA and retrieval."',
+      quoteAuthor: 'AI & Backend',
+      quoteRole: 'Python & LangChain',
+      icon: 'python/python-original.svg',
+      mainImg: 'nexus1.png',
+      sideImg1: 'nexus2.png',
+      sideImg2: 'nexus3.png'
+    },
+    {
+      idx: '02', name: 'BodySync-AI',
       meta: 'Intelligent Pose Detection & Fitness Tracker. An AI fitness assistant that uses pose estimation for real-time exercise tracking, form feedback, and performance analytics.',
       tags: ['MediaPipe', 'OpenCV', 'Python', 'Flask'],
       color: '#3d2fa9',
@@ -504,7 +522,7 @@ function ProjectsDeck() {
       sideImg2: '/body3.png'
     },
     {
-      idx: '02', name: 'Expense Tracker & Analytics',
+      idx: '03', name: 'Expense Tracker & Analytics',
       meta: 'Secure multi-user financial tracking with JWT auth, role-protected routes, and MongoDB aggregation-powered real-time analytics dashboard.',
       tags: ['MERN', 'Recharts', 'JWT', 'Aggregation'],
       color: '#ff3c34',
@@ -524,7 +542,7 @@ function ProjectsDeck() {
       icon: 'react/react-original.svg'
     },
     {
-      idx: '03', name: 'Book Store Management',
+      idx: '04', name: 'Book Store Management',
       meta: 'Full CRUD inventory system with secure REST APIs, input validation, JWT authentication, and a responsive React UI with reusable components. Fully deployed via Vercel and Render.',
       tags: ['React (Vercel)', 'Node.js (Render)', 'MongoDB Atlas', 'JWT'],
       color: '#1a1a1a',
@@ -540,7 +558,7 @@ function ProjectsDeck() {
       icon: 'nodejs/nodejs-original.svg'
     },
     /* {
-      idx: '04', name: 'TechHire — Job Portal',
+      idx: '05', name: 'TechHire — Job Portal',
       meta: 'Job portal with 20+ listings, real-time filtering, dynamic routing, file-upload flow. Deployed on Vercel with CI/CD, sub-2s loads via Next.js App Router.',
       tags: ['Next.js', 'Tailwind', 'Vercel', 'CI/CD'],
       color: '#0055ff',
@@ -554,7 +572,7 @@ function ProjectsDeck() {
       invertIcon: true
     }, */
     {
-      idx: '05', name: 'AI Food Recommendation',
+      idx: '06', name: 'AI Food Recommendation',
       meta: 'A personalized smart food discovery platform that suggests optimal meals based on dietary preferences, health goals, and real-time nutritional analysis.',
       tags: ['React', 'Python', 'Machine Learning', 'API'],
       color: '#F97316',
@@ -573,11 +591,11 @@ function ProjectsDeck() {
   useEffect(() => {
     const section = containerRef.current;
     if (!section) return;
-    
+
     let ctx = gsap.context(() => {
       const deckContainer = section.querySelector('.deck-container');
       const cards = gsap.utils.toArray('.deck-card');
-      
+
       // Initial setup for the stack
       cards.forEach((card, i) => {
         gsap.set(card, {
@@ -617,7 +635,7 @@ function ProjectsDeck() {
             ease: "power2.inOut",
             duration: 1
           }, i);
-          
+
           // Move remaining cards up the stack
           for (let j = i + 1; j < cards.length; j++) {
             let depth = j - i - 1;
@@ -644,127 +662,127 @@ function ProjectsDeck() {
           <div className="reveal-up">
             <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
-              Selected<br/><em>Projects</em>
+              Selected<br /><em>Projects</em>
             </h2>
           </div>
         </section>
 
         <div className="deck-container">
           <div className="deck-viewport">
-          {projects.map((p, i) => (
-            <div
-              key={i}
-              className="deck-card"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                  rotateY: x * 12,
-                  rotateX: -y * 12,
-                  duration: 0.5,
-                  ease: "power2.out"
-                });
-              }}
-              onMouseLeave={(e) => {
-                gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                  rotateY: 0,
-                  rotateX: 0,
-                  duration: 0.8,
-                  ease: "power2.out"
-                });
-              }}
-              style={{
-                backgroundColor: p.color
-              }}
-            >
-              <div className="deck-card-inner">
-                <div className="deck-card-header">
-                  <div style={{ maxWidth: '750px' }}>
-                    <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
-                      {p.name}
-                    </h3>
-                    <p style={{ fontFamily: 'var(--mono)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, marginTop: '1rem', maxWidth: '95%' }}>
-                      {p.meta}
-                    </p>
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      {p.tags.map((t, j) => (
-                        <span key={j} style={{ padding: '4px 12px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '20px', color: '#fff', fontSize: '0.75rem', fontFamily: 'var(--mono)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
-                      {p.github && (
-                        <div>
-                          <a href={p.github} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#111', color: '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s, transform 0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#111'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                            View Repository
-                          </a>
-                        </div>
-                      )}
-                      {p.liveUrl && (
-                        <div>
-                          <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: p.liveBtnColor || 'var(--accent)', color: p.liveBtnText || '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: `1px solid ${p.liveBtnBorder || 'var(--accent)'}`, transition: 'background 0.3s, transform 0.3s', boxShadow: p.liveBtnShadow || '0 4px 10px rgba(246, 36, 64, 0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                            View Live Project
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mono" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.6)' }}>
-                    ({p.idx})
-                  </div>
-                </div>
-
-                <div className="deck-bottom-section">
-                  <div className="quote-column">
-                    <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
-                      {p.quote || '"A brilliant intersection of design and engineering."'}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                        {p.icon ? (
-                          <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${p.icon}`} alt="tech-icon" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: p.invertIcon ? 'invert(1)' : 'none' }} />
-                        ) : null}
+            {projects.map((p, i) => (
+              <div
+                key={i}
+                className="deck-card"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = (e.clientX - rect.left) / rect.width - 0.5;
+                  const y = (e.clientY - rect.top) / rect.height - 0.5;
+                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
+                    rotateY: x * 12,
+                    rotateX: -y * 12,
+                    duration: 0.5,
+                    ease: "power2.out"
+                  });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
+                    rotateY: 0,
+                    rotateX: 0,
+                    duration: 0.8,
+                    ease: "power2.out"
+                  });
+                }}
+                style={{
+                  backgroundColor: p.color
+                }}
+              >
+                <div className="deck-card-inner">
+                  <div className="deck-card-header">
+                    <div style={{ maxWidth: '750px' }}>
+                      <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
+                        {p.name}
+                      </h3>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, marginTop: '1rem', maxWidth: '95%' }}>
+                        {p.meta}
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                        {p.tags.map((t, j) => (
+                          <span key={j} style={{ padding: '4px 12px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '20px', color: '#fff', fontSize: '0.75rem', fontFamily: 'var(--mono)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                            {t}
+                          </span>
+                        ))}
                       </div>
-                      <div>
-                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
-                        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+                        {p.github && (
+                          <div>
+                            <a href={p.github} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#111', color: '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s, transform 0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#111'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                              View Repository
+                            </a>
+                          </div>
+                        )}
+                        {p.liveUrl && (
+                          <div>
+                            <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: p.liveBtnColor || 'var(--accent)', color: p.liveBtnText || '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: `1px solid ${p.liveBtnBorder || 'var(--accent)'}`, transition: 'background 0.3s, transform 0.3s', boxShadow: p.liveBtnShadow || '0 4px 10px rgba(246, 36, 64, 0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                              View Live Project
+                            </a>
+                          </div>
+                        )}
                       </div>
+                    </div>
+                    <div className="mono" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.6)' }}>
+                      ({p.idx})
                     </div>
                   </div>
 
-                  <div className="landscape-mockup-wrapper">
-                    <div className="mockup-main">
-                      {p.mainVideo ? (
-                        <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
-                      ) : p.mainImg ? (
-                        <img src={p.mainImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
-                      ) : (
-                        <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
-                      )}
-                    </div>
-                    <div className="landscape-side-images">
-                      <div className="mockup-side">
-                        {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
+                  <div className="deck-bottom-section">
+                    <div className="quote-column">
+                      <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
+                        {p.quote || '"A brilliant intersection of design and engineering."'}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
+                          {p.icon ? (
+                            <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${p.icon}`} alt="tech-icon" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: p.invertIcon ? 'invert(1)' : 'none' }} />
+                          ) : null}
+                        </div>
+                        <div>
+                          <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
+                        </div>
                       </div>
-                      <div className="mockup-side">
-                        {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
+                    </div>
+
+                    <div className="landscape-mockup-wrapper">
+                      <div className="mockup-main">
+                        {p.mainVideo ? (
+                          <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
+                        ) : p.mainImg ? (
+                          <img src={p.mainImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
+                        ) : (
+                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
+                        )}
+                      </div>
+                      <div className="landscape-side-images">
+                        <div className="mockup-side">
+                          {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
+                        </div>
+                        <div className="mockup-side">
+                          {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-      </div>
-      
+
       {zoomedMedia && (
-        <div 
+        <div
           style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out', backdropFilter: 'blur(10px)' }}
           onClick={() => setZoomedMedia(null)}
         >
@@ -773,7 +791,7 @@ function ProjectsDeck() {
           ) : (
             <img src={zoomedMedia.src} style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', objectFit: 'contain' }} alt="Zoomed view" onClick={(e) => e.stopPropagation()} />
           )}
-          <div style={{ position: 'absolute', top: '20px', right: '30px', color: '#fff', fontSize: '3rem', cursor: 'pointer', fontFamily: 'sans-serif', fontWeight: 200, opacity: 0.7 }} onMouseEnter={(e) => e.currentTarget.style.opacity=1} onMouseLeave={(e) => e.currentTarget.style.opacity=0.7}>&times;</div>
+          <div style={{ position: 'absolute', top: '20px', right: '30px', color: '#fff', fontSize: '3rem', cursor: 'pointer', fontFamily: 'sans-serif', fontWeight: 200, opacity: 0.7 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}>&times;</div>
         </div>
       )}
     </>
@@ -785,32 +803,32 @@ function Skills() {
   const getImg = (src, invert = false) => `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" style="width: 100%; height: 100%; object-fit: contain; ${invert ? 'filter: invert(1);' : ''}" />`;
 
   const allSkills = [
-    { name: 'React.js', featured: true, symbol: getImg('react/react-original.svg') }, 
-    { name: 'Next.js', featured: true, symbol: getImg('nextjs/nextjs-original.svg', true) }, 
+    { name: 'React.js', featured: true, symbol: getImg('react/react-original.svg') },
+    { name: 'Next.js', featured: true, symbol: getImg('nextjs/nextjs-original.svg', true) },
     { name: 'Node.js', featured: true, symbol: getImg('nodejs/nodejs-original.svg') },
-    { name: 'MongoDB', symbol: getImg('mongodb/mongodb-original.svg') }, 
-    { name: 'JavaScript (ES6+)', symbol: getImg('javascript/javascript-original.svg') }, 
-    { name: 'Python', symbol: getImg('python/python-original.svg') }, 
+    { name: 'MongoDB', symbol: getImg('mongodb/mongodb-original.svg') },
+    { name: 'JavaScript (ES6+)', symbol: getImg('javascript/javascript-original.svg') },
+    { name: 'Python', symbol: getImg('python/python-original.svg') },
     { name: 'Java', symbol: getImg('java/java-original.svg') },
-    { name: 'Express.js', symbol: getImg('express/express-original.svg', true) }, 
-    { name: 'Flask', symbol: getImg('flask/flask-original.svg', true) }, 
+    { name: 'Express.js', symbol: getImg('express/express-original.svg', true) },
+    { name: 'Flask', symbol: getImg('flask/flask-original.svg', true) },
     { name: 'HTML5 / CSS3', symbol: getImg('html5/html5-original.svg') },
-    { name: 'Tailwind CSS', symbol: getImg('tailwindcss/tailwindcss-original.svg') }, 
-    { name: 'RESTful APIs', featured: true, symbol: getImg('json/json-original.svg') }, 
+    { name: 'Tailwind CSS', symbol: getImg('tailwindcss/tailwindcss-original.svg') },
+    { name: 'RESTful APIs', featured: true, symbol: getImg('json/json-original.svg') },
     { name: 'MySQL', symbol: getImg('mysql/mysql-original.svg') },
-    { name: 'Supabase', symbol: getImg('supabase/supabase-original.svg') }, 
-    { name: 'Xano', symbol: '✖️' }, 
+    { name: 'Supabase', symbol: getImg('supabase/supabase-original.svg') },
+    { name: 'Xano', symbol: '✖️' },
     { name: 'Git / GitHub', symbol: getImg('github/github-original.svg', true) },
-    { name: 'Retell AI', symbol: '🤖' }, 
-    { name: 'Claude AI', symbol: '🧠' }, 
+    { name: 'Retell AI', symbol: '🤖' },
+    { name: 'Claude AI', symbol: '🧠' },
     { name: 'Plivo', symbol: '📞' },
-    { name: 'nexHealth APIs', symbol: '🦷' }, 
-    { name: 'OpenRouter', symbol: '🌐' }, 
+    { name: 'nexHealth APIs', symbol: '🦷' },
+    { name: 'OpenRouter', symbol: '🌐' },
     { name: 'MediaPipe', symbol: '👁️' },
-    { name: 'Power BI', symbol: '📊' }, 
-    { name: 'Recharts', symbol: '📈' }, 
+    { name: 'Power BI', symbol: '📊' },
+    { name: 'Recharts', symbol: '📈' },
     { name: 'Socket.io', symbol: getImg('socketio/socketio-original.svg', true) },
-    { name: 'Vercel', symbol: getImg('vercel/vercel-original.svg', true) }, 
+    { name: 'Vercel', symbol: getImg('vercel/vercel-original.svg', true) },
     { name: 'Bootstrap', symbol: getImg('bootstrap/bootstrap-original.svg') },
   ];
 
@@ -894,7 +912,7 @@ function ExperienceEditorial() {
     if (!section) return;
 
     let ctx = gsap.context(() => {
-      gsap.fromTo('.exp-title-inner', 
+      gsap.fromTo('.exp-title-inner',
         { yPercent: 120 },
         {
           yPercent: 0,
@@ -915,11 +933,11 @@ function ExperienceEditorial() {
   useEffect(() => {
     if (!listWrapRef.current) return;
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
-    gsap.fromTo(rows, 
-      { x: -40, opacity: 0 }, 
+    gsap.fromTo(rows,
+      { x: -40, opacity: 0 },
       { x: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: 'power3.out' }
     );
-    
+
     // Animate timeline line filling up
     gsap.fromTo('.exp-list-line-fill',
       { scaleY: 0 },
@@ -929,12 +947,12 @@ function ExperienceEditorial() {
 
   const handleTabSwitch = (tab) => {
     if (tab === activeTab) return;
-    
+
     const msg = tab === 'experience' ? 'Work history!' : 'Education history!';
     window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '💼', msg } }));
 
     const rows = listWrapRef.current.querySelectorAll('.exp-row');
-    
+
     // Animate out with stagger
     gsap.to(rows, {
       x: 40,
@@ -954,8 +972,8 @@ function ExperienceEditorial() {
     if (activeIdx !== null && contentRefs.current[activeIdx]) {
       gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
     }
-    gsap.fromTo(contentRefs.current[idx], 
-      { height: 0, opacity: 0 }, 
+    gsap.fromTo(contentRefs.current[idx],
+      { height: 0, opacity: 0 },
       { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() }
     );
     setActiveIdx(idx);
@@ -975,16 +993,16 @@ function ExperienceEditorial() {
       <div className="exp-bg-glow"></div>
       <div className="exp-header-top">
         <span className="typewriter-terminal-tag" style={{ background: 'transparent', borderColor: 'rgba(255,229,191,0.2)', color: 'var(--bg)' }}>{'>'}_ timeline.log</span>
-        
+
         <div className="exp-tabs-pill">
-          <div 
-            className="exp-tab-highlighter" 
-            style={{ 
-              transform: `translateX(${activeTab === 'experience' ? '0%' : '100%'})` 
-            }} 
+          <div
+            className="exp-tab-highlighter"
+            style={{
+              transform: `translateX(${activeTab === 'experience' ? '0%' : '100%'})`
+            }}
           />
           {['experience', 'education'].map(tab => (
-            <button 
+            <button
               key={tab}
               onClick={() => handleTabSwitch(tab)}
               data-hover
@@ -1001,12 +1019,12 @@ function ExperienceEditorial() {
           <div className="exp-list-line">
             <div className="exp-list-line-fill"></div>
           </div>
-        {currentList.map((item, i) => (
-          <div 
-            key={`${activeTab}-${i}`} 
-            className={`exp-row ${activeIdx === i ? 'active' : ''}`}
-            onMouseEnter={() => handleMouseEnter(i)}
-            onClick={() => handleMouseEnter(i)}
+          {currentList.map((item, i) => (
+            <div
+              key={`${activeTab}-${i}`}
+              className={`exp-row ${activeIdx === i ? 'active' : ''}`}
+              onMouseEnter={() => handleMouseEnter(i)}
+              onClick={() => handleMouseEnter(i)}
             >
               <div className="exp-timeline-node">
                 <div className="exp-timeline-dot-inner"></div>
@@ -1016,43 +1034,43 @@ function ExperienceEditorial() {
                 <div className="exp-row-left">
                   <span className="exp-num">({item.num})</span>
                 </div>
-              
-              <div className="exp-title-wrap">
-                <h3 className="exp-title">
-                  <span className="exp-title-inner">{item.roleHtml}</span>
-                </h3>
-              </div>
-              
-              <div className="exp-row-right">
-                <span className="exp-period">{item.period}</span>
-                <div className="exp-hover-indicator">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </div>
-              </div>
-            </div>
 
-            <div 
-              className="exp-accordion-content" 
-              ref={el => contentRefs.current[i] = el}
-              style={{ height: 0, opacity: 0, overflow: 'hidden' }}
-            >
-              <div className="exp-accordion-inner creative-accordion">
-                <div className="exp-acc-left">
-                  <div className="exp-acc-company-large">{item.company}</div>
+                <div className="exp-title-wrap">
+                  <h3 className="exp-title">
+                    <span className="exp-title-inner">{item.roleHtml}</span>
+                  </h3>
                 </div>
-                <div className="exp-acc-right">
-                  <p className="exp-acc-desc">{item.desc}</p>
-                  <div className="exp-acc-tags">
-                    {item.tags.map((t, j) => <span key={j} className="creative-tag">{t}</span>)}
+
+                <div className="exp-row-right">
+                  <span className="exp-period">{item.period}</span>
+                  <div className="exp-hover-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="exp-accordion-content"
+                ref={el => contentRefs.current[i] = el}
+                style={{ height: 0, opacity: 0, overflow: 'hidden' }}
+              >
+                <div className="exp-accordion-inner creative-accordion">
+                  <div className="exp-acc-left">
+                    <div className="exp-acc-company-large">{item.company}</div>
+                  </div>
+                  <div className="exp-acc-right">
+                    <p className="exp-acc-desc">{item.desc}</p>
+                    <div className="exp-acc-tags">
+                      {item.tags.map((t, j) => <span key={j} className="creative-tag">{t}</span>)}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
       </div>
     </section>
@@ -1080,64 +1098,23 @@ const initAudio = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!window.audioCtx && AudioContext) window.audioCtx = new AudioContext();
     if (window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
-  } catch(e) {}
+  } catch (e) { }
 };
 
 const playChargeSound = () => {
-  if (!window.audioCtx) return;
   try {
-    const ctx = window.audioCtx;
-    const osc = ctx.createOscillator();
-    osc.type = 'square'; // 8-bit style
-    
-    const now = ctx.currentTime;
-    // Classic retro power-up arpeggio (rising major chord)
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.setValueAtTime(277, now + 0.1);
-    osc.frequency.setValueAtTime(330, now + 0.2);
-    osc.frequency.setValueAtTime(440, now + 0.3);
-    osc.frequency.setValueAtTime(554, now + 0.4);
-    
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
-    gain.gain.setValueAtTime(0.05, now + 0.4);
-    gain.gain.linearRampToValueAtTime(0.001, now + 0.5);
-    
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(now + 0.5);
-  } catch(e) {}
+    const audio = new Audio('/pikaa-pikaa.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play failed', e));
+  } catch (e) { }
 };
 
 const playZapSound = () => {
-  if (!window.audioCtx) return;
   try {
-    const ctx = window.audioCtx;
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    osc1.type = 'square';
-    osc2.type = 'sawtooth';
-    
-    // Classic retro descending zap ("pew" sound)
-    const now = ctx.currentTime;
-    osc1.frequency.setValueAtTime(1200, now);
-    osc1.frequency.exponentialRampToValueAtTime(50, now + 0.2);
-    
-    osc2.frequency.setValueAtTime(1200, now);
-    osc2.frequency.exponentialRampToValueAtTime(50, now + 0.2);
-    
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-    
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(ctx.destination);
-    osc1.start(); osc2.start();
-    osc1.stop(now + 0.2); osc2.stop(now + 0.2);
-  } catch(e) {}
+    const audio = new Audio('/pikachu-thunderbolt.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(e => console.log('Audio play failed', e));
+  } catch (e) { }
 };
 
 /* ════════ PIKACHU PET ════════ */
@@ -1178,26 +1155,26 @@ function PikaPet() {
       let newX = pad + Math.random() * (window.innerWidth - pad * 2);
 
       if (window.innerWidth <= 768) {
-         // Guide mobile user to tap timeline buttons if visible
-         const indicators = document.querySelectorAll('.exp-hover-indicator');
-         let guided = false;
-         for (let i = 0; i < indicators.length; i++) {
-           const rect = indicators[i].getBoundingClientRect();
-           // Find the first indicator that is well within the screen
-           if (rect.top > 100 && rect.bottom < window.innerHeight - 100) {
-             newX = rect.left - 50;
-             newY = rect.top - 10;
-             guided = true;
-             window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '👆', msg: 'Tap to expand!' } }));
-             break;
-           }
-         }
-         
-         if (!guided) {
-           newY = window.innerHeight - 150 + Math.random() * 50; // Keep at bottom
-         }
+        // Guide mobile user to tap timeline buttons if visible
+        const indicators = document.querySelectorAll('.exp-hover-indicator');
+        let guided = false;
+        for (let i = 0; i < indicators.length; i++) {
+          const rect = indicators[i].getBoundingClientRect();
+          // Find the first indicator that is well within the screen
+          if (rect.top > 100 && rect.bottom < window.innerHeight - 100) {
+            newX = rect.left - 50;
+            newY = rect.top - 10;
+            guided = true;
+            window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '👆', msg: 'Tap to expand!' } }));
+            break;
+          }
+        }
+
+        if (!guided) {
+          newY = window.innerHeight - 150 + Math.random() * 50; // Keep at bottom
+        }
       }
-      
+
       targetRef.current = { x: newX, y: newY };
     }, 3000 + Math.random() * 3000);
 
@@ -1273,34 +1250,34 @@ function PikaPet() {
     window._lastZap = Date.now();
     const loop = () => {
       const pos = posRef.current;
-      
-      if (draggingRef.current) { 
+
+      if (draggingRef.current) {
         velocityRef.current.x = pos.x - lastPosRef.current.x;
         velocityRef.current.y = pos.y - lastPosRef.current.y;
         lastPosRef.current = { ...pos };
-        rafRef.current = requestAnimationFrame(loop); 
-        return; 
+        rafRef.current = requestAnimationFrame(loop);
+        return;
       }
-      
+
       if (thrownRef.current) {
         pos.x += velocityRef.current.x;
         pos.y += velocityRef.current.y;
         velocityRef.current.x *= 0.94;
         velocityRef.current.y *= 0.94;
-        
+
         // Bounce off edges
         if (pos.x <= 10) { pos.x = 10; velocityRef.current.x *= -0.8; setFacingLeft(false); }
         if (pos.x >= window.innerWidth - 90) { pos.x = window.innerWidth - 90; velocityRef.current.x *= -0.8; setFacingLeft(true); }
         if (pos.y <= 10) { pos.y = 10; velocityRef.current.y *= -0.8; }
         if (pos.y >= window.innerHeight - 90) { pos.y = window.innerHeight - 90; velocityRef.current.y *= -0.8; }
-        
+
         if (Math.hypot(velocityRef.current.x, velocityRef.current.y) < 0.8) {
           thrownRef.current = false;
           targetRef.current = { ...pos };
           setPetState('idle');
           setBubble({ section: '\u26A1', msg: 'Oof! That was fun!', show: true });
         }
-        
+
         if (petRef.current) {
           petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
         }
@@ -1318,29 +1295,29 @@ function PikaPet() {
         const zapElapsed = Date.now() - window._lastZap;
 
         if (window._zapPhase === 'just-charging') {
-            if (petRef.current) {
-              petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
-            }
-            rafRef.current = requestAnimationFrame(loop);
-            return;
+          if (petRef.current) {
+            petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+          }
+          rafRef.current = requestAnimationFrame(loop);
+          return;
         }
 
         if (zapElapsed > 500 && window._zapPhase === 'charging') {
-            window._zapPhase = 'shooting';
-            if (pathEl) pathEl.style.opacity = 1;
-            playZapSound();
+          window._zapPhase = 'shooting';
+          if (pathEl) pathEl.style.opacity = 1;
+          playZapSound();
         }
 
         if (matterEl && pathEl && window._zapPhase === 'shooting') {
           const shootElapsed = zapElapsed - 500;
           let progress = Math.min(1, shootElapsed / 150); // Takes 150ms to shoot
-          
+
           const rect = matterEl.getBoundingClientRect();
           const targetEndX = rect.left + rect.width / 2;
           const targetEndY = rect.top + rect.height / 2;
           const startX = pos.x + 45;
           const startY = pos.y + 45;
-          
+
           const endX = startX + (targetEndX - startX) * progress;
           const endY = startY + (targetEndY - startY) * progress;
 
@@ -1354,10 +1331,10 @@ function PikaPet() {
           }
           pathStr += `L ${endX} ${endY}`;
           pathEl.setAttribute('d', pathStr);
-          
+
           if (progress >= 1 && !window._matterCharged) {
-              window._matterCharged = true;
-              matterEl.classList.add('matter-charged');
+            window._matterCharged = true;
+            matterEl.classList.add('matter-charged');
           }
         }
         if (petRef.current) {
@@ -1369,11 +1346,11 @@ function PikaPet() {
 
       let isMatterVisible = false;
       if (matterEl) {
-         const rect = matterEl.getBoundingClientRect();
-         // Element is visible if its top is above the viewport bottom AND its bottom is below the viewport top.
-         isMatterVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        const rect = matterEl.getBoundingClientRect();
+        // Element is visible if its top is above the viewport bottom AND its bottom is below the viewport top.
+        isMatterVisible = rect.top < window.innerHeight && rect.bottom > 0;
       }
-      
+
       const zapInterval = isMatterVisible ? 3000 : 10000;
 
       if (now - window._lastZap > zapInterval && !draggingRef.current && !thrownRef.current) {
@@ -1381,36 +1358,36 @@ function PikaPet() {
         window._zapping = true;
 
         if (isMatterVisible) {
-            window._zapPhase = 'charging';
-            window._matterCharged = false;
-            
-            playChargeSound();
+          window._zapPhase = 'charging';
+          window._matterCharged = false;
 
-            const rect = matterEl.getBoundingClientRect();
-            setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
-            setFacingLeft((rect.left + rect.width / 2) < pos.x + 45);
-            
+          playChargeSound();
+
+          const rect = matterEl.getBoundingClientRect();
+          setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+          setFacingLeft((rect.left + rect.width / 2) < pos.x + 45);
+
+          if (pathEl) pathEl.style.opacity = 0;
+
+          setTimeout(() => {
             if (pathEl) pathEl.style.opacity = 0;
-            
-            setTimeout(() => {
-              if (pathEl) pathEl.style.opacity = 0;
-              if (matterEl) matterEl.classList.remove('matter-charged');
-              window._zapping = false;
-              setPetState('idle');
-              window._lastZap = Date.now();
-            }, 1500);
+            if (matterEl) matterEl.classList.remove('matter-charged');
+            window._zapping = false;
+            setPetState('idle');
+            window._lastZap = Date.now();
+          }, 1500);
         } else {
-            window._zapPhase = 'just-charging';
-            playChargeSound();
-            setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
-            
-            setTimeout(() => {
-              window._zapping = false;
-              setPetState('idle');
-              window._lastZap = Date.now();
-            }, 500);
+          window._zapPhase = 'just-charging';
+          playChargeSound();
+          setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
+
+          setTimeout(() => {
+            window._zapping = false;
+            setPetState('idle');
+            window._lastZap = Date.now();
+          }, 500);
         }
-        
+
         rafRef.current = requestAnimationFrame(loop);
         return;
       }
@@ -1419,9 +1396,21 @@ function PikaPet() {
       const distToMouse = Math.hypot(mouse.x - pos.x, mouse.y - pos.y);
       let followTarget = targetRef.current;
       let bookHovered = false;
+      let timelineHovered = false;
+
+      const timelineTarget = document.querySelector('#timeline-pika-target');
+      if (timelineTarget) {
+        const tRect = timelineTarget.getBoundingClientRect();
+        if (tRect.top > 0 && tRect.bottom < window.innerHeight) {
+          timelineHovered = true;
+          // Follow the target! (Subtract offset for Pikachu's center)
+          followTarget = { x: tRect.left - 32, y: tRect.top - 32 };
+        }
+      }
+
       const bookEl = document.querySelector('.resume-btn-wrap');
 
-      if (bookEl) {
+      if (bookEl && !timelineHovered) {
         const rect = bookEl.getBoundingClientRect();
         if (mouse.x >= rect.left && mouse.x <= rect.right && mouse.y >= rect.top && mouse.y <= rect.bottom) {
           bookHovered = true;
@@ -1430,7 +1419,7 @@ function PikaPet() {
         }
       }
 
-      if (window.innerWidth > 768 && !bookHovered && distToMouse < 180) {
+      if (window.innerWidth > 768 && !bookHovered && !timelineHovered && distToMouse < 180) {
         followTarget = { x: mouse.x - 40, y: mouse.y - 40 };
       }
 
@@ -1438,8 +1427,15 @@ function PikaPet() {
       const dy = followTarget.y - pos.y;
       const dist = Math.hypot(dx, dy);
 
-      if (dist > 5) {
-        const speed = (distToMouse < 150 || bookHovered) ? 1.8 : 2.5;
+      if (timelineHovered) {
+        pos.x = followTarget.x;
+        pos.y = followTarget.y;
+        setFacingLeft(dx < 0);
+        setFrame(3);
+        setPetState('sliding');
+        lastMoveRef.current = Date.now();
+      } else if (dist > 5) {
+        let speed = (distToMouse < 150 || bookHovered) ? 1.8 : 2.5;
         pos.x += (dx / dist) * speed;
         pos.y += (dy / dist) * speed;
         pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
@@ -1496,7 +1492,7 @@ function PikaPet() {
 
 
   const cls = ['pika-pet', visible && 'visible', facingLeft && 'face-left', isDragging && 'dragging', petState === 'jumping' && 'jumping', petState === 'tumbling' && 'tumbling', petState === 'sparking' && 'sparking', petState === 'sleeping' && 'sleeping'].filter(Boolean).join(' ');
-  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : 'idle';
+  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : petState === 'sliding' ? 'sliding' : 'idle';
 
   return (
     <>
@@ -1532,10 +1528,10 @@ export default function App() {
 
   useEffect(() => {
     // Lenis smooth scroll
-    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), direction: 'vertical', gestureDirection: 'vertical', smooth: true, mouseMultiplier: 1, smoothTouch: false, touchMultiplier: 2, infinite: false });
     window.lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
-    
+
     const update = (time) => { lenis.raf(time * 1000); };
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);
@@ -1546,23 +1542,24 @@ export default function App() {
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal-up').forEach((el) => obs.observe(el));
 
-    return () => { 
+    return () => {
       gsap.ticker.remove(update);
-      lenis.destroy(); 
-      obs.disconnect(); 
+      lenis.destroy();
+      obs.disconnect();
     };
   }, [loaded]);
 
   return (
     <>
       <div className="grain" aria-hidden="true" />
+
       <Cursor />
       {!loaded && <Loader onDone={() => setLoaded(true)} />}
       <Nav />
       <main>
         <Hero />
         <About />
-        <ExperienceEditorial />
+        <ExperienceTimeline />
         <ProjectsDeck />
         <Skills />
         <Contact />

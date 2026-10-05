@@ -31,6 +31,14 @@ const projects = [
     stack: ['Retell AI', 'nexHealth APIs', 'Supabase', 'Plivo', 'Stitch'],
     link: '#',
   },
+  {
+    num: '05',
+    title: 'Nexus Research — AI Document Assistant',
+    desc: 'An AI-powered document research assistant that turns uploaded papers, reports, or notes into clarity. It finds relevant passages, explains key ideas, and grounds every answer with direct source evidence and citations.',
+    stack: ['AI Agent', 'RAG', 'React', 'Tailwind'],
+    link: '#',
+    images: ['nexus1.png', 'nexus2.png'],
+  },
 ];
 
 export default function Projects() {
@@ -68,6 +76,18 @@ export default function Projects() {
                     <span key={j} className="stack-tag">{s}</span>
                   ))}
                 </div>
+                {p.images && (
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                    {p.images.map((img, imgIdx) => (
+                      <img 
+                        key={imgIdx} 
+                        src={`/${img}`} 
+                        alt={`${p.title} screenshot ${imgIdx + 1}`} 
+                        style={{ height: '200px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', objectFit: 'cover', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} 
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="project-arrow">↗</div>
             </a>
