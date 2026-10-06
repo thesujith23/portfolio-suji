@@ -111,8 +111,12 @@ const experiences = [
     color: '#f97316',
     accent: '#ea580c',
     icon: '💼',
-    tags: ['Next.js', 'Retell AI', 'Supabase', 'LiveKit', 'Xano'],
-    fullDesc: 'Architected a real-time AI voice platform using Next.js, React, and LiveKit. Built DigitizedHealth for AI appointment booking via Retell AI and nexHealth APIs. Integrated Plivo, Supabase, Xano, and Stitch.',
+    tags: ['Pipecat', 'Python', 'Supabase', 'Codex'],
+    fullDesc: [
+      'Developed a real-time, model-agnostic conversational AI backend using Pipecat and FastAPI, integrated with multiple STT, TTS, and LLM providers via WebSockets.',
+      'Streamlined daily development with an AI-first workflow, used Codex CLI for implementation, Plan Mode to scope tasks before coding, and the Grill-Me skill to stress-test designs and surface edge cases early, reducing rework.',
+      'VoiceAgentDoctor — Built a custom diagnostic skill to analyze and optimize real-time voice-agent latency, interruptions, and STT–LLM–TTS performance using Pipecat.'
+    ],
     achievement: 'AI Voice Platform',
     side: 'left',
     gapMonths: 0,
@@ -279,15 +283,29 @@ function ExperiencePopup({ exp, onClose }) {
             {/* Body */}
             <div className="px-8 pb-8 flex flex-col gap-6 flex-1">
               {/* Full description */}
-              <motion.p
-                className="text-sm md:text-base leading-relaxed"
-                style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'IBM Plex Mono, monospace' }}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                {exp.fullDesc}
-              </motion.p>
+              {Array.isArray(exp.fullDesc) ? (
+                <motion.ul
+                  className="list-disc pl-5 text-sm md:text-base leading-relaxed flex flex-col gap-2"
+                  style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'IBM Plex Mono, monospace' }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {exp.fullDesc.map((point, i) => (
+                    <li key={i}>{point}</li>
+                  ))}
+                </motion.ul>
+              ) : (
+                <motion.p
+                  className="text-sm md:text-base leading-relaxed whitespace-pre-line"
+                  style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'IBM Plex Mono, monospace' }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {exp.fullDesc}
+                </motion.p>
+              )}
 
               {/* Skills */}
               <motion.div
