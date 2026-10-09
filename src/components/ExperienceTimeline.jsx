@@ -21,7 +21,7 @@ const ScrollChar = ({ char, progress, dist, maxDist, autoPlay, delay, isInView }
   );
 };
 
-const TextReveal = ({ children, className = '', autoPlay = false, delay = 0 }) => {
+export const TextReveal = ({ children, className = '', autoPlay = false, delay = 0 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-20px' });
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 95%', 'center center'] });
@@ -486,7 +486,7 @@ const ExperienceTimeline = () => {
             >
               // section.experience
             </motion.span>
-            <h2 style={{ marginTop: '0.5rem' }}>
+            <h2 style={{ marginTop: '0.5rem', fontFamily: '"Oswald", sans-serif', fontWeight: 700, textTransform: 'uppercase', fontSize: 'clamp(3rem,6vw,5rem)' }}>
               <TextReveal delay={0.05}>Experience</TextReveal>
             </h2>
             <motion.p
