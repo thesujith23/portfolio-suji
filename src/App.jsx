@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import './index.css';
 
-import ExperienceTimeline from './components/ExperienceTimeline';
+import ExperienceTimeline, { TextReveal } from './components/ExperienceTimeline';
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
@@ -661,9 +661,9 @@ function ProjectsDeck() {
         <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px', paddingBottom: '20px' }}>
           <div className="reveal-up">
             <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
-            <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
-              Selected<br /><em>Projects</em>
-            </h2>
+          <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
+            <TextReveal delay={0.05}>Selected</TextReveal><br /><em><TextReveal delay={0.1}>Projects</TextReveal></em>
+          </h2>
           </div>
         </section>
 
@@ -835,8 +835,8 @@ function Skills() {
   return (
     <section className="skills" id="skills">
       <div className="skills-header">
-        <h2 className="skills-title reveal-up">
-          Tools &<br /><span className="accent">Technologies</span>
+        <h2 className="skills-title">
+          <TextReveal delay={0.05}>Tools &</TextReveal><br /><span className="accent"><TextReveal delay={0.1}>Technologies</TextReveal></span>
         </h2>
         <p className="skills-subtitle reveal-up">
           A curated set of languages, frameworks, and platforms I work with daily
@@ -1082,7 +1082,7 @@ function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="contact-eyebrow reveal-up">Get In Touch</div>
-      <h2 className="contact-heading reveal-up">Let's create<br />something <em>great</em></h2>
+      <h2 className="contact-heading"><TextReveal delay={0.05}>Let's create</TextReveal><br /><TextReveal delay={0.1}>something</TextReveal> <em><TextReveal delay={0.15}>great</TextReveal></em></h2>
       <div className="contact-links reveal-up">
         <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>Email ↗</a>
         <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer" className="contact-btn" data-hover>GitHub ↗</a>

@@ -1399,18 +1399,20 @@ button { cursor: none; }
   #work > section { padding-left: 24px !important; padding-right: 24px !important; }
 
   /* Deck Reference CSS from Portfolio */
-  .deck-viewport { height: 85vh !important; }
+  .deck-viewport { height: 85vh !important; top: 10vh !important; align-items: center !important; }
   .deck-card { border-radius: 12px !important; height: 65vh !important; }
   .deck-card-inner { padding: 1.5rem !important; overflow-y: hidden !important; }
   .deck-card-inner > div:first-child h3 { font-size: 2rem !important; }
-  .deck-card-inner p { font-size: 0.95rem !important; margin-top: 1rem !important; }
-  .deck-quote, .quote-column, .mockup-main { display: none !important; }
-  .deck-card-header > .mono { display: none !important; }
-  .deck-bottom-section { margin-top: auto !important; padding-top: 1rem !important; flex: none !important; }
+  .deck-card-inner p { font-size: 0.95rem !important; margin-top: 1rem !important; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .deck-quote, .quote-column { display: none !important; }
+  .deck-bottom-section { margin-top: 2rem !important; }
   
-  .landscape-mockup-wrapper { height: auto !important; width: 100% !important; display: flex !important; flex-direction: row !important; }
-  .landscape-side-images { width: 100% !important; display: flex !important; flex-direction: row !important; gap: 1rem !important; }
-  .mockup-side { flex: 1 !important; height: auto !important; aspect-ratio: 16/9 !important; }
+  .landscape-mockup-wrapper { height: 18vh !important; width: 100% !important; flex: none !important; display: flex !important; flex-direction: row !important; justify-content: center !important; gap: 0.5rem !important; }
+  .landscape-mockup-wrapper > div { border-radius: 6px !important; }
+  .landscape-side-images { display: flex !important; flex-direction: column !important; gap: 0.5rem !important; }
+  .landscape-side-images > div { flex: 1 !important; width: 100% !important; border-radius: 6px !important; }
+  .mockup-main { display: block !important; width: 60% !important; }
+  .mockup-side { flex: 1 !important; height: 100% !important; }
   
   /* Timeline buttons */
   .exp-tab-btn-pill { padding: 8px 16px !important; font-size: 0.65rem !important; width: 140px !important; }
