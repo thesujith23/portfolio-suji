@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import './index.css';
 
 import ExperienceTimeline, { TextReveal } from './components/ExperienceTimeline';
+import ProjectsSection from './components/ProjectsSection';
+import SkillsSection from './components/SkillsSection';
+import SoundToggle from './components/SoundToggle';
+import PikaSprite from './components/PikaSprite';
+import { attachGlobalSounds, play, playChirp, unlockAudio } from './lib/sound';
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
@@ -20,11 +25,16 @@ function Cursor() {
     let currentHover = null;
     let reqId;
 
-    const move = (e) => { tx = e.clientX; ty = e.clientY; };
+    const move = (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (!reqId) reqId = requestAnimationFrame(tick);
+    };
     const tick = () => {
       x += (tx - x) * 0.15; y += (ty - y) * 0.15;
       if (dot) { dot.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
       if (sym) { sym.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
+      // Once the dot has caught up there is nothing left to draw — stop the loop.
+      if (Math.abs(tx - x) < 0.08 && Math.abs(ty - y) < 0.08) { reqId = 0; return; }
       reqId = requestAnimationFrame(tick);
     };
 
@@ -93,22 +103,28 @@ function Loader({ onDone }) {
     const tl = gsap.timeline({
       onComplete: () => {
         gsap.to(wrapRef.current, {
-          yPercent: -100, duration: 1.2, ease: 'power3.inOut',
+          yPercent: -100, duration: 0.7, ease: 'power3.inOut',
           onComplete: onDone,
         });
       },
     });
 
     tl.to(barRef.current, {
-      scaleX: 1, duration: 4.5, ease: 'power1.inOut',
+      scaleX: 1, duration: 1.1, ease: 'power1.inOut',
     });
 
     // Counter
     const obj = { val: 0 };
+    let lastTick = -10;
     tl.to(obj, {
-      val: 100, duration: 4.5, ease: 'power1.inOut',
+      val: 100, duration: 1.1, ease: 'power1.inOut',
       onUpdate: () => {
-        if (counterRef.current) counterRef.current.textContent = Math.round(obj.val);
+        const val = Math.round(obj.val);
+        if (counterRef.current) counterRef.current.textContent = val;
+        if (val !== lastTick && val % 10 === 0) {
+          lastTick = val;
+          play('tick');
+        }
       },
     }, 0);
   }, [onDone]);
@@ -123,41 +139,14 @@ function Loader({ onDone }) {
 }
 
 /* â•â•â•â•â•â•â•â• MAGNETIC â•â•â•â•â•â•â•â• */
-let audioCtx;
-const playHoverSound = () => {
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.06);
-  } catch (e) {
-    // Ignore audio context errors if browser blocks it before interaction
-  }
-};
-
-function Magnetic({ children, strength = 0.4 }) {
+function Magnetic({ children, strength = 0.4, className, style }) {
   const magneticRef = useRef(null);
 
   useEffect(() => {
     const el = magneticRef.current;
     if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "elastic.out(1, 0.3)" });
     const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "elastic.out(1, 0.3)" });
@@ -176,35 +165,19 @@ function Magnetic({ children, strength = 0.4 }) {
       yTo(0);
     };
 
-    const handleMouseEnter = () => {
-      playHoverSound();
-    };
-
     el.addEventListener("mousemove", handleMouseMove);
     el.addEventListener("mouseleave", handleMouseLeave);
-    el.addEventListener("mouseenter", handleMouseEnter);
 
     return () => {
       el.removeEventListener("mousemove", handleMouseMove);
       el.removeEventListener("mouseleave", handleMouseLeave);
-      el.removeEventListener("mouseenter", handleMouseEnter);
+      gsap.killTweensOf(el);
     };
   }, []);
 
   return (
-    <div ref={magneticRef} style={{ display: 'inline-flex' }}>
+    <div ref={magneticRef} className={className} style={{ display: 'inline-flex', ...style }}>
       {children}
-    </div>
-  );
-}
-
-/* ════════ HERO CANVAS (CSS Aurora) ════════ */
-function HeroCanvas() {
-  return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <div className="aurora-blob aurora-1"></div>
-      <div className="aurora-blob aurora-2"></div>
-      <div className="aurora-blob aurora-3"></div>
     </div>
   );
 }
@@ -259,59 +232,70 @@ function Nav() {
 }
 
 /* â•â•â•â•â•â•â•â• HERO â•â•â•â•â•â•â•â• */
-const MagneticText = ({ text, strength = 0.8 }) => {
-  const triggerPiano = (e) => {
-    const el = e.currentTarget;
-    el.style.transform = 'translateY(-20px)';
-    el.style.color = 'var(--accent)';
-    setTimeout(() => {
-      el.style.transform = 'translateY(0)';
-      el.style.color = '';
-    }, 200);
-  };
+/* Old-school per-letter magnet: one <Magnetic> per character. */
+const MagneticWord = ({ text, strength = 0.55 }) => (
+  <>
+    {text.split('').map((char, index) => (
+      <Magnetic key={index} strength={strength} className="hero-magnet" style={{ verticalAlign: 'baseline' }}>
+        <span
+          className="piano-char"
+          onClick={(event) => {
+            play('pop', { rate: 0.85 + (index % 12) / 12 });
+            const el = event.currentTarget;
+            el.style.color = 'var(--accent)';
+            window.setTimeout(() => {
+              el.style.color = '';
+            }, 260);
+          }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      </Magnetic>
+    ))}
+  </>
+);
 
-  return (
-    <>
-      {text.split('').map((char, index) => {
-        if (char === ' ') return <span key={index}>&nbsp;</span>;
-        return (
-          <Magnetic key={index} strength={strength}>
-            <span
-              className="piano-char"
-              style={{ display: 'inline-block', whiteSpace: 'pre', transition: 'transform 0.2s, color 0.2s' }}
-              onTouchStart={triggerPiano}
-              onClick={triggerPiano}
-            >
-              {char}
-            </span>
-          </Magnetic>
-        );
-      })}
-    </>
-  );
-};
-
-function Hero() {
+function Hero({ ready = true }) {
   const ref = useRef(null);
 
+  // Hide the lines immediately so nothing flashes while the loader wipes away.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const tl = gsap.timeline({ delay: 2.6 });
+    gsap.set(el.querySelectorAll('.line-inner'), { yPercent: 120 });
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !ready) return;
+    const tl = gsap.timeline({ delay: 0.15 });
     tl.fromTo(el.querySelectorAll('.line-inner'), { yPercent: 120 }, { yPercent: 0, duration: 1.1, stagger: 0.12, ease: 'power4.out' });
     tl.fromTo(el.querySelector('.hero-pre span'), { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, '-=0.5');
     tl.fromTo(el.querySelector('.hero-action'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3');
-  }, []);
+    // Cartoon pop on the letters once each line has landed.
+    tl.fromTo(el.querySelectorAll('.piano-char'), { scale: 1.3, rotate: -6 }, { scale: 1, rotate: 0, duration: 0.5, stagger: 0.012, ease: 'back.out(2.2)' }, '-=0.9');
+  }, [ready]);
 
   return (
     <section className="hero" id="home" ref={ref} style={{ position: 'relative' }}>
-      <HeroCanvas />
+      <div className="hero-rays" aria-hidden="true" />
+      <div className="hero-halftone" aria-hidden="true" />
+      <span className="hero-burst" aria-hidden="true">PIKA!</span>
+      <span className="hero-hire" aria-hidden="true">hire me</span>
+      <svg className="hero-arrow" viewBox="0 0 140 136" fill="none" aria-hidden="true">
+        <path className="hero-arrow-line" d="M10 10c16 52 42 72 80 84" />
+        <path className="hero-arrow-head" d="M90 94l-20-9M90 94l-3-21" />
+      </svg>
+      <div className="hero-scroll" aria-hidden="true">
+        <span className="hero-scroll-word">scroll</span>
+        <span className="hero-scroll-chev" />
+      </div>
       <div className="hero-pre" style={{ position: 'relative', zIndex: 1 }}><span style={{ opacity: 0 }}>Software Engineer — Full Stack Developer</span></div>
       <h1 className="hero-title" style={{ position: 'relative', zIndex: 1, pointerEvents: 'auto' }}>
-        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="Building" strength={0.8} /></span></span></span>
-        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span className="italic" style={{ whiteSpace: 'nowrap' }}><MagneticText text="digital" strength={0.8} /></span></span></span>
-        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="experiences" strength={0.8} /></span></span></span>
-        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticText text="that" strength={0.8} /></span>&nbsp;<span className="outline" id="matter-word" style={{ whiteSpace: 'nowrap' }}><MagneticText text="matter" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticWord text="Building" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span className="italic" style={{ whiteSpace: 'nowrap' }}><MagneticWord text="digital" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticWord text="experiences" strength={0.8} /></span></span></span>
+        <span className="line" style={{ paddingBottom: '10px' }}><span className="line-inner"><span style={{ whiteSpace: 'nowrap' }}><MagneticWord text="that" strength={0.8} /></span>&nbsp;<span className="outline" id="matter-word" style={{ whiteSpace: 'nowrap' }}><MagneticWord text="matter" strength={0.8} /></span></span></span>
       </h1>
 
       <div className="hero-action" style={{ opacity: 0, position: 'absolute', bottom: '48px', right: '100px', zIndex: 10 }}>
@@ -345,9 +329,8 @@ function Hero() {
 /* â•â•â•â•â•â•â•â• ABOUT â•â•â•â•â•â•â•â• */
 function About() {
   const sectionRef = useRef(null);
-  const containerRef = useRef(null);
-  const charsRef = useRef([]);
-  const cursorRef = useRef(null);
+  const textRef = useRef(null);
+  const charRefs = useRef([]);
 
   const content = [
     { text: "I'm " },
@@ -367,103 +350,78 @@ function About() {
     { text: " engineering team." }
   ];
 
-  useEffect(() => {
-    // Only select elements that are actually in the document (avoids HMR/unmount bugs)
-    const chars = charsRef.current.filter(c => c && c.isConnected);
-    const cursor = cursorRef.current;
-    const container = containerRef.current;
-    if (!chars.length || !sectionRef.current || !container) return;
+  // Flattened once into individual characters so the scroll can type them.
+  const chars = [];
+  content.forEach((segment) => {
+    for (const ch of segment.text) chars.push({ ch, highlight: Boolean(segment.highlight) });
+  });
 
-    // Set all chars dim initially
-    gsap.set(chars, { opacity: 0.15, color: '#999999' });
+  /* Pinned typewriter: the section holds still while the paragraph types
+     itself in step with the scroll, then the page moves on. */
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const text = textRef.current;
+    if (!section || !text) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // Guaranteed 100% Sync logic: We calculate everything manually inside onUpdate.
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top 70%',
-      end: 'bottom 40%',
-      scrub: true, // Use 'true' to perfectly bind to Lenis smooth scroll instead of adding artificial lag
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const targetIdx = Math.min(Math.floor(progress * chars.length), chars.length - 1);
+    const nodes = charRefs.current.filter(Boolean);
+    if (!nodes.length) return;
 
-        // Update characters only if their state changes
-        chars.forEach((char, i) => {
-          let state = 0; // 0: untyped, 1: actively typing, 2: fully typed
-          if (progress === 1 || i < targetIdx - 2) {
-            state = 2;
-          } else if (i <= targetIdx) {
-            state = 1;
-          } else {
-            state = 0;
-          }
+    // Scrolling is often the first gesture on this page, so make sure the
+    // audio context exists (or resumes) before the first character lands.
+    unlockAudio();
 
-          if (char.dataset.state != state) {
-            char.dataset.state = state;
-            if (state === 2) {
-              char.style.opacity = '1';
-              char.style.color = char.dataset.highlight === 'true' ? '#F62440' : '#ffffff';
-              char.style.textShadow = 'none';
-            } else if (state === 1) {
-              char.style.opacity = '1';
-              char.style.color = '#F62440';
-              char.style.textShadow = '0 0 12px #F62440';
-            } else {
-              char.style.opacity = '0.15';
-              char.style.color = '#999999';
-              char.style.textShadow = 'none';
+    let typed = 0;
+    let soundBudget = 0;
+
+    section.classList.add('about-pinned');
+    text.classList.add('is-typing');
+    nodes.forEach((node) => node.classList.remove('is-on'));
+    nodes[0].classList.add('is-last');
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: `+=${Math.round(nodes.length * 4.2)}`,
+        pin: true,
+        anticipatePin: 1,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const target = Math.round(self.progress * nodes.length);
+          if (target === typed) return;
+          const forward = target > typed;
+          const from = Math.min(target, typed);
+          const to = Math.max(target, typed);
+          for (let i = from; i < to; i += 1) nodes[i].classList.toggle('is-on', forward);
+          nodes[Math.max(0, typed - 1)].classList.remove('is-last');
+          nodes[Math.max(0, target - 1)].classList.add('is-last');
+
+          const step = Math.abs(target - typed);
+          typed = target;
+
+          if (forward) {
+            soundBudget += step;
+            if (soundBudget >= 1) {
+              soundBudget = 0;
+              play('type', { volume: 0.95, rate: 0.9 + Math.random() * 0.2 });
             }
           }
-        });
+          section.classList.toggle('about-done', target >= nodes.length);
+        },
+      });
+    }, section);
 
-        // Update cursor to match the exact same index
-        const target = chars[targetIdx];
-        if (target && cursor && container) {
-          const charRect = target.getBoundingClientRect();
-          const containerRect = container.getBoundingClientRect();
-          cursor.style.left = `${charRect.right - containerRect.left + 2}px`;
-          cursor.style.top = `${charRect.top - containerRect.top}px`;
-          cursor.style.height = `${charRect.height}px`;
-          cursor.style.opacity = (progress > 0 && progress < 1) ? '1' : '0';
-        }
-      },
-    });
+    const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
 
-    return () => ScrollTrigger.getAll().forEach(st => st.kill());
+    return () => {
+      cancelAnimationFrame(raf);
+      ctx.revert();
+      section.classList.remove('about-pinned', 'about-done');
+      text.classList.remove('is-typing');
+    };
   }, []);
-
-  // Split content into characters, preserving spaces
-  let charIdx = 0;
-  const rendered = content.map((segment, si) => (
-    <span key={si} className={segment.highlight ? 'highlight-segment' : ''}>
-      {segment.text.split(' ').map((word, wi, arr) => (
-        <span key={wi} className="typewriter-word">
-          {word.split('').map((ch) => {
-            const idx = charIdx++;
-            return (
-              <span
-                key={idx}
-                className="typewriter-char"
-                data-highlight={segment.highlight ? 'true' : 'false'}
-                ref={(el) => { charsRef.current[idx] = el; }}
-              >
-                {ch}
-              </span>
-            );
-          })}
-          {wi < arr.length - 1 && (
-            <span
-              className="typewriter-char"
-              data-highlight={segment.highlight ? 'true' : 'false'}
-              ref={(el) => { charsRef.current[charIdx++] = el; }}
-            >
-              {' '}
-            </span>
-          )}
-        </span>
-      ))}
-    </span>
-  ));
 
   return (
     <section className="about" id="about" ref={sectionRef}>
@@ -471,616 +429,35 @@ function About() {
         <span className="typewriter-terminal-tag">&gt;_ about.md</span>
         About Me
       </div>
-      <div className="typewriter-container" ref={containerRef}>
-        <p className="about-text typewriter-text">
-          {rendered}
-          <span className="typewriter-cursor" ref={cursorRef} />
+      <div className="typewriter-container">
+        <p className="about-text typewriter-text" ref={textRef}>
+          {chars.map((char, i) => (
+            <span
+              key={i}
+              ref={(el) => {
+                charRefs.current[i] = el;
+              }}
+              className={`typewriter-char${char.highlight ? ' about-hl' : ''}`}
+            >
+              {char.ch}
+            </span>
+          ))}
         </p>
       </div>
-
     </section>
   );
 }
 
 /* â•â•â•â•â•â•â•â• EXPERIENCE (HORIZONTAL SCROLL) â•â•â•â•â•â•â•â• */
 
-/* â•â•â•â•â•â•â•â• PROJECTS (3D DECK) â•â•â•â•â•â•â•â• */
-function ProjectsDeck() {
-  const containerRef = useRef(null);
-  const [zoomedMedia, setZoomedMedia] = useState(null);
 
-  const projects = [
-    {
-      idx: '01', name: 'AI Research Assistant (RAG)',
-      meta: 'An intelligent document assistant using Retrieval-Augmented Generation (RAG). Features hybrid search (FAISS + BM25) and cross-encoder reranking to extract precise insights from raw PDFs.',
-      tags: ['Python', 'Streamlit', 'FAISS', 'OpenAI'],
-      color: '#0ea5e9',
-      isMobile: false,
-      liveUrl: 'https://nexus-research-document-assist.streamlit.app/',
-      github: 'https://github.com/thesujith23/AI-Research-Document-assistance',
-      quote: '"A robust AI pipeline combining semantic search with keyword precision for highly accurate document QA and retrieval."',
-      quoteAuthor: 'AI & Backend',
-      quoteRole: 'Python & LangChain',
-      icon: 'python/python-original.svg',
-      mainImg: 'nexus1.png',
-      sideImg1: 'nexus2.png',
-      sideImg2: 'nexus3.png'
-    },
-    {
-      idx: '02', name: 'BodySync-AI',
-      meta: 'Intelligent Pose Detection & Fitness Tracker. An AI fitness assistant that uses pose estimation for real-time exercise tracking, form feedback, and performance analytics.',
-      tags: ['MediaPipe', 'OpenCV', 'Python', 'Flask'],
-      color: '#3d2fa9',
-      isMobile: false,
-      github: 'https://github.com/thesujith23/BodySync-AI---Intelligent-Pose-Detection-and-Fitness-Tracker',
-      quote: '"Revolutionizing home fitness with real-time AI pose estimation and form correction. The computer vision pipeline achieves remarkable accuracy."',
-      quoteAuthor: 'Research & CV Pipeline',
-      quoteRole: 'MediaPipe & Python',
-      icon: 'python/python-original.svg',
-      mainImg: '/body1.png',
-      sideImg1: '/body2.png',
-      sideImg2: '/body3.png'
-    },
-    {
-      idx: '03', name: 'Expense Tracker & Analytics',
-      meta: 'Secure multi-user financial tracking with JWT auth, role-protected routes, and MongoDB aggregation-powered real-time analytics dashboard.',
-      tags: ['MERN', 'Recharts', 'JWT', 'Aggregation'],
-      color: '#ff3c34',
-      isMobile: false,
-      liveUrl: 'https://expense-tracker-and-financial-analy-five.vercel.app/',
-      liveBtnColor: '#111111',
-      liveBtnText: '#ffffff',
-      liveBtnShadow: '0 4px 15px rgba(0,0,0,0.4)',
-      liveBtnBorder: 'rgba(255,255,255,0.3)',
-      github: 'https://github.com/thesujith23/Expense-Tracker-And-Financial-Analytics-Dashboard.git',
-      mainVideo: '/exptrackvdo.mp4',
-      sideImg1: '/exp1.png',
-      sideImg2: '/exp2.png',
-      quote: '"A seamless, enterprise-grade financial dashboard with lightning-fast data aggregation. Provides deep insights into personal finance seamlessly."',
-      quoteAuthor: 'Full-Stack Architecture',
-      quoteRole: 'MERN Stack',
-      icon: 'react/react-original.svg'
-    },
-    {
-      idx: '04', name: 'Book Store Management',
-      meta: 'Full CRUD inventory system with secure REST APIs, input validation, JWT authentication, and a responsive React UI with reusable components. Fully deployed via Vercel and Render.',
-      tags: ['React (Vercel)', 'Node.js (Render)', 'MongoDB Atlas', 'JWT'],
-      color: '#1a1a1a',
-      isMobile: false,
-      liveUrl: 'https://book-store-mgt.vercel.app/',
-      github: 'https://github.com/thesujith23/bookstore-management-mern',
-      mainVideo: '/Bookvideo.mp4',
-      sideImg1: '/book1.png',
-      sideImg2: '/book2.png',
-      quote: '"Robust inventory management powered by secure, scalable, and responsive web technologies. Fully automated CI/CD pipeline integrated."',
-      quoteAuthor: 'Backend & Database',
-      quoteRole: 'Node.js & MongoDB',
-      icon: 'nodejs/nodejs-original.svg'
-    },
-    /* {
-      idx: '05', name: 'TechHire — Job Portal',
-      meta: 'Job portal with 20+ listings, real-time filtering, dynamic routing, file-upload flow. Deployed on Vercel with CI/CD, sub-2s loads via Next.js App Router.',
-      tags: ['Next.js', 'Tailwind', 'Vercel', 'CI/CD'],
-      color: '#0055ff',
-      isMobile: false,
-      live: true,
-      github: 'https://github.com/thesujith23/HireReady-Ai.git',
-      quote: '"A modern, high-performance job board delivering sub-2s loads and seamless UX. The Next.js app router makes navigation instant."',
-      quoteAuthor: 'Frontend & Routing',
-      quoteRole: 'Next.js App Router',
-      icon: 'nextjs/nextjs-original.svg',
-      invertIcon: true
-    }, */
-    {
-      idx: '06', name: 'AI Food Recommendation',
-      meta: 'A personalized smart food discovery platform that suggests optimal meals based on dietary preferences, health goals, and real-time nutritional analysis.',
-      tags: ['React', 'Python', 'Machine Learning', 'API'],
-      color: '#F97316',
-      isMobile: false,
-      github: 'https://github.com/thesujith23/Food-recommendation-System',
-      mainVideo: '/foodrecmdvdo.mp4',
-      sideImg1: '/food1.png',
-      sideImg2: '/food2.png',
-      quote: '"Personalizing nutrition through intelligent algorithms and real-time dietary analysis. A brilliant intersection of health and machine learning."',
-      quoteAuthor: 'Machine Learning Core',
-      quoteRole: 'Python & Scikit-Learn',
-      icon: 'python/python-original.svg'
-    }
-  ];
 
-  useEffect(() => {
-    const section = containerRef.current;
-    if (!section) return;
-
-    let ctx = gsap.context(() => {
-      const deckContainer = section.querySelector('.deck-container');
-      const cards = gsap.utils.toArray('.deck-card');
-
-      // Initial setup for the stack
-      cards.forEach((card, i) => {
-        gsap.set(card, {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          transformOrigin: 'left center',
-          scale: i > 0 ? 1 - (i * 0.03) : 1,
-          rotationZ: i * 2.5,
-          y: i * 25,
-          x: i * 15,
-          zIndex: cards.length - i
-        });
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: deckContainer || section,
-          start: "top top",
-          end: `+=${(cards.length - 1) * 100}%`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true
-        }
-      });
-
-      cards.forEach((card, i) => {
-        if (i < cards.length - 1) {
-          // Flip current card out to the left
-          tl.to(card, {
-            rotationY: -110,
-            scale: 0.9,
-            x: '-4vw',
-            ease: "power2.inOut",
-            duration: 1
-          }, i);
-
-          // Move remaining cards up the stack
-          for (let j = i + 1; j < cards.length; j++) {
-            let depth = j - i - 1;
-            tl.to(cards[j], {
-              scale: depth > 0 ? 1 - (depth * 0.03) : 1,
-              rotationZ: depth * 2.5,
-              y: depth * 25,
-              x: depth * 15,
-              ease: "power2.inOut",
-              duration: 1
-            }, i);
-          }
-        }
-      });
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <>
-      <div ref={containerRef} id="work" style={{ width: '100%', backgroundColor: 'var(--bg-base)' }}>
-        <section style={{ position: 'relative', paddingTop: '100px', paddingLeft: '48px', paddingRight: '48px', paddingBottom: '20px' }}>
-          <div className="reveal-up">
-            <span className="typewriter-terminal-tag" style={{ marginBottom: '16px', display: 'inline-block' }}>&gt;_ work.dir</span>
-          <h2 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(3rem,6vw,5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95, color: 'var(--text)' }}>
-            <TextReveal delay={0.05}>Selected</TextReveal><br /><em><TextReveal delay={0.1}>Projects</TextReveal></em>
-          </h2>
-          </div>
-        </section>
-
-        <div className="deck-container">
-          <div className="deck-viewport">
-            {projects.map((p, i) => (
-              <div
-                key={i}
-                className="deck-card"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = (e.clientX - rect.left) / rect.width - 0.5;
-                  const y = (e.clientY - rect.top) / rect.height - 0.5;
-                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                    rotateY: x * 12,
-                    rotateX: -y * 12,
-                    duration: 0.5,
-                    ease: "power2.out"
-                  });
-                }}
-                onMouseLeave={(e) => {
-                  gsap.to(e.currentTarget.querySelector('.deck-card-inner'), {
-                    rotateY: 0,
-                    rotateX: 0,
-                    duration: 0.8,
-                    ease: "power2.out"
-                  });
-                }}
-                style={{
-                  backgroundColor: p.color
-                }}
-              >
-                <div className="deck-card-inner">
-                  <div className="deck-card-header">
-                    <div style={{ maxWidth: '750px' }}>
-                      <h3 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.8rem, 3vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, color: '#fff' }}>
-                        {p.name}
-                      </h3>
-                      <p style={{ fontFamily: 'var(--mono)', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, marginTop: '1rem', maxWidth: '95%' }}>
-                        {p.meta}
-                      </p>
-                      <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                        {p.tags.map((t, j) => (
-                          <span key={j} style={{ padding: '4px 12px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '20px', color: '#fff', fontSize: '0.75rem', fontFamily: 'var(--mono)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
-                        {p.github && (
-                          <div>
-                            <a href={p.github} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: '#111', color: '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s, transform 0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#111'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                              View Repository
-                            </a>
-                          </div>
-                        )}
-                        {p.liveUrl && (
-                          <div>
-                            <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" data-hover style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', backgroundColor: p.liveBtnColor || 'var(--accent)', color: p.liveBtnText || '#fff', borderRadius: '100px', fontFamily: 'var(--mono)', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', border: `1px solid ${p.liveBtnBorder || 'var(--accent)'}`, transition: 'background 0.3s, transform 0.3s', boxShadow: p.liveBtnShadow || '0 4px 10px rgba(246, 36, 64, 0.3)' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                              View Live Project
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mono" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.6)' }}>
-                      ({p.idx})
-                    </div>
-                  </div>
-
-                  <div className="deck-bottom-section">
-                    <div className="quote-column">
-                      <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)', lineHeight: 1.5, fontFamily: 'var(--sans)' }}>
-                        {p.quote || '"A brilliant intersection of design and engineering."'}
-                      </p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                          {p.icon ? (
-                            <img src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${p.icon}`} alt="tech-icon" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: p.invertIcon ? 'invert(1)' : 'none' }} />
-                          ) : null}
-                        </div>
-                        <div>
-                          <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>{p.quoteAuthor || 'Project Lead'}</div>
-                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontFamily: 'var(--mono)' }}>{p.quoteRole || 'Engineering'}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="landscape-mockup-wrapper">
-                      <div className="mockup-main">
-                        {p.mainVideo ? (
-                          <video src={p.mainVideo} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'video', src: p.mainVideo })} />
-                        ) : p.mainImg ? (
-                          <img src={p.mainImg} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.mainImg })} alt="Desktop app view" />
-                        ) : (
-                          <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Main Media ]</span>
-                        )}
-                      </div>
-                      <div className="landscape-side-images">
-                        <div className="mockup-side">
-                          {p.sideImg1 ? <img src={p.sideImg1} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg1 })} alt="Feature view 1" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 1 ]</span>}
-                        </div>
-                        <div className="mockup-side">
-                          {p.sideImg2 ? <img src={p.sideImg2} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', transition: 'transform 0.3s' }} data-hover data-symbol="<span style='font-size: 0.8rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: white; background: rgba(0,0,0,0.8); padding: 8px 16px; border-radius: 100px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);'>Click to View</span>" onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} onClick={() => setZoomedMedia({ type: 'img', src: p.sideImg2 })} alt="Feature view 2" /> : <span className="mono" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase' }}>[ Side 2 ]</span>}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {zoomedMedia && (
-        <div
-          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out', backdropFilter: 'blur(10px)' }}
-          onClick={() => setZoomedMedia(null)}
-        >
-          {zoomedMedia.type === 'video' ? (
-            <video src={zoomedMedia.src} autoPlay loop controls style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={(e) => e.stopPropagation()} />
-          ) : (
-            <img src={zoomedMedia.src} style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '12px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', objectFit: 'contain' }} alt="Zoomed view" onClick={(e) => e.stopPropagation()} />
-          )}
-          <div style={{ position: 'absolute', top: '20px', right: '30px', color: '#fff', fontSize: '3rem', cursor: 'pointer', fontFamily: 'sans-serif', fontWeight: 200, opacity: 0.7 }} onMouseEnter={(e) => e.currentTarget.style.opacity = 1} onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}>&times;</div>
-        </div>
-      )}
-    </>
-  );
-}
-
-/* â•â•â•â•â•â•â•â• SKILLS â•â•â•â•â•â•â•â• */
-function Skills() {
-  const getImg = (src, invert = false) => `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" style="width: 100%; height: 100%; object-fit: contain; ${invert ? 'filter: invert(1);' : ''}" />`;
-
-  const allSkills = [
-    { name: 'React.js', featured: true, symbol: getImg('react/react-original.svg') },
-    { name: 'Next.js', featured: true, symbol: getImg('nextjs/nextjs-original.svg', true) },
-    { name: 'Node.js', featured: true, symbol: getImg('nodejs/nodejs-original.svg') },
-    { name: 'MongoDB', symbol: getImg('mongodb/mongodb-original.svg') },
-    { name: 'JavaScript (ES6+)', symbol: getImg('javascript/javascript-original.svg') },
-    { name: 'Python', symbol: getImg('python/python-original.svg') },
-    { name: 'Java', symbol: getImg('java/java-original.svg') },
-    { name: 'Express.js', symbol: getImg('express/express-original.svg', true) },
-    { name: 'Flask', symbol: getImg('flask/flask-original.svg', true) },
-    { name: 'HTML5 / CSS3', symbol: getImg('html5/html5-original.svg') },
-    { name: 'Tailwind CSS', symbol: getImg('tailwindcss/tailwindcss-original.svg') },
-    { name: 'RESTful APIs', featured: true, symbol: getImg('json/json-original.svg') },
-    { name: 'MySQL', symbol: getImg('mysql/mysql-original.svg') },
-    { name: 'Supabase', symbol: getImg('supabase/supabase-original.svg') },
-    { name: 'Xano', symbol: '✖️' },
-    { name: 'Git / GitHub', symbol: getImg('github/github-original.svg', true) },
-    { name: 'Retell AI', symbol: '🤖' },
-    { name: 'Claude AI', symbol: '🧠' },
-    { name: 'Plivo', symbol: '📞' },
-    { name: 'nexHealth APIs', symbol: '🦷' },
-    { name: 'OpenRouter', symbol: '🌐' },
-    { name: 'MediaPipe', symbol: '👁️' },
-    { name: 'Power BI', symbol: '📊' },
-    { name: 'Recharts', symbol: '📈' },
-    { name: 'Socket.io', symbol: getImg('socketio/socketio-original.svg', true) },
-    { name: 'Vercel', symbol: getImg('vercel/vercel-original.svg', true) },
-    { name: 'Bootstrap', symbol: getImg('bootstrap/bootstrap-original.svg') },
-  ];
-
-  return (
-    <section className="skills" id="skills">
-      <div className="skills-header">
-        <h2 className="skills-title">
-          <TextReveal delay={0.05}>Tools &</TextReveal><br /><span className="accent"><TextReveal delay={0.1}>Technologies</TextReveal></span>
-        </h2>
-        <p className="skills-subtitle reveal-up">
-          A curated set of languages, frameworks, and platforms I work with daily
-        </p>
-      </div>
-      <div className="skills-orbit reveal-up">
-        {allSkills.map((s, i) => (
-          <span key={i} className={`skill-pill${s.featured ? ' featured' : ''}`} data-hover data-symbol={s.symbol} style={{ animationDelay: `${i * 30}ms` }}>
-            {s.name}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ════════ EXPERIENCE & EDUCATION (TABBED EDITORIAL) ════════ */
-function ExperienceEditorial() {
-  const sectionRef = useRef(null);
-  const [activeTab, setActiveTab] = useState('experience');
-  const [activeIdx, setActiveIdx] = useState(null);
-  const contentRefs = useRef([]);
-  const listWrapRef = useRef(null);
-
-  const exps = [
-    {
-      num: '01',
-      roleHtml: <>Software <span className="italic">Engineer</span></>,
-      company: 'Trikon Software Labs',
-      period: 'Apr 2026 – Present',
-      desc: 'Architected a real-time AI voice platform using Next.js, React, and LiveKit. Built DigitizedHealth for AI appointment booking via Retell AI and nexHealth APIs. Integrated Plivo, Supabase, Xano, and Stitch.',
-      tags: ['Next.js', 'Retell AI', 'Supabase', 'LiveKit', 'Xano'],
-    },
-    {
-      num: '02',
-      roleHtml: <>Web App Dev <span className="italic">Intern</span></>,
-      company: 'MBL Technologies Pvt Ltd',
-      period: 'Jan 2025 – Mar 2025',
-      desc: 'Built "Asare," a full-featured animal trust care platform using React.js. Reduced component re-renders by 20% through structured state management and integrated multiple third-party APIs.',
-      tags: ['React.js', 'State Management', 'REST APIs'],
-    },
-    {
-      num: '03',
-      roleHtml: <>Software Dev <span className="italic">Intern</span></>,
-      company: 'Accolade Tech Solutions Pvt Ltd',
-      period: 'Mar 2023 – Aug 2023',
-      desc: 'Developed internal web applications using .NET and C#, delivering secure backend services. Optimized SQL Server schemas, reducing average query execution time by ~30%.',
-      tags: ['.NET', 'C#', 'SQL Server', 'Backend'],
-    },
-  ];
-
-  const edu = [
-    {
-      num: '01',
-      roleHtml: <>Master of <span className="italic">Computer Applications</span></>,
-      company: 'NMAM Institute of Technology',
-      period: 'Aug 2025',
-      desc: 'Focused on advanced software engineering, data structures, and full-stack web technologies.',
-      tags: ['Computer Science', 'Web Tech', 'Data Structures'],
-    },
-    {
-      num: '02',
-      roleHtml: <>Bachelor of <span className="italic">Computer Applications</span></>,
-      company: 'SDM College of Business Management',
-      period: 'July 2023',
-      desc: 'Foundation in computer science, programming languages, and database management.',
-      tags: ['Programming', 'Databases', 'Networking'],
-    }
-  ];
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    let ctx = gsap.context(() => {
-      gsap.fromTo('.exp-title-inner',
-        { yPercent: 120 },
-        {
-          yPercent: 0,
-          duration: 1.2,
-          stagger: 0.1,
-          ease: 'power4.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 70%',
-          }
-        }
-      );
-    }, section);
-    return () => ctx.revert();
-  }, []);
-
-  // Handle staggered entrance animation when activeTab changes
-  useEffect(() => {
-    if (!listWrapRef.current) return;
-    const rows = listWrapRef.current.querySelectorAll('.exp-row');
-    gsap.fromTo(rows,
-      { x: -40, opacity: 0 },
-      { x: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: 'power3.out' }
-    );
-
-    // Animate timeline line filling up
-    gsap.fromTo('.exp-list-line-fill',
-      { scaleY: 0 },
-      { scaleY: 1, duration: 1.5, ease: 'power2.inOut', delay: 0.2 }
-    );
-  }, [activeTab]);
-
-  const handleTabSwitch = (tab) => {
-    if (tab === activeTab) return;
-
-    const msg = tab === 'experience' ? 'Work history!' : 'Education history!';
-    window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '💼', msg } }));
-
-    const rows = listWrapRef.current.querySelectorAll('.exp-row');
-
-    // Animate out with stagger
-    gsap.to(rows, {
-      x: 40,
-      opacity: 0,
-      stagger: 0.05,
-      duration: 0.4,
-      ease: 'power2.in',
-      onComplete: () => {
-        setActiveIdx(null); // Reset accordion
-        setActiveTab(tab); // Changes state, triggers re-render and useEffect entrance
-      }
-    });
-  };
-
-  const handleMouseEnter = (idx) => {
-    if (activeIdx === idx) return;
-    if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
-    }
-    gsap.fromTo(contentRefs.current[idx],
-      { height: 0, opacity: 0 },
-      { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() }
-    );
-    setActiveIdx(idx);
-  };
-
-  const handleMouseLeaveList = () => {
-    if (activeIdx !== null && contentRefs.current[activeIdx]) {
-      gsap.to(contentRefs.current[activeIdx], { height: 0, opacity: 0, duration: 0.5, ease: 'power3.inOut', onUpdate: () => ScrollTrigger.refresh() });
-      setActiveIdx(null);
-    }
-  };
-
-  const currentList = activeTab === 'experience' ? exps : edu;
-
-  return (
-    <section className="exp-editorial" id="experience" ref={sectionRef}>
-      <div className="exp-bg-glow"></div>
-      <div className="exp-header-top">
-        <span className="typewriter-terminal-tag" style={{ background: 'transparent', borderColor: 'rgba(255,229,191,0.2)', color: 'var(--bg)' }}>{'>'}_ timeline.log</span>
-
-        <div className="exp-tabs-pill">
-          <div
-            className="exp-tab-highlighter"
-            style={{
-              transform: `translateX(${activeTab === 'experience' ? '0%' : '100%'})`
-            }}
-          />
-          {['experience', 'education'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => handleTabSwitch(tab)}
-              data-hover
-              className={`exp-tab-btn-pill ${activeTab === tab ? 'active' : ''}`}
-            >
-              {tab === 'experience' ? 'WORK EXPERIENCE' : 'EDUCATION'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="exp-list-container" style={{ position: 'relative', zIndex: 2 }}>
-        <div className="exp-list" onMouseLeave={handleMouseLeaveList} ref={listWrapRef} style={{ minHeight: '400px', position: 'relative' }}>
-          <div className="exp-list-line">
-            <div className="exp-list-line-fill"></div>
-          </div>
-          {currentList.map((item, i) => (
-            <div
-              key={`${activeTab}-${i}`}
-              className={`exp-row ${activeIdx === i ? 'active' : ''}`}
-              onMouseEnter={() => handleMouseEnter(i)}
-              onClick={() => handleMouseEnter(i)}
-            >
-              <div className="exp-timeline-node">
-                <div className="exp-timeline-dot-inner"></div>
-              </div>
-
-              <div className="exp-row-visible">
-                <div className="exp-row-left">
-                  <span className="exp-num">({item.num})</span>
-                </div>
-
-                <div className="exp-title-wrap">
-                  <h3 className="exp-title">
-                    <span className="exp-title-inner">{item.roleHtml}</span>
-                  </h3>
-                </div>
-
-                <div className="exp-row-right">
-                  <span className="exp-period">{item.period}</span>
-                  <div className="exp-hover-indicator">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19"></line>
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="exp-accordion-content"
-                ref={el => contentRefs.current[i] = el}
-                style={{ height: 0, opacity: 0, overflow: 'hidden' }}
-              >
-                <div className="exp-accordion-inner creative-accordion">
-                  <div className="exp-acc-left">
-                    <div className="exp-acc-company-large">{item.company}</div>
-                  </div>
-                  <div className="exp-acc-right">
-                    <p className="exp-acc-desc">{item.desc}</p>
-                    <div className="exp-acc-tags">
-                      {item.tags.map((t, j) => <span key={j} className="creative-tag">{t}</span>)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ════════ CONTACT ════════ */
 function Contact() {
   return (
     <section className="contact" id="contact">
+      <span className="cartoon-sticker contact-sticker" aria-hidden="true">open to work ★</span>
       <div className="contact-eyebrow reveal-up">Get In Touch</div>
       <h2 className="contact-heading"><TextReveal delay={0.05}>Let's create</TextReveal><br /><TextReveal delay={0.1}>something</TextReveal> <em><TextReveal delay={0.15}>great</TextReveal></em></h2>
       <div className="contact-links reveal-up">
@@ -1091,36 +468,19 @@ function Contact() {
     </section>
   );
 }
-/* ════════ SOUND HELPERS ════════ */
-const initAudio = () => {
-  if (typeof window === 'undefined') return;
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!window.audioCtx && AudioContext) window.audioCtx = new AudioContext();
-    if (window.audioCtx && window.audioCtx.state === 'suspended') window.audioCtx.resume();
-  } catch (e) { }
-};
-
-const playChargeSound = () => {
-  try {
-    const audio = new Audio('/pikaa-pikaa.mp3');
-    audio.volume = 0.5;
-    audio.play().catch(e => console.log('Audio play failed', e));
-  } catch (e) { }
-};
-
-const playZapSound = () => {
-  try {
-    const audio = new Audio('/pikachu-thunderbolt.mp3');
-    audio.volume = 0.6;
-    audio.play().catch(e => console.log('Audio play failed', e));
-  } catch (e) { }
-};
 
 /* ════════ PIKACHU PET ════════ */
 function PikaPet() {
   const petRef = useRef(null);
-  const posRef = useRef({ x: typeof window !== 'undefined' ? window.innerWidth - 120 : 300, y: typeof window !== 'undefined' ? window.innerHeight / 2 : 300 });
+  const posRef = useRef((() => {
+    if (typeof window === 'undefined') return { x: 300, y: 300 };
+    // Start in a side lane, low on small screens, so it never lands on the copy.
+    const narrow = window.innerWidth <= 768;
+    return {
+      x: window.innerWidth - (narrow ? 120 : 150),
+      y: narrow ? window.innerHeight - 190 : window.innerHeight * 0.62,
+    };
+  })());
   const targetRef = useRef({ ...posRef.current });
   const mouseRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
@@ -1136,23 +496,35 @@ function PikaPet() {
   const [isDragging, setIsDragging] = useState(false);
   const [bubble, setBubble] = useState({ section: '⚡', msg: 'Pika pika!', show: true });
   const [visible, setVisible] = useState(false);
+  const [seated, setSeated] = useState(false);
+  const [boarding, setBoarding] = useState(false);
+  const [expression, setExpression] = useState('idle');
+  const [action, setAction] = useState('');
+  const nearSlideRef = useRef(false);
+  const ridingRef = useRef(false);
   const lastMoveRef = useRef(Date.now());
+  const onSlideRef = useRef(false);
+  const wasRidingRef = useRef(false);
+  const boardAtRef = useRef(0);
+  const ridePhaseRef = useRef('gone');
 
   useEffect(() => {
-    // Unlock Audio Context on first interaction
-    const unlock = () => { initAudio(); window.removeEventListener('click', unlock); window.removeEventListener('keydown', unlock); window.removeEventListener('touchstart', unlock); };
-    window.addEventListener('click', unlock); window.addEventListener('keydown', unlock); window.addEventListener('touchstart', unlock);
-
-    const showTimer = setTimeout(() => setVisible(true), 2500);
+    const showTimer = setTimeout(() => setVisible(true), 1200);
     const onMouse = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', onMouse, { passive: true });
 
     // Random wander
     const wanderInterval = setInterval(() => {
-      if (draggingRef.current) return;
-      const pad = 80;
+      // Never wander while it is being dragged, riding, or near the chute.
+      if (draggingRef.current || ridingRef.current || nearSlideRef.current) return;
+      const pad = 70;
+      const vw = window.innerWidth;
+      // Keep to the side lanes so the pet never parks on top of the copy.
+      const lane = Math.max(90, vw * 0.15);
       let newY = pad + Math.random() * (window.innerHeight - pad * 2);
-      let newX = pad + Math.random() * (window.innerWidth - pad * 2);
+      let newX = Math.random() < 0.5
+        ? pad + Math.random() * lane
+        : vw - pad - 60 - Math.random() * lane;
 
       if (window.innerWidth <= 768) {
         // Guide mobile user to tap timeline buttons if visible
@@ -1227,6 +599,10 @@ function PikaPet() {
       lastMoveRef.current = Date.now();
       if (movedDist < 6) {
         setPetState('jumping');
+        setExpression('happy');
+        setAction('pounce');
+        window.setTimeout(() => setExpression('idle'), 1300);
+        window.setTimeout(() => setAction(''), 700);
         setBubble({ section: '\u26A1', msg: 'Pika pika!!', show: true });
         setTimeout(() => {
           setPetState('sparking');
@@ -1248,6 +624,19 @@ function PikaPet() {
     let fc = 0;
     window._zapping = false;
     window._lastZap = Date.now();
+
+    // Cache the anchor elements once instead of querying them every frame.
+    const els = {
+      matter: document.querySelector('#matter-word'),
+      path: document.querySelector('#pika-lightning-path'),
+      coaster: document.querySelector('.exp-section'),
+      seat: document.querySelector('#slide-seat'),
+      book: document.querySelector('.resume-btn-wrap'),
+    };
+    // Reading layout every frame is what makes a fixed sprite feel laggy, so
+    // the page anchors are measured ~11x a second and reused in between.
+    const rectCache = { at: 0, matter: null, coaster: null, book: null };
+
     const loop = () => {
       const pos = posRef.current;
 
@@ -1288,8 +677,16 @@ function PikaPet() {
 
       const now = Date.now();
       if (!window._lastZap) window._lastZap = now;
-      const matterEl = document.querySelector('#matter-word');
-      const pathEl = document.querySelector('#pika-lightning-path');
+      const matterEl = els.matter;
+      const pathEl = els.path;
+
+      const stamp = typeof performance !== 'undefined' ? performance.now() : now;
+      if (!rectCache.at || stamp - rectCache.at > 90) {
+        rectCache.at = stamp;
+        rectCache.matter = matterEl ? matterEl.getBoundingClientRect() : null;
+        rectCache.coaster = els.coaster ? els.coaster.getBoundingClientRect() : null;
+        rectCache.book = els.book ? els.book.getBoundingClientRect() : null;
+      }
 
       if (window._zapping) {
         const zapElapsed = Date.now() - window._lastZap;
@@ -1305,7 +702,7 @@ function PikaPet() {
         if (zapElapsed > 500 && window._zapPhase === 'charging') {
           window._zapPhase = 'shooting';
           if (pathEl) pathEl.style.opacity = 1;
-          playZapSound();
+          play('zap');
         }
 
         if (matterEl && pathEl && window._zapPhase === 'shooting') {
@@ -1344,12 +741,10 @@ function PikaPet() {
         return;
       }
 
-      let isMatterVisible = false;
-      if (matterEl) {
-        const rect = matterEl.getBoundingClientRect();
-        // Element is visible if its top is above the viewport bottom AND its bottom is below the viewport top.
-        isMatterVisible = rect.top < window.innerHeight && rect.bottom > 0;
-      }
+      // Visible if its top is above the viewport bottom AND its bottom below the top.
+      const isMatterVisible = Boolean(
+        rectCache.matter && rectCache.matter.top < window.innerHeight && rectCache.matter.bottom > 0
+      );
 
       const zapInterval = isMatterVisible ? 3000 : 10000;
 
@@ -1361,7 +756,7 @@ function PikaPet() {
           window._zapPhase = 'charging';
           window._matterCharged = false;
 
-          playChargeSound();
+          playChirp(0.35);
 
           const rect = matterEl.getBoundingClientRect();
           setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
@@ -1378,7 +773,7 @@ function PikaPet() {
           }, 1500);
         } else {
           window._zapPhase = 'just-charging';
-          playChargeSound();
+          playChirp(0.35);
           setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
 
           setTimeout(() => {
@@ -1398,24 +793,60 @@ function PikaPet() {
       let bookHovered = false;
       let timelineHovered = false;
 
-      const timelineTarget = document.querySelector('#timeline-pika-target');
-      if (timelineTarget) {
-        const tRect = timelineTarget.getBoundingClientRect();
-        if (tRect.top > 0 && tRect.bottom < window.innerHeight) {
+      const seat = els.seat;
+      const phase = seat?.dataset.phase || 'gone';
+      ridePhaseRef.current = phase;
+
+      // Is the chute on screen at all? While it is, the pet stays nearby.
+      const cRect = rectCache.coaster;
+      const slideOnScreen = Boolean(cRect && cRect.bottom > 0 && cRect.top < window.innerHeight);
+      nearSlideRef.current = slideOnScreen;
+
+      let seatPoint = null;
+      // The rider publishes the seat in screen space every frame it runs, so
+      // this side needs no layout read at all while riding the chute.
+      const published = window.__pikaSeat;
+      if (seat && phase !== 'gone' && published && published.phase !== 'gone') {
+        // The seat anchor is where Pikachu's feet belong.
+        if (published.y > -160 && published.y < window.innerHeight + 160) {
+          seatPoint = { x: published.x - 29, y: published.y - 58 };
+          followTarget = seatPoint;
           timelineHovered = true;
-          // Follow the target! (Subtract offset for Pikachu's center)
-          followTarget = { x: tRect.left - 32, y: tRect.top - 32 };
         }
       }
 
-      const bookEl = document.querySelector('.resume-btn-wrap');
+      if (!seatPoint) {
+        ridingRef.current = false;
+      } else if (ridingRef.current) {
+        // A page jump should not drag the pet across the screen.
+        if (Math.hypot(seatPoint.x - pos.x, seatPoint.y - pos.y) > 340) ridingRef.current = false;
+      } else if (phase !== 'fall') {
+        // It hurries to the chute and hops on when it arrives: no fading out,
+        // no teleporting between sections.
+        const dToSeat = Math.hypot(seatPoint.x - pos.x, seatPoint.y - pos.y);
+        if (dToSeat <= 18) {
+          ridingRef.current = true;
+          boardAtRef.current = Date.now();
+          setBoarding(true);
+          window.setTimeout(() => setBoarding(false), 320);
+          setAction('pounce');
+          window.setTimeout(() => setAction(''), 700);
+          playChirp(0.32);
+          play('zap', { volume: 0.4 });
+          setPetState('jumping');
+        }
+      }
 
-      if (bookEl && !timelineHovered) {
-        const rect = bookEl.getBoundingClientRect();
-        if (mouse.x >= rect.left && mouse.x <= rect.right && mouse.y >= rect.top && mouse.y <= rect.bottom) {
+      if (ridingRef.current) timelineHovered = true;
+
+      const bookEl = els.book;
+
+      const bookRect = rectCache.book;
+      if (bookEl && bookRect && !timelineHovered) {
+        if (mouse.x >= bookRect.left && mouse.x <= bookRect.right && mouse.y >= bookRect.top && mouse.y <= bookRect.bottom) {
           bookHovered = true;
           // Place Pikachu to the left of the book
-          followTarget = { x: rect.left - 100, y: rect.bottom - 80 };
+          followTarget = { x: bookRect.left - 100, y: bookRect.bottom - 80 };
         }
       }
 
@@ -1427,15 +858,41 @@ function PikaPet() {
       const dy = followTarget.y - pos.y;
       const dist = Math.hypot(dx, dy);
 
-      if (timelineHovered) {
-        pos.x = followTarget.x;
-        pos.y = followTarget.y;
-        setFacingLeft(dx < 0);
+      onSlideRef.current = ridingRef.current;
+
+      if (ridingRef.current && seatPoint) {
+        // Welded to the seat: no spring, so it can never drift off the chute.
+        pos.x = seatPoint.x;
+        pos.y = seatPoint.y;
+        setFacingLeft(false);
         setFrame(3);
-        setPetState('sliding');
+        if (petRef.current) {
+          petRef.current.style.setProperty('--slide-tilt', seat.dataset.tilt || '0deg');
+        }
+
+        wasRidingRef.current = true;
+
+        if (phase === 'fall') {
+          setSeated(false);
+          setPetState('falling');
+        } else if (phase === 'approach' || phase === 'rest') {
+          setSeated(true);
+          setPetState('idle');
+        } else if (Date.now() - boardAtRef.current > 420) {
+          setSeated(true);
+          setPetState('riding');
+        }
         lastMoveRef.current = Date.now();
       } else if (dist > 5) {
+        if (wasRidingRef.current) {
+          wasRidingRef.current = false;
+          ridingRef.current = false;
+          setSeated(false);
+          playChirp(0.3);
+        }
         let speed = (distToMouse < 150 || bookHovered) ? 1.8 : 2.5;
+        // Headed for the chute? Get there quickly so it never trails behind.
+        if (seatPoint) speed = 11;
         pos.x += (dx / dist) * speed;
         pos.y += (dy / dist) * speed;
         pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
@@ -1478,8 +935,50 @@ function PikaPet() {
     };
   }, []);
 
+  // Random moods — blinking itself is pure CSS on the sprite.
+  useEffect(() => {
+    let nextTimer;
+    let resetTimer;
+    const schedule = () => {
+      nextTimer = window.setTimeout(() => {
+        const pool = ['happy', 'wink', 'love', 'derp', 'happy', 'idle'];
+        setExpression(pool[Math.floor(Math.random() * pool.length)]);
+        resetTimer = window.setTimeout(() => setExpression('idle'), 1900);
+        schedule();
+      }, 6500 + Math.random() * 6500);
+    };
+    schedule();
+    return () => {
+      window.clearTimeout(nextTimer);
+      window.clearTimeout(resetTimer);
+    };
+  }, []);
+
+  // Cat-like idle beats: loaf, head tilt, stretch, yawn.
+  useEffect(() => {
+    let nextTimer;
+    let resetTimer;
+    const schedule = () => {
+      nextTimer = window.setTimeout(() => {
+        const pool = ['loaf', 'tilt', 'stretch', 'yawn'];
+        setAction(pool[Math.floor(Math.random() * pool.length)]);
+        resetTimer = window.setTimeout(() => setAction(''), 1700);
+        schedule();
+      }, 9000 + Math.random() * 9000);
+    };
+    schedule();
+    return () => {
+      window.clearTimeout(nextTimer);
+      window.clearTimeout(resetTimer);
+    };
+  }, []);
+
   const handleMouseDown = (e) => {
     e.preventDefault();
+    if (onSlideRef.current) {
+      window.dispatchEvent(new CustomEvent('pika-boost'));
+      return;
+    }
     const cx = e.touches ? e.touches[0].clientX : e.clientX;
     const cy = e.touches ? e.touches[0].clientY : e.clientY;
     draggingRef.current = true;
@@ -1487,12 +986,21 @@ function PikaPet() {
     dragStartRef.current = { x: cx, y: cy };
     dragOffsetRef.current = { x: cx - posRef.current.x, y: cy - posRef.current.y };
     setPetState('idle');
+    setExpression('shock');
+    window.setTimeout(() => setExpression('idle'), 900);
     setBubble({ section: '\u26A1', msg: 'Pika~?!', show: true });
   };
 
 
-  const cls = ['pika-pet', visible && 'visible', facingLeft && 'face-left', isDragging && 'dragging', petState === 'jumping' && 'jumping', petState === 'tumbling' && 'tumbling', petState === 'sparking' && 'sparking', petState === 'sleeping' && 'sleeping'].filter(Boolean).join(' ');
-  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : petState === 'sliding' ? 'sliding' : 'idle';
+  const cls = ['pika-pet', visible && 'visible', seated && 'seated', facingLeft && 'face-left', isDragging && 'dragging', boarding && 'boarding', petState === 'walking' && 'walking', petState === 'jumping' && 'jumping', petState === 'falling' && 'falling', petState === 'tumbling' && 'tumbling', petState === 'sparking' && 'sparking', petState === 'sleeping' && 'sleeping', petState === 'riding' && 'on-slide', action].filter(Boolean).join(' ');
+  const sprCls = petState === 'sleeping' ? 'sleeping' : petState === 'walking' ? '' : petState === 'riding' ? 'seated' : 'idle';
+  const shownExpression = petState === 'sleeping'
+    ? 'sleepy'
+    : isDragging || petState === 'sparking' || petState === 'falling'
+      ? 'shock'
+      : petState === 'riding'
+        ? 'happy'
+        : expression;
 
   return (
     <>
@@ -1505,11 +1013,14 @@ function PikaPet() {
         </div>
         <div className="pika-zzz">zzZ</div>
         <div className={`pika-sprite ${sprCls}`} data-frame={frame}>
-          <div className="pika-body" />
+          <PikaSprite expression={shownExpression} />
           <div className="pika-shadow" />
         </div>
         <div className="pika-sparks">
           <div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" /><div className="pika-spark" />
+        </div>
+        <div className="pika-dust" aria-hidden="true">
+          <span /><span /><span /><span />
         </div>
       </div>
     </>
@@ -1524,17 +1035,53 @@ function PikaPet() {
 
 /* â•â•â•â•â•â•â•â• APP â•â•â•â•â•â•â•â• */
 export default function App() {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.sessionStorage.getItem('sujith-visited') === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLoaderDone = useCallback(() => {
+    try {
+      window.sessionStorage.setItem('sujith-visited', '1');
+    } catch {
+      /* private mode */
+    }
+    setLoaded(true);
+  }, []);
+
+  // One delegated listener for every click and hover sound.
+  useEffect(() => attachGlobalSounds(), []);
 
   useEffect(() => {
-    // Lenis smooth scroll
-    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), direction: 'vertical', gestureDirection: 'vertical', smooth: true, mouseMultiplier: 1, smoothTouch: false, touchMultiplier: 2, infinite: false });
-    window.lenis = lenis;
-    lenis.on('scroll', ScrollTrigger.update);
+    const root = document.documentElement;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let lenis = null;
+    let ticker = null;
 
-    const update = (time) => { lenis.raf(time * 1000); };
-    gsap.ticker.add(update);
-    gsap.ticker.lagSmoothing(0);
+    if (!reduceMotion) {
+      // Slow, long glide on wheel; touch stays native, which is smoother on phones.
+      lenis = new Lenis({
+        duration: 1.6,
+        easing: (t) => 1 - Math.pow(1 - t, 3.2),
+        direction: 'vertical',
+        gestureDirection: 'vertical',
+        smoothWheel: true,
+        syncTouch: false,
+        mouseMultiplier: 0.9,
+        touchMultiplier: 1.6,
+        infinite: false,
+      });
+      window.lenis = lenis;
+      lenis.on('scroll', ScrollTrigger.update);
+
+      ticker = (time) => { lenis.raf(time * 1000); };
+      gsap.ticker.add(ticker);
+      gsap.ticker.lagSmoothing(0);
+    }
 
     // Reveal observer
     const obs = new IntersectionObserver((entries) => {
@@ -1542,26 +1089,57 @@ export default function App() {
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal-up').forEach((el) => obs.observe(el));
 
+    // Accent colour follows the section you are in.
+    const accents = [
+      ['#home', '#F62440', '246, 36, 64'],
+      ['#about', '#F65540', '246, 85, 64'],
+      ['#education', '#22D3EE', '34, 211, 238'],
+      ['#work', '#A78BFA', '167, 139, 250'],
+      ['#skills', '#F62440', '246, 36, 64'],
+      ['#contact', '#F62440', '246, 36, 64'],
+    ];
+    const accentTriggers = accents
+      .map(([selector, color, rgb]) => {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        return ScrollTrigger.create({
+          trigger: el,
+          start: 'top 55%',
+          end: 'bottom 45%',
+          onToggle: (self) => {
+            if (!self.isActive) return;
+            root.style.setProperty('--accent', color);
+            root.style.setProperty('--accent-rgb', rgb);
+          },
+        });
+      })
+      .filter(Boolean);
+
     return () => {
-      gsap.ticker.remove(update);
-      lenis.destroy();
+      if (ticker) gsap.ticker.remove(ticker);
+      if (lenis) {
+        lenis.destroy();
+        if (window.lenis === lenis) window.lenis = null;
+      }
       obs.disconnect();
+      accentTriggers.forEach((t) => t.kill());
+      root.style.setProperty('--accent', '#F62440');
+      root.style.setProperty('--accent-rgb', '246, 36, 64');
     };
   }, [loaded]);
 
   return (
     <>
-      <div className="grain" aria-hidden="true" />
-
       <Cursor />
-      {!loaded && <Loader onDone={() => setLoaded(true)} />}
+      <SoundToggle />
+      {!loaded && <Loader onDone={handleLoaderDone} />}
       <Nav />
       <main>
-        <Hero />
+        <Hero ready={loaded} />
         <About />
         <ExperienceTimeline />
-        <ProjectsDeck />
-        <Skills />
+        <ProjectsSection />
+        <SkillsSection />
         <Contact />
       </main>
       <PikaPet />
