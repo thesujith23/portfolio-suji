@@ -9,9 +9,9 @@ export const PROJECTS = [
     color: '#8b5e3c',
     liveUrl: 'https://cafee-management.vercel.app/',
     github: 'https://github.com/thesujith23/cafe-management',
-    mainImg: '/cafe-console.webp',
+    mainImg: '/cafe-landing.webp',
     sideImg1: '/cafe-floor.webp',
-    sideImg2: '/cafe-landing.webp',
+    sideImg2: '/cafe-console.webp',
     quote:
       '"Scan the table QR, order, pay and watch the ticket move across the kitchen board — one real-time flow from counter to table."',
     quoteAuthor: 'Product & Full-Stack',
