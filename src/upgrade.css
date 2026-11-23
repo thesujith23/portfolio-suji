@@ -488,6 +488,14 @@
 }
 
 /* ── About: pinned scroll typewriter ────────────────────── */
+/* The page-wide accent is re-pointed per section on scroll and only written
+   when a trigger turns active, so returning from Experience/Projects left the
+   About text in their cyan/violet. Pin About to its own accent. */
+.about {
+  --accent: #F65540;
+  --accent-rgb: 246, 85, 64;
+}
+
 .about.about-pinned {
   min-height: 100vh;
   display: flex;
