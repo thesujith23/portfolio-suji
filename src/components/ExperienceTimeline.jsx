@@ -1,20 +1,24 @@
 import ThreeSlide from './ThreeSlide';
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence, useMotionValueEvent } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  motion, useScroll, useTransform, useSpring, useInView, AnimatePresence,
+} from 'framer-motion';
+import { play } from '../lib/sound';
+import SlideRider from './SlideRider';
 
 
 // ── Scroll-Linked Character
 const ScrollChar = ({ char, progress, dist, maxDist, autoPlay, delay, isInView }) => {
   const startRange = maxDist === 0 ? 0 : (dist / maxDist) * 0.6;
   const endRange = Math.min(1, startRange + 0.4);
-  const yScroll = useTransform(progress, [startRange, endRange], ['-120%', '0%']);
-  const opacityScroll = useTransform(progress, [startRange, endRange], [0, 1]);
+  const yScroll = useTransform(progress, [startRange, endRange], ['-40%', '0%']);
+  const opacityScroll = useTransform(progress, [startRange, endRange], [0.15, 1]);
   return (
     <motion.span
       style={autoPlay ? { display: 'inline-block' } : { display: 'inline-block', y: yScroll, opacity: opacityScroll }}
-      initial={autoPlay ? { y: '-120%', opacity: 0 } : {}}
+      initial={autoPlay ? { y: '-40%', opacity: 0 } : {}}
       animate={autoPlay && isInView ? { y: 0, opacity: 1 } : {}}
-      transition={{ duration: 0.8, delay: delay + dist * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.9, delay: delay + dist * 0.02, ease: [0.22, 1, 0.36, 1] }}
     >
       {char}
     </motion.span>
@@ -188,7 +192,61 @@ const experiences = [
 ];
 
 // ── Creative Experience Popup
-function ExperiencePopup({ exp, onClose }) {
+function ExperiencePopup({ exp, index, total, onClose, onStep }) {
+  const panelRef = useRef(null);
+  const closeRef = useRef(null);
+
+  // Lock the page, wire keyboard controls, restore on close.
+  useEffect(() => {
+    if (!exp) return;
+
+    const lenis = window.lenis;
+    try {
+      lenis?.stop();
+    } catch {
+      /* lenis does not exist under reduced motion */
+    }
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), 80);
+
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      } else if (event.key === 'ArrowRight') {
+        onStep(1);
+      } else if (event.key === 'ArrowLeft') {
+        onStep(-1);
+      } else if (event.key === 'Tab') {
+        const nodes = panelRef.current?.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        );
+        if (!nodes || !nodes.length) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.clearTimeout(focusTimer);
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+      try {
+        lenis?.start();
+      } catch {
+        /* nothing to restore */
+      }
+    };
+  }, [exp, onClose, onStep]);
+
   return (
     <AnimatePresence>
       {exp && (
@@ -206,7 +264,11 @@ function ExperiencePopup({ exp, onClose }) {
 
           {/* Panel — slides in from right */}
           <motion.div
-            className="fixed top-0 right-0 h-full z-[9991] flex flex-col"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={exp.title + ' at ' + exp.org}
+            className="fixed top-0 right-0 h-full z-[9991] flex flex-col exp-panel"
             style={{
               width: 'min(560px, 100vw)',
               background: '#080808',
@@ -235,7 +297,7 @@ function ExperiencePopup({ exp, onClose }) {
                     className="font-mono text-xs tracking-widest uppercase mb-2 block"
                     style={{ color: exp.color }}
                   >
-                    {exp.type} · {exp.period}
+                    {exp.type} · {exp.period} · {String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
                   </span>
                   <h2
                     className="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight text-white"
@@ -347,8 +409,20 @@ function ExperiencePopup({ exp, onClose }) {
               </div>
             </div>
 
+            {/* Step through the timeline */}
+            <div className="exp-popup-nav">
+              <button type="button" onClick={() => onStep(-1)} disabled={index <= 0} data-sound="none">
+                ← Prev
+              </button>
+              <span>{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+              <button type="button" onClick={() => onStep(1)} disabled={index >= total - 1} data-sound="none">
+                Next →
+              </button>
+            </div>
+
             {/* Close button */}
             <motion.button
+              ref={closeRef}
               className="fixed top-6 right-6 z-[9992] w-10 h-10 flex items-center justify-center rounded-full font-mono text-lg font-bold"
               style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
               onClick={onClose}
@@ -368,20 +442,24 @@ function ExperiencePopup({ exp, onClose }) {
 }
 
 // ── Experience Card
-function ExperienceCard({ exp, onOpen }) {
+function ExperienceCard({ exp, onOpen, onHover }) {
   return (
     <motion.div
       className="timeline-content cursor-pointer select-none"
-      initial={{ opacity: 0, scale: 0.1, y: 50, filter: 'hue-rotate(90deg)' }}
-      whileInView={{ opacity: 1, scale: 1, y: 0, filter: 'hue-rotate(0deg)' }}
-      viewport={{ once: true, margin: '-45% 0px -45% 0px' }}
-      transition={{ type: 'spring', damping: 8, stiffness: 300, mass: 0.5 }}
+      initial={{ opacity: 0, y: 40, rotate: -3, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ type: 'spring', stiffness: 120, damping: 18, mass: 0.6 }}
       whileHover={{
         scale: 1.05, y: -4,
         boxShadow: `0 16px 40px ${exp.color}25`,
         borderColor: `${exp.color}50`,
       }}
       onClick={() => onOpen(exp)}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+      onFocus={() => onHover(true)}
+      onBlur={() => onHover(false)}
       style={{ position: 'relative', overflow: 'hidden' }}
     >
       {/* Color accent bar on left edge */}
@@ -411,15 +489,13 @@ function ExperienceCard({ exp, onOpen }) {
         <p className="mono text-blue">{exp.org}</p>
         <p className="desc">{exp.shortDesc}</p>
 
-        {/* Click hint */}
-        <motion.div
-          className="flex items-center gap-1 mt-2 font-mono text-[10px] uppercase tracking-widest"
+        {/* Click hint — a CSS nudge instead of a permanent JS animation */}
+        <div
+          className="exp-card-hint flex items-center gap-1 mt-2 font-mono text-[10px] uppercase tracking-widest"
           style={{ color: exp.color, opacity: 0.6 }}
-          animate={{ x: [0, 3, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
         >
           click to expand →
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
@@ -427,54 +503,96 @@ function ExperienceCard({ exp, onOpen }) {
 
 // ── Main Component
 const ExperienceTimeline = () => {
-  const [activeExp, setActiveExp] = useState(null);
   const timelineRef = useRef(null);
+  const railRef = useRef(null);
+  const itemRefs = useRef([]);
 
-  const { scrollYProgress: timelineScroll } = useScroll({
-    target: timelineRef,
-    offset: ['start center', 'end center'],
-  });
+  const [activeStop, setActiveStop] = useState(0);
+  const [hoverStop, setHoverStop] = useState(-1);
+  const [activeIndex, setActiveIndex] = useState(null);
 
-  // Playful Children's Slide Path
-  let slidePath = `M 100 0`;
-  for (let i = 1; i <= 60; i++) {
-    const t = i / 60;
-    // Sweeping curves like a playground slide
-    const x = 100 + Math.sin(t * Math.PI * 3.5) * 65; 
-    slidePath += ` L ${x} ${t * 1000}`;
-  }
-  const pikaLeft = useTransform(timelineScroll, (t) => `calc(50% + ${Math.sin(t * Math.PI * 3.5) * 32.5}%)`);
-  const dogOpacity = useTransform(timelineScroll, [0.9, 1], [1, 0]);
+  const goToStop = useCallback((i) => {
+    const idx = Math.max(0, Math.min(experiences.length - 1, i));
+    setActiveStop(idx);
+    play('tick');
+    const el = itemRefs.current[idx];
+    if (!el) return;
+    if (window.lenis) window.lenis.scrollTo(el, { offset: -120 });
+    else el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
-  const [pikaMessage, setPikaMessage] = useState('Work Experience');
+  const openExp = useCallback((exp) => {
+    setActiveIndex(experiences.findIndex((item) => item.id === exp.id));
+    play('open');
+  }, []);
 
-  useMotionValueEvent(timelineScroll, "change", (latest) => {
-    if (latest < 0.05) {
-      setPikaMessage(''); 
-    } else if (latest < 0.3) {
-      setPikaMessage('Work'); // Trikon
-    } else if (latest < 0.5) {
-      setPikaMessage('Education (MCA)'); // NMAM
-    } else if (latest < 0.7) {
-      setPikaMessage('Work'); // Intern 1
-    } else if (latest < 0.9) {
-      setPikaMessage('Work'); // Intern 2
-    } else {
-      setPikaMessage('Education (BCA)'); // BCA
-    }
-  });
+  const closeExp = useCallback(() => {
+    setActiveIndex(null);
+    play('close');
+  }, []);
 
+  const stepExp = useCallback((dir) => {
+    setActiveIndex((current) => {
+      if (current === null) return current;
+      const next = Math.max(0, Math.min(experiences.length - 1, current + dir));
+      if (next !== current) play('tick');
+      return next;
+    });
+  }, []);
+
+  // Which card currently sits in the middle of the viewport.
   useEffect(() => {
-    if (pikaMessage) {
-      window.dispatchEvent(new CustomEvent('pika-speak', { detail: { section: '💼', msg: pikaMessage } }));
-    }
-  }, [pikaMessage]);
+    const els = itemRefs.current.filter(Boolean);
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const i = els.indexOf(entry.target);
+          if (i >= 0) setActiveStop(i);
+        });
+      },
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  // Pikachu tells the section what it is riding past.
+  useEffect(() => {
+    const exp = experiences[activeStop];
+    if (!exp) return;
+    window.dispatchEvent(
+      new CustomEvent('pika-speak', {
+        detail: { section: exp.icon, msg: `${exp.type} · ${exp.org}` },
+      }),
+    );
+  }, [activeStop]);
+
+  // Tap Pikachu while it rides -> push it to the next stop.
+  useEffect(() => {
+    const onBoost = () => {
+      goToStop(Math.min(activeStop + 1, experiences.length - 1));
+      play('whoosh');
+      play('sparkle', { volume: 0.5 });
+    };
+    window.addEventListener('pika-boost', onBoost);
+    return () => window.removeEventListener('pika-boost', onBoost);
+  }, [activeStop, goToStop]);
+
+  const activeExp = activeIndex === null ? null : experiences[activeIndex];
 
   return (
     <>
-      <ExperiencePopup exp={activeExp} onClose={() => setActiveExp(null)} />
+      <ExperiencePopup
+        exp={activeExp}
+        index={activeIndex ?? 0}
+        total={experiences.length}
+        onClose={closeExp}
+        onStep={stepExp}
+      />
 
-      <section id="education" className="section">
+      <section id="education" className="section exp-section">
         <div className="container relative">
           <div className="section-header" style={{ textAlign: 'center' }}>
             <motion.span
@@ -491,40 +609,79 @@ const ExperienceTimeline = () => {
             </h2>
             <motion.p
               className="font-mono text-xs mt-2"
-              style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}
+              style={{ color: 'var(--muted)', letterSpacing: '0.1em' }}
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
             >
-              click any card for full details
+              ride the slide — click any card for full details
             </motion.p>
           </div>
 
+          <div className="exp-rail-wrap">
+            <div
+              className="exp-rail"
+              ref={railRef}
+              tabIndex={0}
+              role="group"
+              aria-label="Experience stops — use the arrow keys to step through them"
+              onKeyDown={(event) => {
+                if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                  event.preventDefault();
+                  goToStop(activeStop + 1);
+                } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+                  event.preventDefault();
+                  goToStop(activeStop - 1);
+                }
+              }}
+            >
+              <span className="exp-rail-line" aria-hidden="true" />
+              <span
+                className="exp-rail-fill"
+                aria-hidden="true"
+                style={{
+                  transform: `scaleY(${(activeStop + 1) / experiences.length})`,
+                  background: experiences[activeStop]?.color,
+                }}
+              />
+              {experiences.map((exp, i) => (
+                <button
+                  key={exp.id}
+                  type="button"
+                  className={`exp-rail-stop${i === activeStop ? ' active' : ''}`}
+                  style={{ '--stop-color': exp.color }}
+                  onClick={() => goToStop(i)}
+                  aria-current={i === activeStop ? 'true' : 'false'}
+                  aria-label={`${exp.title} at ${exp.org}, ${exp.period}`}
+                  data-sound="none"
+                >
+                  <span className="exp-rail-dot" />
+                  <span className="exp-rail-year">{(exp.period.match(/\d{4}/) || [''])[0]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="timeline-container" ref={timelineRef}>
-            <ThreeSlide />
+            <ThreeSlide activeIndex={activeStop} hoverIndex={hoverStop} />
 
-            {/* Invisible target for global PikaPet (sliding down the curvy slide) */}
-            <motion.div 
-              id="timeline-pika-target" 
-              style={{ 
-                position: 'absolute',
-                left: pikaLeft,
-                top: useTransform(timelineScroll, [0, 1], ['0%', '100%']), 
-                x: '-50%',
-                width: '0px',
-                height: '0px'
-              }} 
-            />
+            <SlideRider containerRef={timelineRef} />
 
-            {/* Experience Cards */}
             {experiences.map((exp, i) => (
               <div
                 key={exp.id}
+                ref={(el) => {
+                  itemRefs.current[i] = el;
+                }}
                 className={`timeline-item ${exp.side}`}
                 style={{ marginTop: i === 0 ? '100px' : `${Math.max(40, exp.gapMonths * 12)}px` }}
               >
-                <ExperienceCard exp={exp} onOpen={setActiveExp} />
+                <ExperienceCard
+                  exp={exp}
+                  onOpen={openExp}
+                  onHover={(on) => setHoverStop(on ? i : -1)}
+                />
               </div>
             ))}
           </div>
