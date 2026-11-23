@@ -331,30 +331,57 @@ function About() {
   const sectionRef = useRef(null);
   const textRef = useRef(null);
   const charRefs = useRef([]);
+  // Three milestones for the cartoon sidekick: 1 = a third typed, 2 = two
+  // thirds, 3 = paragraph finished.
+  const [stage, setStage] = useState(0);
+  const stageRef = useRef(0);
 
   const content = [
     { text: "I'm " },
     { text: "Sujith,", highlight: true },
     { text: " a " },
     { text: "software engineer", highlight: true },
-    { text: " who transforms complex problems into elegant, production-ready web applications. I build with " },
-    { text: "React, Next.js,", highlight: true },
-    { text: " and " },
+    { text: " building real-time " },
+    { text: "voice AI backends", highlight: true },
+    { text: ", secure " },
+    { text: "REST APIs", highlight: true },
+    { text: ", and " },
+    { text: "MERN applications", highlight: true },
+    { text: " with " },
+    { text: "Python", highlight: true },
+    { text: ", " },
+    { text: "FastAPI", highlight: true },
+    { text: ", " },
+    { text: "React", highlight: true },
+    { text: ", and " },
     { text: "Node.js", highlight: true },
-    { text: " — creating " },
-    { text: "AI-integrated", highlight: true },
-    { text: " platforms, secure " },
-    { text: "REST APIs,", highlight: true },
-    { text: " and data-driven dashboards that deliver real business value. Currently seeking to contribute to a " },
+    { text: ". I ship " },
+    { text: "LLM integrations", highlight: true },
+    { text: " and RAG pipelines, and I care about clean state, fast queries, and products people actually use. Currently looking for a " },
     { text: "product-focused", highlight: true },
-    { text: " engineering team." }
+    { text: " engineering team." },
   ];
 
-  // Flattened once into individual characters so the scroll can type them.
-  const chars = [];
+  // Each character gets its own box so the scroll can pop it in, but a box is
+  // an inline-block and browsers break lines between those — so characters are
+  // grouped into word boxes that may never split. Spaces stay on their own.
+  const words = [];
+  let word = { chars: [] };
+  let charIndex = 0;
   content.forEach((segment) => {
-    for (const ch of segment.text) chars.push({ ch, highlight: Boolean(segment.highlight) });
+    for (const ch of segment.text) {
+      if (ch === ' ') {
+        if (word.chars.length) words.push(word);
+        words.push({ space: true, chars: [{ ch: ' ', index: charIndex }] });
+        charIndex += 1;
+        word = { chars: [] };
+        continue;
+      }
+      word.chars.push({ ch, highlight: Boolean(segment.highlight), index: charIndex });
+      charIndex += 1;
+    }
   });
+  if (word.chars.length) words.push(word);
 
   /* Pinned typewriter: the section holds still while the paragraph types
      itself in step with the scroll, then the page moves on. */
@@ -366,6 +393,13 @@ function About() {
 
     const nodes = charRefs.current.filter(Boolean);
     if (!nodes.length) return;
+
+    // Each red word gets a golden star burst the moment its last character
+    // lands, so the highlights register as highlights.
+    const starWords = [...text.querySelectorAll('.tw-word[data-hl]')].map((el) => {
+      const chars = el.querySelectorAll('.typewriter-char');
+      return { el, end: Number(chars[chars.length - 1].dataset.i) };
+    });
 
     // Scrolling is often the first gesture on this page, so make sure the
     // audio context exists (or resumes) before the first character lands.
@@ -383,7 +417,7 @@ function About() {
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
-        end: `+=${Math.round(nodes.length * 4.2)}`,
+        end: `+=${Math.round(nodes.length * 5)}`,
         pin: true,
         anticipatePin: 1,
         scrub: 0.6,
@@ -401,6 +435,11 @@ function About() {
           const step = Math.abs(target - typed);
           typed = target;
 
+          for (const word of starWords) {
+            if (target > word.end) word.el.classList.add('sparkled');
+            else word.el.classList.remove('sparkled');
+          }
+
           if (forward) {
             soundBudget += step;
             if (soundBudget >= 1) {
@@ -409,6 +448,18 @@ function About() {
             }
           }
           section.classList.toggle('about-done', target >= nodes.length);
+
+          const nextStage = target >= nodes.length * 0.85
+            ? 3
+            : target > nodes.length * 0.55
+              ? 2
+              : target > nodes.length * 0.2
+                ? 1
+                : 0;
+          if (nextStage !== stageRef.current) {
+            stageRef.current = nextStage;
+            setStage(nextStage);
+          }
         },
       });
     }, section);
@@ -420,6 +471,7 @@ function About() {
       ctx.revert();
       section.classList.remove('about-pinned', 'about-done');
       text.classList.remove('is-typing');
+      starWords.forEach((word) => word.el.classList.remove('sparkled'));
     };
   }, []);
 
@@ -431,18 +483,85 @@ function About() {
       </div>
       <div className="typewriter-container">
         <p className="about-text typewriter-text" ref={textRef}>
-          {chars.map((char, i) => (
+          {words.map((group, gi) =>
+            group.space ? (
+              <span
+                key={`s${gi}`}
+                ref={(el) => {
+                  charRefs.current[group.chars[0].index] = el;
+                }}
+                className="typewriter-char tw-space"
+              >
+                {' '}
+              </span>
+            ) : (
+              <span
+                className="tw-word"
+                key={`w${gi}`}
+                data-hl={group.chars.some((char) => char.highlight) ? '' : undefined}
+              >
+                {group.chars.map((char) => (
+                  <span
+                    key={char.index}
+                    data-i={char.index}
+                    ref={(el) => {
+                      charRefs.current[char.index] = el;
+                    }}
+                    className={`typewriter-char${char.highlight ? ' about-hl' : ''}`}
+                  >
+                    {char.ch}
+                  </span>
+                ))}
+              </span>
+            )
+          )}
+        </p>
+      </div>
+
+      {/* Sticker wall: an "open to work" sticker leads, then tag stickers and
+          red stars pop in beside the paragraph as it types. Decorative —
+          absolute, and hidden on smaller screens so the text keeps its
+          full column. */}
+      <div className="about-side" data-stage={stage} aria-hidden="true">
+        <svg className="about-side-arrow" viewBox="0 0 120 80" fill="none">
+          <path d="M110 8C82 10 44 18 18 40" />
+          <path d="M18 40 36 34M18 40 29 54" />
+        </svg>
+
+        <div className="about-side-stack">
+          {[
+            { label: 'open to work', at: 1, tilt: -3.4, lead: true },
+            { label: 'Node.js', at: 1, tilt: 2.2 },
+            { label: 'React', at: 2, tilt: -2.4 },
+            { label: 'Pipecat', at: 2, tilt: 2.8 },
+            { label: 'FastAPI', at: 3, tilt: -2 },
+            { label: 'Python', at: 3, tilt: 2.6 },
+          ].map((chip, i) => (
             <span
-              key={i}
-              ref={(el) => {
-                charRefs.current[i] = el;
-              }}
-              className={`typewriter-char${char.highlight ? ' about-hl' : ''}`}
+              key={chip.label}
+              className={`about-chip${chip.lead ? ' lead' : ''}${stage >= chip.at ? ' pop' : ''}`}
+              style={{ '--tilt': `${chip.tilt}deg`, '--d': i }}
             >
-              {char.ch}
+              <i aria-hidden="true">★</i>
+              {chip.label}
             </span>
           ))}
-        </p>
+        </div>
+
+        {[
+          { cls: 's1', at: 1 },
+          { cls: 's2', at: 2 },
+          { cls: 's3', at: 2 },
+          { cls: 's4', at: 3 },
+        ].map((star) => (
+          <span
+            key={star.cls}
+            className={`about-star ${star.cls}${stage >= star.at ? ' pop' : ''}`}
+            aria-hidden="true"
+          >
+            ★
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -1065,14 +1184,16 @@ export default function App() {
     if (!reduceMotion) {
       // Slow, long glide on wheel; touch stays native, which is smoother on phones.
       lenis = new Lenis({
-        duration: 1.6,
-        easing: (t) => 1 - Math.pow(1 - t, 3.2),
+        // Duration mode (not lerp) so the glide takes the same wall-clock time
+        // on a 60Hz laptop and a 120Hz screen instead of running twice as fast.
+        duration: 2.05,
+        easing: (t) => 1 - Math.pow(1 - t, 3.4),
         direction: 'vertical',
         gestureDirection: 'vertical',
         smoothWheel: true,
         syncTouch: false,
-        mouseMultiplier: 0.9,
-        touchMultiplier: 1.6,
+        mouseMultiplier: 0.78,
+        touchMultiplier: 1.5,
         infinite: false,
       });
       window.lenis = lenis;
