@@ -280,7 +280,7 @@ function Hero({ ready = true }) {
     <section className="hero" id="home" ref={ref} style={{ position: 'relative' }}>
       <div className="hero-rays" aria-hidden="true" />
       <div className="hero-halftone" aria-hidden="true" />
-      <span className="hero-burst" aria-hidden="true">PIKA!</span>
+      <span className="hero-burst" aria-hidden="true">Portfolio</span>
       <span className="hero-hire" aria-hidden="true">hire me</span>
       <svg className="hero-arrow" viewBox="0 0 140 136" fill="none" aria-hidden="true">
         <path className="hero-arrow-line" d="M10 10c16 52 42 72 80 84" />
