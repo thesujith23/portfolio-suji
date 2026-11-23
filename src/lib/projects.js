@@ -6,7 +6,7 @@ export const PROJECTS = [
     name: 'Cafe Management System',
     meta: 'Smart QR-based café platform (MERN + Socket.IO): signed per-table QR ordering, 24-dish menu with a customiser and live cart, server-priced Razorpay checkout with signature verification, kitchen Kanban display, public order board, and an admin dashboard with KPIs, table floor plan and sales analytics.',
     tags: ['React 19', 'Express', 'MongoDB', 'Socket.IO', 'Razorpay', 'Tailwind'],
-    color: '#8b5e3c',
+    color: '#0f7a5a',
     liveUrl: 'https://cafee-management.vercel.app/',
     github: 'https://github.com/thesujith23/cafe-management',
     mainImg: '/cafe-landing.webp',
