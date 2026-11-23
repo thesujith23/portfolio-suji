@@ -107,21 +107,22 @@ export const PixelPikachu = ({ isRunning = false }) => (
 const experiences = [
   {
     id: 1,
-    period: 'Apr 2026 – Present',
+    period: 'Apr 2026 – Oct 2026',
     type: 'Work Experience',
     title: 'Software Engineer',
     org: 'Trikon Software Labs',
-    shortDesc: 'Real-time AI voice platform & AI appointment booking.',
+    shortDesc: 'Model-agnostic voice AI: Pipecat, FastAPI, WebSockets.',
     color: '#f97316',
     accent: '#ea580c',
     icon: '💼',
-    tags: ['Pipecat', 'Python', 'Supabase', 'Codex'],
+    tags: ['Pipecat', 'FastAPI', 'WebSockets', 'Next.js'],
     fullDesc: [
-      'Developed a real-time, model-agnostic conversational AI backend using Pipecat and FastAPI, integrated with multiple STT, TTS, and LLM providers via WebSockets.',
-      'Streamlined daily development with an AI-first workflow, used Codex CLI for implementation, Plan Mode to scope tasks before coding, and the Grill-Me skill to stress-test designs and surface edge cases early, reducing rework.',
-      'VoiceAgentDoctor — Built a custom diagnostic skill to analyze and optimize real-time voice-agent latency, interruptions, and STT–LLM–TTS performance using Pipecat.'
+      'Built a real-time, model-agnostic conversational AI backend with Pipecat and FastAPI — multiple STT, TTS and LLM providers plus a Gemini speech-to-speech model, all streamed over WebSockets.',
+      'Shipped the React/Next.js frontend for live voice sessions: real-time audio streaming, session management and clean interruption handling.',
+      'Built VoiceAgentDoctor, a custom diagnostic skill that profiles live calls and tunes latency, interruptions and STT–LLM–TTS performance.',
+      'Worked AI-first day to day — Codex CLI, Claude, Plan Mode, MCP and custom skills — scoping before coding and stress-testing designs early to cut rework.'
     ],
-    achievement: 'AI Voice Platform',
+    achievement: 'Real-Time Voice AI',
     side: 'left',
     gapMonths: 0,
   },
@@ -131,12 +132,12 @@ const experiences = [
     type: 'Education',
     title: 'Master of Computer Applications',
     org: 'NMAM Institute of Technology',
-    shortDesc: 'Advanced software engineering & full-stack tech.',
+    shortDesc: 'MCA — software engineering, data structures, full-stack web.',
     color: '#22d3ee',
     accent: '#0891b2',
     icon: '🏫',
-    tags: ['Computer Science', 'Web Tech', 'Data Structures'],
-    fullDesc: 'Focused on advanced software engineering, data structures, and full-stack web technologies.',
+    tags: ['Software Engineering', 'Data Structures', 'Full-Stack Web'],
+    fullDesc: 'Master of Computer Applications, completed Aug 2025. Coursework centred on advanced software engineering, data structures and algorithms, and full-stack web technologies — the base I now build production Python, Node.js and React systems on.',
     achievement: 'Post Graduation',
     side: 'right',
     gapMonths: 8,
@@ -179,12 +180,12 @@ const experiences = [
     type: 'Education',
     title: 'Bachelor of Computer Applications',
     org: 'SDM College of Business Management',
-    shortDesc: 'Foundation in CS and database management.',
+    shortDesc: 'BCA — programming, SQL databases and computer networks.',
     color: '#ec4899',
     accent: '#db2777',
     icon: '🎓',
-    tags: ['Programming', 'Databases', 'Networking'],
-    fullDesc: 'Foundation in computer science, programming languages, and database management.',
+    tags: ['Java & C#', 'SQL Databases', 'Networking'],
+    fullDesc: 'Bachelor of Computer Applications, completed Jul 2023. Covered programming fundamentals, relational databases and SQL, computer networks and business software — the groundwork for the .NET and SQL Server work that followed.',
     achievement: 'Graduation',
     side: 'left',
     gapMonths: 0,
@@ -442,60 +443,58 @@ function ExperiencePopup({ exp, index, total, onClose, onStep }) {
 }
 
 // ── Experience Card
-function ExperienceCard({ exp, onOpen, onHover }) {
+function ExperienceCard({ exp, index, onOpen, onHover }) {
+  // Cards sit at a slight angle each side so the zig-zag reads hand-placed.
+  const base = exp.side === 'left' ? -1.4 : 1.1;
+
   return (
     <motion.div
-      className="timeline-content cursor-pointer select-none"
-      initial={{ opacity: 0, y: 40, rotate: -3, scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+      className="timeline-content sticker-card cursor-pointer select-none"
+      style={{ '--exp-color': exp.color, '--exp-tint': exp.color + '1f' }}
+      initial={{ opacity: 0, y: 46, scale: 0.92, rotate: base * 3.2 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotate: base }}
       viewport={{ once: true, amount: 0.15 }}
-      transition={{ type: 'spring', stiffness: 120, damping: 18, mass: 0.6 }}
-      whileHover={{
-        scale: 1.05, y: -4,
-        boxShadow: `0 16px 40px ${exp.color}25`,
-        borderColor: `${exp.color}50`,
-      }}
+      transition={{ type: 'spring', stiffness: 180, damping: 15, mass: 0.7 }}
+      whileHover={{ y: -5, rotate: base * 0.55, scale: 1.015 }}
+      whileTap={{ scale: 0.965, y: 0 }}
       onClick={() => onOpen(exp)}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
       onFocus={() => onHover(true)}
       onBlur={() => onHover(false)}
-      style={{ position: 'relative', overflow: 'hidden' }}
+      role="button"
+      tabIndex={0}
+      aria-label={`${exp.title} at ${exp.org}, ${exp.period} — open details`}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen(exp);
+        }
+      }}
     >
-      {/* Color accent bar on left edge */}
-      <motion.div
-        className="absolute left-0 top-0 bottom-0 w-0.5"
-        style={{ background: `linear-gradient(180deg, ${exp.accent}, ${exp.color})` }}
-        initial={{ scaleY: 0 }}
-        whileInView={{ scaleY: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      />
+      <span className="sticker-tape" aria-hidden="true" />
+      <span className="sticker-icon" aria-hidden="true">{exp.icon}</span>
+      <span className="sticker-num" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
 
-      <div className="pl-3">
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <div className="mono text-orange" style={{ letterSpacing: '0.05em', fontSize: '0.75rem' }}>
-            {exp.period}
-          </div>
-          <span
-            className="font-mono text-[10px] px-2 py-0.5 rounded-sm uppercase tracking-wider shrink-0"
-            style={{ background: `${exp.color}15`, color: exp.color, border: `1px solid ${exp.color}30` }}
-          >
-            {exp.type}
-          </span>
+      <div className="sticker-inner">
+        <div className="sticker-meta">
+          <span className="sticker-period">{exp.period}</span>
+          <span className="sticker-type">{exp.type}</span>
         </div>
 
-        <h3 style={{ marginBottom: '0.25rem', fontFamily: 'Oswald, sans-serif' }}>{exp.title}</h3>
-        <p className="mono text-blue">{exp.org}</p>
+        <h3>{exp.title}</h3>
+        <p className="sticker-org">{exp.org}</p>
         <p className="desc">{exp.shortDesc}</p>
 
-        {/* Click hint — a CSS nudge instead of a permanent JS animation */}
-        <div
-          className="exp-card-hint flex items-center gap-1 mt-2 font-mono text-[10px] uppercase tracking-widest"
-          style={{ color: exp.color, opacity: 0.6 }}
-        >
-          click to expand →
-        </div>
+        {Array.isArray(exp.tags) && exp.tags.length > 0 && (
+          <div className="exp-tags">
+            {exp.tags.map((tag) => (
+              <span className="exp-tag" key={tag}>{tag}</span>
+            ))}
+          </div>
+        )}
+
+        <span className="exp-card-hint">click to expand →</span>
       </div>
     </motion.div>
   );
@@ -679,6 +678,7 @@ const ExperienceTimeline = () => {
               >
                 <ExperienceCard
                   exp={exp}
+                  index={i}
                   onOpen={openExp}
                   onHover={(on) => setHoverStop(on ? i : -1)}
                 />

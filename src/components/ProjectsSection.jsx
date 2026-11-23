@@ -78,7 +78,10 @@ export default function ProjectsSection() {
           start: 'top top',
           end: `+=${(cards.length - 1) * 100}%`,
           pin: true,
-          scrub: 1,
+          // A one-second scrub stacked on top of Lenis's glide kept the deck
+          // drifting for ~2.4s after the wheel stopped, which read as lag right
+          // at the Experience -> Projects handoff.
+          scrub: 0.35,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
