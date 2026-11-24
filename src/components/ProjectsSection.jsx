@@ -298,7 +298,7 @@ export default function ProjectsSection() {
                         >
                           {p.meta}
                         </p>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                        <div className="deck-tags" style={{ display: 'flex', gap: '10px', marginTop: '1rem', flexWrap: 'wrap' }}>
                           {p.tags.map((t) => (
                             <span
                               key={t}
@@ -316,7 +316,7 @@ export default function ProjectsSection() {
                             </span>
                           ))}
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+                        <div className="deck-links" style={{ display: 'flex', gap: '12px', marginTop: '1.25rem', flexWrap: 'wrap' }}>
                           {p.github && (
                             <a
                               href={p.github}
