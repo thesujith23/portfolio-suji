@@ -480,6 +480,7 @@ function About() {
       <div className="about-label">
         <span className="typewriter-terminal-tag">&gt;_ about.md</span>
         About Me
+        <span className="about-open-sticker" aria-hidden="true">open to work ★</span>
       </div>
       <div className="typewriter-container">
         <p className="about-text typewriter-text" ref={textRef}>

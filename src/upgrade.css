@@ -1547,3 +1547,374 @@
   62% { opacity: 1; transform: translate(0.14em, 0.14em) scale(1) rotate(4deg); }
   100% { opacity: 0; transform: translate(0.24em, 0.42em) scale(0.8) rotate(-18deg); }
 }
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE-ONLY PASS (≤768px)
+   Hero + About read bigger, Experience cards get tighter, and
+   the comic POP! badge stops sitting on the project title.
+   Nothing here touches tablet or desktop.
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* ── Hero: fill the phone width, one line per word ── */
+  /* 5.14em is the widest word ("experiences"), so 15.6vw keeps it
+     inside a 320px screen — down from 48.8px to 60.8px at 390. */
+  .hero-title { font-size: clamp(3rem, 15.6vw, 4.6rem) !important; line-height: 0.84 !important; }
+  .hero-pre { font-size: 0.7rem; letter-spacing: 0.12em; }
+
+  /* ── About: the pinned paragraph gets a real reading size ── */
+  .about-pinned .typewriter-text { font-size: clamp(1.45rem, 6vw, 1.7rem); line-height: 1.36; }
+
+  /* ── Experience: shorter, tidier sticker cards ── */
+  .timeline-content.sticker-card {
+    padding: 0.85rem 0.95rem 0.8rem !important;
+    border-radius: 13px;
+  }
+  .sticker-card h3 { font-size: 1.14rem; margin: 0.45rem 0 0.1rem; line-height: 1.18; }
+  .sticker-org { font-size: 0.66rem; }
+  .sticker-card p.desc { font-size: 0.79rem; line-height: 1.45; margin-top: 0.4rem; }
+  .sticker-period { font-size: 0.6rem; padding: 1px 6px; }
+  .sticker-type { font-size: 0.47rem; padding: 2px 7px; }
+  .exp-tags { gap: 4px; margin-top: 0.55rem; }
+  .exp-tag { font-size: 0.49rem; padding: 1px 6px; }
+  .sticker-card .exp-card-hint { font-size: 0.5rem; letter-spacing: 0.12em; padding-top: 0.55rem; }
+  .sticker-num { font-size: 2.7rem; }
+  .sticker-icon { width: 28px; height: 28px; top: -12px; left: 11px; font-size: 0.8rem; }
+  .sticker-tape { width: 72px; height: 18px; top: -8px; }
+
+  /* ── Projects: give the title a clear lane under the POP! badge ── */
+  .deck-card-inner { padding-top: 2.55rem !important; }
+  .deck-pop {
+    top: 9px;
+    left: 13px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    box-shadow: 2px 2px 0 #161311;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   ABOUT — "open to work" sticker on the heading (mobile only)
+   The full sticker wall is hidden below 1360px, which left phones
+   with no availability cue at all. This pins a small cartoon
+   sticker, set crossways, right beside the About Me label.
+   ════════════════════════════════════════════════════════════ */
+.about-open-sticker { display: none; }
+
+@keyframes openStickerPop {
+  0% { opacity: 0; transform: rotate(-20deg) scale(0.62); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+
+@media (max-width: 768px) {
+  /* Leads the heading row, so it sits on the left of "About Me". The
+     terminal tag steps aside on phones — the row is only ~290px wide
+     and holding sticker + tag + words left the hairline at nothing. */
+  .about-label { gap: 12px; }
+  .about-label .typewriter-terminal-tag { display: none; }
+  .about-open-sticker {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    order: -1;
+    padding: 5px 10px 4px;
+    border: 2px solid #14110f;
+    border-radius: 10px;
+    background: #ffd93b;
+    color: #14110f;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 3px 3px 0 #14110f;
+    transform: rotate(-8deg);
+    transform-origin: 50% 60%;
+    animation: openStickerPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+  }
+}
+
+/* Narrow phones: trim the sticker so the hairline still gets a run. */
+@media (max-width: 400px) {
+  .about-label { gap: 10px; }
+  .about-open-sticker {
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    padding: 4px 8px 3px;
+    box-shadow: 2px 2px 0 #14110f;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-open-sticker { animation: none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   PROJECT CARDS — mobile tidy-up
+   The tech chips are the noisiest row on a phone and the repo /
+   live buttons already carry that proof, so the chips step aside
+   and the card settles into one even rhythm: title, meta, links,
+   screenshots. Desktop keeps the chips.
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .deck-card-inner { padding: 2.5rem 1.15rem 1.1rem !important; }
+  .deck-card-header { gap: 0.35rem !important; }
+  .deck-card-header > div:first-child { width: 100%; }
+
+  /* Tech chips back on phones, compact enough to read as one block
+     and fill the dead air between the meta line and the buttons. */
+  .deck-tags {
+    display: flex !important;
+    gap: 5px !important;
+    margin-top: 0.6rem !important;
+  }
+  .deck-tags span {
+    padding: 4px 10px !important;
+    font-size: 0.6rem !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.02em;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+  }
+
+  .deck-card-inner p {
+    margin-top: 0.5rem !important;
+    font-size: 0.8rem !important;
+    line-height: 1.45 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .deck-links { margin-top: 0.8rem !important; gap: 8px !important; }
+  .deck-links a {
+    padding: 8px 14px !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.04em;
+  }
+  .deck-links a svg { width: 13px; height: 13px; }
+
+  /* the index is a small margin note, not a headline */
+  .deck-card-header > div.mono { font-size: 0.72rem !important; opacity: 0.55; margin-top: 0.15rem; }
+
+  /* The screenshots take whatever room is left instead of leaving a
+     dead band under the buttons — the card always reads full. */
+  .deck-bottom-section {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    justify-content: flex-end !important;
+    margin-top: 0.85rem !important;
+    padding-top: 0.5rem !important;
+    gap: 0 !important;
+  }
+  .landscape-mockup-wrapper {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 14vh !important;
+    max-height: 31vh !important;
+    align-items: stretch !important;
+  }
+  .mockup-main,
+  .mockup-side {
+    aspect-ratio: auto !important;
+    height: 100% !important;
+  }
+  /* Taller frames: fit the shot inside instead of cropping it. */
+  .mockup-main .zoomable img,
+  .mockup-side .zoomable img,
+  .mockup-main video {
+    object-fit: contain !important;
+    background: #0a0a0a;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   SKILLS — MARQUEE RAILS
+   Four full-bleed bands, one per group, drifting past each other
+   in alternating directions. Chips are cream stickers with ink
+   edges and a red offset shadow, so they read as cut-outs sliding
+   across the black section.
+
+   Performance: the track is a single translate3d loop with two
+   duplicated lists (no JS per frame), it stays paused until the
+   section is on screen, and it freezes under the pointer.
+   ════════════════════════════════════════════════════════════ */
+
+.skills { overflow: hidden; }
+
+.skills-rails {
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+/* ── band label ── */
+.skill-rail-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.13);
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+.skill-rail-num { color: var(--accent); font-weight: 700; letter-spacing: 0.1em; }
+.skill-rail-name {
+  font-family: 'Oswald', var(--sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+.skill-rail-count { margin-left: auto; }
+
+/* ── the moving window ── */
+.skill-rail-window {
+  overflow: hidden;
+  margin-inline: calc(50% - 50vw);
+  padding-block: 8px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+.skill-rail-track {
+  display: flex;
+  width: max-content;
+  animation: railSlide var(--speed, 70s) linear infinite;
+  animation-direction: var(--dir, normal);
+  animation-play-state: paused;
+  will-change: transform;
+}
+.skills-rails.is-live .skill-rail-track { animation-play-state: running; }
+.skill-rail-window:hover .skill-rail-track,
+.skill-rail-window:active .skill-rail-track,
+.skill-rail-window:focus-within .skill-rail-track { animation-play-state: paused; }
+
+@keyframes railSlide {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Alternating speeds and directions keep the four bands from marching. */
+.skill-rail:nth-child(1) .skill-rail-track { --speed: 66s; }
+.skill-rail:nth-child(2) .skill-rail-track { --speed: 78s; --dir: reverse; }
+.skill-rail:nth-child(3) .skill-rail-track { --speed: 72s; }
+.skill-rail:nth-child(4) .skill-rail-track { --speed: 84s; --dir: reverse; }
+
+.skill-rail-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0 6px;
+  list-style: none;
+}
+
+/* ── chips ── */
+.rail-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  padding: 8px 15px 8px 8px;
+  border: 2px solid #14110f;
+  border-radius: 999px;
+  background: #fff9ee;
+  color: #14110f;
+  box-shadow: 3px 3px 0 rgba(246, 36, 64, 0.6);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(var(--tilt, 0deg));
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1),
+    background 0.24s var(--ease),
+    color 0.24s var(--ease),
+    box-shadow 0.24s var(--ease);
+}
+.rail-chip:nth-child(odd) { --tilt: -1.3deg; }
+.rail-chip:nth-child(even) { --tilt: 1.1deg; }
+
+.rail-chip.is-core { background: #ffd93b; }
+
+.rail-chip:hover {
+  transform: rotate(0deg) translateY(-3px) scale(1.06);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 4px 4px 0 #fff9ee;
+}
+
+.rail-chip-mark {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  border: 1.5px solid #14110f;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.rail-logo { display: block; width: 16px; height: 16px; }
+.rail-logo img { display: block; }
+
+.rail-mono {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  border: 1.5px solid #14110f;
+  border-radius: 8px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.rail-mono.tone-red { background: #f62440; color: #fff; }
+.rail-mono.tone-gold { background: #ffd93b; color: #14110f; }
+.rail-mono.tone-cream { background: #ffe5bf; color: #14110f; }
+.rail-mono.tone-ink { background: #14110f; color: #fff9ee; }
+
+.rail-chip-star {
+  font-size: 0.6rem;
+  line-height: 1;
+  color: #f62440;
+  transform: translateY(-1px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.6, 0.64, 1), color 0.24s var(--ease);
+}
+.rail-chip:hover .rail-chip-star { color: #ffd93b; transform: rotate(-16deg) scale(1.2); }
+
+/* ── phones ── */
+@media (max-width: 768px) {
+  .skills-rails { gap: 28px; }
+  .skill-rail-head { gap: 10px; font-size: 0.5rem; padding-bottom: 8px; margin-bottom: 8px; }
+  .skill-rail-name { font-size: 0.82rem; }
+  .skill-rail-list { gap: 9px; }
+
+  .rail-chip { padding: 7px 12px 7px 7px; gap: 7px; font-size: 0.55rem; letter-spacing: 0.05em; }
+  .rail-chip-mark, .rail-mono { width: 21px; height: 21px; border-radius: 7px; }
+  .rail-logo { width: 13px; height: 13px; }
+  .rail-mono { font-size: 0.5rem; }
+
+  /* Slower drift on a small screen: same motion, less rush. */
+  .skill-rail:nth-child(1) .skill-rail-track { --speed: 92s; }
+  .skill-rail:nth-child(2) .skill-rail-track { --speed: 108s; }
+  .skill-rail:nth-child(3) .skill-rail-track { --speed: 100s; }
+  .skill-rail:nth-child(4) .skill-rail-track { --speed: 116s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-rail-track { animation: none !important; }
+  .skill-rail-window { overflow-x: auto; }
+  .rail-chip, .rail-chip-star { transition: none; }
+}

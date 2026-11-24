@@ -1,50 +1,96 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TextReveal } from './ExperienceTimeline';
-import { play } from '../lib/sound';
 
-const devicon = (src, invert = false) =>
-  `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" style="width: 100%; height: 100%; object-fit: contain; ${
-    invert ? 'filter: invert(1);' : ''
-  }" />`;
+const devicon = (src) =>
+  `<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${src}" alt="" style="width: 100%; height: 100%; object-fit: contain;" />`;
 
 const SKILLS = [
-  { name: 'React.js', group: 'Frontend', featured: true, symbol: devicon('react/react-original.svg') },
-  { name: 'Next.js', group: 'Frontend', featured: true, symbol: devicon('nextjs/nextjs-original.svg', true) },
-  { name: 'JavaScript (ES6+)', group: 'Frontend', symbol: devicon('javascript/javascript-original.svg') },
-  { name: 'HTML5 / CSS3', group: 'Frontend', symbol: devicon('html5/html5-original.svg') },
-  { name: 'Tailwind CSS', group: 'Frontend', symbol: devicon('tailwindcss/tailwindcss-original.svg') },
-  { name: 'Bootstrap', group: 'Frontend', symbol: devicon('bootstrap/bootstrap-original.svg') },
-  { name: 'Recharts', group: 'Frontend', symbol: '📈' },
+  { name: 'React.js', group: 'Frontend', featured: true, logo: devicon('react/react-original.svg') },
+  { name: 'Next.js', group: 'Frontend', featured: true, logo: devicon('nextjs/nextjs-original.svg') },
+  { name: 'JavaScript (ES6+)', group: 'Frontend', logo: devicon('javascript/javascript-original.svg') },
+  { name: 'HTML5 / CSS3', group: 'Frontend', logo: devicon('html5/html5-original.svg') },
+  { name: 'Tailwind CSS', group: 'Frontend', logo: devicon('tailwindcss/tailwindcss-original.svg') },
+  { name: 'Bootstrap', group: 'Frontend', logo: devicon('bootstrap/bootstrap-original.svg') },
+  { name: 'Recharts', group: 'Frontend', mark: 'R', tone: 'gold' },
 
-  { name: 'Node.js', group: 'Backend', featured: true, symbol: devicon('nodejs/nodejs-original.svg') },
-  { name: 'Express.js', group: 'Backend', symbol: devicon('express/express-original.svg', true) },
-  { name: 'Flask', group: 'Backend', symbol: devicon('flask/flask-original.svg', true) },
-  { name: 'RESTful APIs', group: 'Backend', featured: true, symbol: devicon('json/json-original.svg') },
-  { name: 'Socket.io', group: 'Backend', symbol: devicon('socketio/socketio-original.svg', true) },
-  { name: 'MongoDB', group: 'Backend', symbol: devicon('mongodb/mongodb-original.svg') },
-  { name: 'MySQL', group: 'Backend', symbol: devicon('mysql/mysql-original.svg') },
-  { name: 'Supabase', group: 'Backend', symbol: devicon('supabase/supabase-original.svg') },
-  { name: 'Xano', group: 'Backend', symbol: '✖️' },
+  { name: 'Node.js', group: 'Backend', featured: true, logo: devicon('nodejs/nodejs-original.svg') },
+  { name: 'Express.js', group: 'Backend', logo: devicon('express/express-original.svg') },
+  { name: 'Flask', group: 'Backend', logo: devicon('flask/flask-original.svg') },
+  { name: 'RESTful APIs', group: 'Backend', featured: true, logo: devicon('json/json-original.svg') },
+  { name: 'Socket.io', group: 'Backend', logo: devicon('socketio/socketio-original.svg') },
+  { name: 'MongoDB', group: 'Backend', logo: devicon('mongodb/mongodb-original.svg') },
+  { name: 'MySQL', group: 'Backend', logo: devicon('mysql/mysql-original.svg') },
+  { name: 'Supabase', group: 'Backend', logo: devicon('supabase/supabase-original.svg') },
+  { name: 'Xano', group: 'Backend', mark: 'X', tone: 'red' },
 
-  { name: 'Retell AI', group: 'AI & Voice', symbol: '🤖' },
-  { name: 'Claude AI', group: 'AI & Voice', symbol: '🧠' },
-  { name: 'Plivo', group: 'AI & Voice', symbol: '📞' },
-  { name: 'nexHealth APIs', group: 'AI & Voice', symbol: '🦷' },
-  { name: 'OpenRouter', group: 'AI & Voice', symbol: '🌐' },
-  { name: 'MediaPipe', group: 'AI & Voice', symbol: '👁️' },
+  { name: 'Retell AI', group: 'AI & Voice', mark: 'Re', tone: 'ink' },
+  { name: 'Claude AI', group: 'AI & Voice', mark: 'C', tone: 'cream' },
+  { name: 'Plivo', group: 'AI & Voice', mark: 'P', tone: 'gold' },
+  { name: 'nexHealth APIs', group: 'AI & Voice', mark: 'n', tone: 'red' },
+  { name: 'OpenRouter', group: 'AI & Voice', mark: 'O', tone: 'ink' },
+  { name: 'MediaPipe', group: 'AI & Voice', mark: 'M', tone: 'cream' },
 
-  { name: 'Python', group: 'Data & Tools', symbol: devicon('python/python-original.svg') },
-  { name: 'Java', group: 'Data & Tools', symbol: devicon('java/java-original.svg') },
-  { name: 'Power BI', group: 'Data & Tools', symbol: '📊' },
-  { name: 'Git / GitHub', group: 'Data & Tools', symbol: devicon('github/github-original.svg', true) },
-  { name: 'Vercel', group: 'Data & Tools', symbol: devicon('vercel/vercel-original.svg', true) },
+  { name: 'Python', group: 'Data & Tools', logo: devicon('python/python-original.svg') },
+  { name: 'Java', group: 'Data & Tools', logo: devicon('java/java-original.svg') },
+  { name: 'Power BI', group: 'Data & Tools', mark: 'BI', tone: 'gold' },
+  { name: 'Git / GitHub', group: 'Data & Tools', logo: devicon('github/github-original.svg') },
+  { name: 'Vercel', group: 'Data & Tools', logo: devicon('vercel/vercel-original.svg') },
 ];
 
-const GROUPS = ['All', 'Frontend', 'Backend', 'AI & Voice', 'Data & Tools'];
+/* Four bands, one per group. Speed and direction live in CSS so the
+   mobile pass can slow them down without touching the markup. */
+const RAILS = [
+  { key: 'Frontend', num: '01' },
+  { key: 'Backend', num: '02' },
+  { key: 'AI & Voice', num: '03' },
+  { key: 'Data & Tools', num: '04' },
+];
+
+function RailChip({ skill }) {
+  return (
+    <li
+      className={`rail-chip${skill.featured ? ' is-core' : ''}`}
+      data-hover
+      data-symbol={skill.logo || undefined}
+    >
+      {skill.logo ? (
+        <span className="rail-chip-mark">
+          <span className="rail-logo" dangerouslySetInnerHTML={{ __html: skill.logo }} />
+        </span>
+      ) : (
+        <span className={`rail-mono tone-${skill.tone}`} aria-hidden="true">
+          {skill.mark}
+        </span>
+      )}
+      <span className="rail-chip-name">{skill.name}</span>
+      {skill.featured ? <span className="rail-chip-star" aria-hidden="true">★</span> : null}
+    </li>
+  );
+}
 
 export default function SkillsSection() {
-  const [group, setGroup] = useState('All');
-  const visible = group === 'All' ? SKILLS : SKILLS.filter((s) => s.group === group);
+  const [live, setLive] = useState(false);
+  const railsRef = useRef(null);
+
+  // The bands only need to move once someone can see them.
+  useEffect(() => {
+    const el = railsRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setLive(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setLive(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <section className="skills" id="skills">
@@ -56,47 +102,42 @@ export default function SkillsSection() {
             <TextReveal delay={0.1}>Technologies</TextReveal>
           </span>
         </h2>
-        <p className="skills-subtitle">A curated set of languages, frameworks, and platforms I work with daily</p>
-        <span className="cartoon-sticker skills-sticker" aria-hidden="true">daily drivers ★</span>
+        <p className="skills-subtitle">Four lines of work, one kit — hover a band to stop it and read</p>
+        <span className="cartoon-sticker skills-sticker" aria-hidden="true">the kit ★</span>
       </div>
 
-      <div className="skills-filters" role="group" aria-label="Filter skills by category">
-        {GROUPS.map((g) => (
-          <button
-            key={g}
-            type="button"
-            className={`skill-group-btn ${group === g ? 'active' : ''}`}
-            onClick={() => {
-              if (g === group) return;
-              setGroup(g);
-              play('tick');
-            }}
-            aria-pressed={group === g}
-            data-sound="none"
-          >
-            {g}
-          </button>
-        ))}
-      </div>
+      <div className={`skills-rails${live ? ' is-live' : ''}`} ref={railsRef}>
+        {RAILS.map((rail) => {
+          const items = SKILLS.filter((s) => s.group === rail.key);
+          return (
+            <div className="skill-rail" key={rail.key}>
+              <div className="skill-rail-head">
+                <span className="skill-rail-num">{rail.num}</span>
+                <span className="skill-rail-name">{rail.key}</span>
+                <span className="skill-rail-count">{items.length} tools</span>
+              </div>
 
-      <div className="skills-orbit" key={group}>
-        {visible.map((s, i) => (
-          <span
-            key={s.name}
-            className={`skill-pill${s.featured ? ' featured' : ''}`}
-            data-hover
-            data-symbol={s.symbol}
-            style={{ animationDelay: `${i * 30}ms` }}
-          >
-            {s.name}
-          </span>
-        ))}
+              <div className="skill-rail-window">
+                <div className="skill-rail-track">
+                  {/* Two identical lists: the track slides exactly one list
+                      width, so the loop has no visible seam. */}
+                  {[0, 1].map((copy) => (
+                    <ul
+                      className="skill-rail-list"
+                      key={copy}
+                      aria-hidden={copy === 1 ? 'true' : undefined}
+                    >
+                      {items.map((skill, i) => (
+                        <RailChip skill={skill} key={`${copy}-${skill.name}-${i}`} />
+                      ))}
+                    </ul>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-      <p className="skills-count">
-        {visible.length} {visible.length === 1 ? 'tool' : 'tools'}
-        {group !== 'All' ? ` in ${group}` : ' across the stack'}
-      </p>
     </section>
   );
 }
