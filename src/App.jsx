@@ -4,7 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import './index.css';
 
-import ExperienceTimeline, { TextReveal } from './components/ExperienceTimeline';
+import ExperienceTimeline, { TextReveal, Cloud } from './components/ExperienceTimeline';
+import TornEdge from './components/TornEdge';
 import ProjectsSection from './components/ProjectsSection';
 import SkillsSection from './components/SkillsSection';
 import SoundToggle from './components/SoundToggle';
@@ -276,10 +277,40 @@ function Hero({ ready = true }) {
     tl.fromTo(el.querySelectorAll('.piano-char'), { scale: 1.3, rotate: -6 }, { scale: 1, rotate: 0, duration: 0.5, stagger: 0.012, ease: 'back.out(2.2)' }, '-=0.9');
   }, [ready]);
 
+  /* The hero holds still while About climbs over it: the whole panel shrinks
+     and dims slightly so the overlap reads as depth, not as a jump. */
+  useEffect(() => {
+    const el = ref.current;
+    const stage = el?.parentElement;
+    if (!el || !stage || !stage.classList.contains('hero-stage')) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const tween = gsap.fromTo(
+      el,
+      { scale: 1, opacity: 1 },
+      {
+        scale: 0.94,
+        opacity: 0.55,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.5,
+          invalidateOnRefresh: true,
+        },
+      }
+    );
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, []);
+
   return (
-    <section className="hero" id="home" ref={ref} style={{ position: 'relative' }}>
+    <section className="hero" id="home" ref={ref}>
       <div className="hero-rays" aria-hidden="true" />
-      <div className="hero-halftone" aria-hidden="true" />
       <span className="hero-burst" aria-hidden="true">Portfolio</span>
       <span className="hero-hire" aria-hidden="true">hire me</span>
       <svg className="hero-arrow" viewBox="0 0 140 136" fill="none" aria-hidden="true">
@@ -383,8 +414,8 @@ function About() {
   });
   if (word.chars.length) words.push(word);
 
-  /* Pinned typewriter: the section holds still while the paragraph types
-     itself in step with the scroll, then the page moves on. */
+  /* Option B: About holds the screen for a beat and types itself out in
+     three seconds — no scrolling needed — then the label and stickers pop. */
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const text = textRef.current;
@@ -401,19 +432,21 @@ function About() {
       return { el, end: Number(chars[chars.length - 1].dataset.i) };
     });
 
-    // Scrolling is often the first gesture on this page, so make sure the
-    // audio context exists (or resumes) before the first character lands.
     unlockAudio();
-
-    let typed = 0;
-    let soundBudget = 0;
 
     section.classList.add('about-pinned');
     text.classList.add('is-typing');
-    nodes.forEach((node) => node.classList.remove('is-on'));
-    nodes[0].classList.add('is-last');
 
     const ctx = gsap.context(() => {
+      let typed = 0;
+      let soundBudget = 0;
+
+      // The first letter is already there; the rest type in with the scroll.
+      nodes[0].classList.add('is-last');
+
+      /* About is only pinned once its top reaches the top of the viewport —
+         the same moment it has fully covered the hero — so the typing can
+         never start while a sliver of hero is still showing. */
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
@@ -447,7 +480,9 @@ function About() {
               play('type', { volume: 0.95, rate: 0.9 + Math.random() * 0.2 });
             }
           }
-          section.classList.toggle('about-done', target >= nodes.length);
+
+          const done = target >= nodes.length;
+          section.classList.toggle('about-done', done);
 
           const nextStage = target >= nodes.length * 0.85
             ? 3
@@ -574,17 +609,159 @@ function About() {
 
 
 /* ════════ CONTACT ════════ */
+const CONTACT_KEYS = [
+  {
+    key: 'e',
+    label: 'Email',
+    href: 'mailto:sujith7344@gmail.com',
+    kc: '#EA4335',
+    kd: '#A92A20',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6.5h18v11H3z" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinejoin="round" />
+        <path d="M3.4 7.2 12 13l8.6-5.8" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    key: 'l',
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/sujith-s-625846397/',
+    kc: '#0A66C2',
+    kd: '#06457f',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#fff" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C21.6 8.65 22 11 22 14.1V21h-4v-6.1c0-1.45-.03-3.3-2-3.3-2 0-2.3 1.56-2.3 3.2V21h-4z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'g',
+    label: 'GitHub',
+    href: 'https://github.com/thesujith23',
+    kc: '#2b3137',
+    kd: '#12161a',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#fff" d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.4-3.88-1.4-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z" />
+      </svg>
+    ),
+  },
+];
+
 function Contact() {
+  const sectionRef = useRef(null);
+  const keyRefs = useRef({});
+
+  /* Keyboard shortcuts: while the section is on screen, E / L / G press the
+     matching key cap and follow it, like the reference site. */
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const onKey = (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      // Only while the section is actually on screen.
+      const rect = section.getBoundingClientRect();
+      if (rect.top > window.innerHeight * 0.8 || rect.bottom < window.innerHeight * 0.2) return;
+      if (event.target instanceof HTMLElement && event.target.closest('input, textarea, [contenteditable]')) return;
+      const hit = CONTACT_KEYS.find((item) => item.key === event.key.toLowerCase());
+      if (!hit) return;
+      const el = keyRefs.current[hit.key];
+      if (!el) return;
+      event.preventDefault();
+      el.classList.add('down');
+      window.setTimeout(() => el.classList.remove('down'), 190);
+      window.setTimeout(() => el.click(), 90);
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  /* The clouds drift at different rates as the section passes. */
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const ctx = gsap.context(() => {
+      section.querySelectorAll('.contact-sky .cloud-art').forEach((el, i) => {
+        gsap.fromTo(el, { yPercent: 14 + i * 6, opacity: 0.2 }, {
+          yPercent: -8 - i * 6, opacity: 1, ease: 'none',
+          scrollTrigger: { trigger: section, start: 'top bottom', end: 'top 22%', scrub: 0.6 },
+        });
+      });
+      section.querySelectorAll('.contact-clouds .cloud-art').forEach((el, i) => {
+        gsap.fromTo(el, { yPercent: 20 }, {
+          yPercent: -12 - i * 8, ease: 'none',
+          scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom bottom', scrub: 0.8 },
+        });
+      });
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="contact" id="contact">
+    <section className="contact" id="contact" ref={sectionRef}>
+      {/* The dark section above tears open into the sky. */}
+      <TornEdge className="contact-torn contact-torn-top" fill="#000000" />
+      <div className="contact-stars" aria-hidden="true" />
+      <div className="contact-sky" aria-hidden="true">
+        <Cloud id="h1" seed="61" className="contact-cloud contact-cloud-a" />
+        <Cloud id="h2" seed="67" className="contact-cloud contact-cloud-b" />
+        <Cloud id="h3" seed="73" className="contact-cloud contact-cloud-c" />
+        <Cloud id="h4" seed="97" className="contact-cloud contact-cloud-d" />
+        <Cloud id="h5" seed="101" className="contact-cloud contact-cloud-e" />
+        <Cloud id="h6" seed="103" className="contact-cloud contact-cloud-f" />
+        <Cloud id="h7" seed="107" className="contact-cloud contact-cloud-g" />
+        <Cloud id="h8" seed="109" className="contact-cloud contact-cloud-h" />
+      </div>
+
       <span className="cartoon-sticker contact-sticker" aria-hidden="true">open to work ★</span>
       <div className="contact-eyebrow reveal-up">Get In Touch</div>
       <h2 className="contact-heading"><TextReveal delay={0.05}>Let's create</TextReveal><br /><TextReveal delay={0.1}>something</TextReveal> <em><TextReveal delay={0.15}>great</TextReveal></em></h2>
-      <div className="contact-links reveal-up">
-        <a href="mailto:sujith7344@gmail.com" className="contact-btn primary" data-hover>Email ↗</a>
-        <a href="https://github.com/thesujith23" target="_blank" rel="noreferrer" className="contact-btn" data-hover>GitHub ↗</a>
-        <a href="https://www.linkedin.com/in/sujith-s-625846397/" target="_blank" rel="noreferrer" className="contact-btn" data-hover>LinkedIn ↗</a>
+
+      <p className="contact-hint reveal-up">
+        psst, these work on your keyboard too:{' '}
+        <kbd>E</kbd> <kbd>L</kbd> <kbd>G</kbd>
+      </p>
+
+      <div className="contact-keys reveal-up">
+        {CONTACT_KEYS.map((item) => (
+          <a
+            key={item.key}
+            className="ckey"
+            href={item.href}
+            target={item.href.startsWith('http') ? '_blank' : undefined}
+            rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
+            data-hover
+            data-key={item.key}
+            ref={(el) => { keyRefs.current[item.key] = el; }}
+            style={{ '--kc': item.kc, '--kd': item.kd }}
+          >
+            <span className="ckey-cap">
+              <span className="ckey-letter" aria-hidden="true">{item.key.toUpperCase()}</span>
+              {item.icon}
+            </span>
+            <span className="ckey-note">{item.label}</span>
+          </a>
+        ))}
       </div>
+
+      {/* A real cloud bank: overlapping cumulus along the bottom, not one
+          stretched strip. */}
+      <div className="contact-clouds" aria-hidden="true">
+        <Cloud id="f1" seed="81" className="contact-cloud contact-bed contact-bed-a" />
+        <Cloud id="f2" seed="87" className="contact-cloud contact-bed contact-bed-b" />
+        <Cloud id="f3" seed="93" className="contact-cloud contact-bed contact-bed-c" />
+        <Cloud id="f4" seed="111" className="contact-cloud contact-bed contact-bed-d" />
+        <Cloud id="f5" seed="113" className="contact-cloud contact-bed contact-bed-e" />
+        <Cloud id="f6" seed="115" className="contact-cloud contact-bed contact-bed-f" />
+      </div>
+
+      <TornEdge className="contact-torn contact-torn-bottom" fill="#bff3ff" edge="bottom" />
     </section>
   );
 }
@@ -627,8 +804,16 @@ function PikaPet() {
   const wasRidingRef = useRef(false);
   const boardAtRef = useRef(0);
   const ridePhaseRef = useRef('gone');
+  /* Set by the main effect: wires the drag listeners only while dragging. */
+  const dragAttachRef = useRef(null);
 
   useEffect(() => {
+    /* Reduced motion: show the pet, but never start its frame loop. */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const showTimer = window.setTimeout(() => setVisible(true), 300);
+      return () => window.clearTimeout(showTimer);
+    }
+
     const showTimer = setTimeout(() => setVisible(true), 1200);
     const onMouse = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', onMouse, { passive: true });
@@ -699,8 +884,8 @@ function PikaPet() {
     // Drag handlers
     const onDragMove = (e) => {
       if (!draggingRef.current) return;
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const cx = e.clientX;
+      const cy = e.clientY;
       posRef.current.x = cx - dragOffsetRef.current.x;
       posRef.current.y = cy - dragOffsetRef.current.y;
       targetRef.current = { ...posRef.current };
@@ -709,9 +894,10 @@ function PikaPet() {
       }
     };
     const onDragEnd = (e) => {
+      detachDrag();
       if (!draggingRef.current) return;
-      const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-      const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+      const cx = e.clientX;
+      const cy = e.clientY;
       const movedDist = Math.hypot(cx - dragStartRef.current.x, cy - dragStartRef.current.y);
       draggingRef.current = false;
       setIsDragging(false);
@@ -734,10 +920,20 @@ function PikaPet() {
         setBubble({ section: '\u26A1', msg: 'Wheee!', show: true });
       }
     };
-    window.addEventListener('mousemove', onDragMove);
-    window.addEventListener('mouseup', onDragEnd);
-    window.addEventListener('touchmove', onDragMove, { passive: false });
-    window.addEventListener('touchend', onDragEnd);
+    /* Drag listeners exist only for the length of a drag. A permanent
+       non-passive touchmove on window stops Android using its fast scroll
+       path for the whole page, which is exactly the lag we do not want. */
+    const attachDrag = () => {
+      window.addEventListener('pointermove', onDragMove, { passive: true });
+      window.addEventListener('pointerup', onDragEnd);
+      window.addEventListener('pointercancel', onDragEnd);
+    };
+    const detachDrag = () => {
+      window.removeEventListener('pointermove', onDragMove);
+      window.removeEventListener('pointerup', onDragEnd);
+      window.removeEventListener('pointercancel', onDragEnd);
+    };
+    dragAttachRef.current = attachDrag;
 
     // Main animation loop
     let walkFrame = 0;
@@ -752,10 +948,43 @@ function PikaPet() {
       coaster: document.querySelector('.exp-section'),
       seat: document.querySelector('#slide-seat'),
       book: document.querySelector('.resume-btn-wrap'),
+      about: document.querySelector('#about'),
     };
     // Reading layout every frame is what makes a fixed sprite feel laggy, so
     // the page anchors are measured ~11x a second and reused in between.
-    const rectCache = { at: 0, matter: null, coaster: null, book: null };
+    const rectCache = { at: 0, matter: null, coaster: null, book: null, about: null };
+
+    /* A parked pet has nothing to animate, so the loop drops from 60 fps to
+       ~4 wake-ups a second; hidden tabs are parked entirely. */
+    const schedule = (idle = false) => {
+      if (document.hidden) {
+        rafRef.current = window.setTimeout(loop, 900);
+        return;
+      }
+      rafRef.current = idle ? window.setTimeout(loop, 240) : requestAnimationFrame(loop);
+    };
+    const onVisibility = () => {
+      if (document.hidden) return;
+      cancelAnimationFrame(rafRef.current);
+      window.clearTimeout(rafRef.current);
+                schedule();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    /* These two only change a handful of times a minute, but were written on
+       every frame — guard them so React is not poked 60x a second. */
+    let lastFacing = null;
+    const setFacing = (value) => {
+      if (lastFacing === value) return;
+      lastFacing = value;
+      setFacingLeft(value);
+    };
+    let lastFrame = -1;
+    const setFrameOnce = (value) => {
+      if (lastFrame === value) return;
+      lastFrame = value;
+      setFrame(value);
+    };
 
     const loop = () => {
       const pos = posRef.current;
@@ -764,7 +993,7 @@ function PikaPet() {
         velocityRef.current.x = pos.x - lastPosRef.current.x;
         velocityRef.current.y = pos.y - lastPosRef.current.y;
         lastPosRef.current = { ...pos };
-        rafRef.current = requestAnimationFrame(loop);
+        schedule();
         return;
       }
 
@@ -775,8 +1004,8 @@ function PikaPet() {
         velocityRef.current.y *= 0.94;
 
         // Bounce off edges
-        if (pos.x <= 10) { pos.x = 10; velocityRef.current.x *= -0.8; setFacingLeft(false); }
-        if (pos.x >= window.innerWidth - 90) { pos.x = window.innerWidth - 90; velocityRef.current.x *= -0.8; setFacingLeft(true); }
+        if (pos.x <= 10) { pos.x = 10; velocityRef.current.x *= -0.8; setFacing(false); }
+        if (pos.x >= window.innerWidth - 90) { pos.x = window.innerWidth - 90; velocityRef.current.x *= -0.8; setFacing(true); }
         if (pos.y <= 10) { pos.y = 10; velocityRef.current.y *= -0.8; }
         if (pos.y >= window.innerHeight - 90) { pos.y = window.innerHeight - 90; velocityRef.current.y *= -0.8; }
 
@@ -791,12 +1020,15 @@ function PikaPet() {
           petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
         }
         lastPosRef.current = { ...pos };
-        rafRef.current = requestAnimationFrame(loop);
+        schedule();
         return;
       }
 
       const now = Date.now();
-      if (!window._lastZap) window._lastZap = now;
+      // The hero only stays uncovered for the first ~140px of scroll (the About
+      // sheet rides up over it), so the first bolt lands early rather than
+      // waiting a full interval.
+      if (!window._lastZap) window._lastZap = now - 2200;
       const matterEl = els.matter;
       const pathEl = els.path;
 
@@ -806,6 +1038,16 @@ function PikaPet() {
         rectCache.matter = matterEl ? matterEl.getBoundingClientRect() : null;
         rectCache.coaster = els.coaster ? els.coaster.getBoundingClientRect() : null;
         rectCache.book = els.book ? els.book.getBoundingClientRect() : null;
+        rectCache.about = els.about ? els.about.getBoundingClientRect() : null;
+      }
+
+      /* Watchdog: a throttled tab can swallow the timer that clears a zap,
+         which would wedge the pet in 'sparking' and stop it for good. */
+      if (window._zapping && now - window._lastZap > 4000) {
+        window._zapping = false;
+        window._zapPhase = 'idle';
+        if (pathEl) pathEl.style.opacity = 0;
+        matterEl?.classList.remove('matter-charged');
       }
 
       if (window._zapping) {
@@ -815,7 +1057,7 @@ function PikaPet() {
           if (petRef.current) {
             petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
           }
-          rafRef.current = requestAnimationFrame(loop);
+          schedule();
           return;
         }
 
@@ -857,12 +1099,37 @@ function PikaPet() {
         if (petRef.current) {
           petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
         }
-        rafRef.current = requestAnimationFrame(loop);
+        schedule();
         return;
       }
 
+      /* Zap only while the hero is what the visitor is looking at. The About
+         sheet climbs over the hero across the first viewport of scroll, so
+         past a third of the way down we are in the next section: stop until
+         they come back to the top. The About-rect test catches the climb
+         itself, the scroll test catches any missed frame. */
+      const inHero = window.scrollY < window.innerHeight * 0.35;
+      const aboutOverHero = Boolean(
+        rectCache.about &&
+          rectCache.matter &&
+          rectCache.about.top <= rectCache.matter.top + rectCache.matter.height * 0.15
+      );
+      const heroCovered = !inHero || aboutOverHero;
+
+      if (!window.__pika) window.__pika = { zaps: 0, gated: 0, inHero: true };
+      window.__pika.inHero = !heroCovered;
+
+      if (heroCovered && window._zapping) {
+        window._zapping = false;
+        window._zapPhase = 'idle';
+        if (pathEl) pathEl.style.opacity = 0;
+        matterEl?.classList.remove('matter-charged');
+        window.__pika.gated += 1;
+        window._lastZap = Date.now();
+      }
+
       // Visible if its top is above the viewport bottom AND its bottom below the top.
-      const isMatterVisible = Boolean(
+      const isMatterVisible = !heroCovered && Boolean(
         rectCache.matter && rectCache.matter.top < window.innerHeight && rectCache.matter.bottom > 0
       );
 
@@ -871,6 +1138,7 @@ function PikaPet() {
       if (now - window._lastZap > zapInterval && !draggingRef.current && !thrownRef.current) {
         window._lastZap = now;
         window._zapping = true;
+        if (window.__pika) window.__pika.zaps += 1;
 
         if (isMatterVisible) {
           window._zapPhase = 'charging';
@@ -880,7 +1148,7 @@ function PikaPet() {
 
           const rect = matterEl.getBoundingClientRect();
           setPetState(prev => prev !== 'sparking' ? 'sparking' : prev);
-          setFacingLeft((rect.left + rect.width / 2) < pos.x + 45);
+          setFacing((rect.left + rect.width / 2) < pos.x + 45);
 
           if (pathEl) pathEl.style.opacity = 0;
 
@@ -903,7 +1171,7 @@ function PikaPet() {
           }, 500);
         }
 
-        rafRef.current = requestAnimationFrame(loop);
+        schedule();
         return;
       }
 
@@ -984,8 +1252,8 @@ function PikaPet() {
         // Welded to the seat: no spring, so it can never drift off the chute.
         pos.x = seatPoint.x;
         pos.y = seatPoint.y;
-        setFacingLeft(false);
-        setFrame(3);
+        setFacing(false);
+        setFrameOnce(3);
         if (petRef.current) {
           petRef.current.style.setProperty('--slide-tilt', seat.dataset.tilt || '0deg');
         }
@@ -1017,15 +1285,15 @@ function PikaPet() {
         pos.y += (dy / dist) * speed;
         pos.x = Math.max(10, Math.min(window.innerWidth - 90, pos.x));
         pos.y = Math.max(10, Math.min(window.innerHeight - 90, pos.y));
-        setFacingLeft(dx < 0);
+        setFacing(dx < 0);
         fc++;
-        if (fc % 8 === 0) { walkFrame = walkFrame === 1 ? 2 : 1; setFrame(walkFrame); }
+        if (fc % 8 === 0) { walkFrame = walkFrame === 1 ? 2 : 1; setFrameOnce(walkFrame); }
         setPetState('walking');
         lastMoveRef.current = Date.now();
       } else {
-        setFrame(0);
+        setFrameOnce(0);
         if (bookHovered) {
-          setFacingLeft(false); // Make sure Pikachu faces the book (right)
+          setFacing(false); // Make sure Pikachu faces the book (right)
           setPetState(prev => prev !== 'idle' ? 'idle' : prev);
         } else {
           const newState = Date.now() - lastMoveRef.current > 8000 ? 'sleeping' : 'idle';
@@ -1037,20 +1305,21 @@ function PikaPet() {
         petRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
       }
       lastPosRef.current = { ...pos };
-      rafRef.current = requestAnimationFrame(loop);
+      /* At rest (and not riding, zapping or flying) there is nothing to draw. */
+      schedule(dist <= 5 && !ridingRef.current && !window._zapping);
     };
-    rafRef.current = requestAnimationFrame(loop);
+    schedule();
 
     return () => {
       clearTimeout(showTimer);
       clearInterval(wanderInterval);
       cancelAnimationFrame(rafRef.current);
+      window.clearTimeout(rafRef.current);
       triggers.forEach(t => t.kill());
+      dragAttachRef.current = null;
+      detachDrag();
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('mousemove', onMouse);
-      window.removeEventListener('mousemove', onDragMove);
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('touchmove', onDragMove);
-      window.removeEventListener('touchend', onDragEnd);
       window.removeEventListener('pika-speak', onPikaSpeak);
     };
   }, []);
@@ -1095,6 +1364,7 @@ function PikaPet() {
 
   const handleMouseDown = (e) => {
     e.preventDefault();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (onSlideRef.current) {
       window.dispatchEvent(new CustomEvent('pika-boost'));
       return;
@@ -1109,6 +1379,7 @@ function PikaPet() {
     setExpression('shock');
     window.setTimeout(() => setExpression('idle'), 900);
     setBubble({ section: '\u26A1', msg: 'Pika~?!', show: true });
+    dragAttachRef.current?.();
   };
 
 
@@ -1127,7 +1398,7 @@ function PikaPet() {
       <svg id="pika-lightning-svg" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9998, overflow: 'visible' }}>
         <path id="pika-lightning-path" fill="none" stroke="#FFD700" strokeWidth="3" filter="drop-shadow(0 0 8px #FFD700)" />
       </svg>
-      <div className={cls} ref={petRef} style={{ transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`, left: 0, top: 0 }} onMouseDown={handleMouseDown} onTouchStart={handleMouseDown}>
+      <div className={cls} ref={petRef} style={{ transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`, left: 0, top: 0 }} onPointerDown={handleMouseDown}>
         <div className={`pika-bubble ${bubble.show ? 'show' : ''}`}>
           <span className="pika-bubble-section">{bubble.section}</span>{bubble.msg}
         </div>
@@ -1175,6 +1446,21 @@ export default function App() {
 
   // One delegated listener for every click and hover sound.
   useEffect(() => attachGlobalSounds(), []);
+
+  /* Offscreen sections keep their infinite CSS animations ticking (clouds,
+     rays, marquees). Marking the visible ones lets CSS park the rest. */
+  useEffect(() => {
+    const scopes = document.querySelectorAll('.hero-stage, .about, .exp-section, #work, #skills, .contact');
+    if (!scopes.length || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => entry.target.classList.toggle('is-live', entry.isIntersecting));
+      },
+      { rootMargin: '150px 0px' },
+    );
+    scopes.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -1257,8 +1543,14 @@ export default function App() {
       {!loaded && <Loader onDone={handleLoaderDone} />}
       <Nav />
       <main>
-        <Hero ready={loaded} />
-        <About />
+        <div className="hero-stage">
+          <Hero ready={loaded} />
+        </div>
+        {/* The overlap lives on this wrapper: GSAP pins .about and zeroes
+            its inline margin, so the negative pull must sit outside it. */}
+        <div className="about-shell">
+          <About />
+        </div>
         <ExperienceTimeline />
         <ProjectsSection />
         <SkillsSection />

@@ -157,7 +157,12 @@ function noise({ dur = 0.2, gain = 0.05, from = 800, to = 3000, q = 1, delay = 0
 const RECIPES = {
   hover: {
     throttle: 70,
-    fn: ({ v, r }) => tone({ type: 'sine', from: 1180 * r, to: 880 * r, dur: 0.045, gain: 0.016 * v }),
+    fn: ({ v, r }) => {
+      // Paper tick, like the reference's hover.wav: one noise transient with
+      // a barely-there tone under it so it reads as a card edge, not a beep.
+      noise({ dur: 0.03, gain: 0.05 * v, from: 2600 * r, to: 1500 * r, q: 1.4 });
+      tone({ type: 'sine', from: 1180 * r, to: 880 * r, dur: 0.045, gain: 0.014 * v });
+    },
   },
   click: {
     throttle: 45,
