@@ -4,8 +4,14 @@ export const PROJECTS = [
   {
     idx: '01',
     name: 'Cafe Management System',
+    tagline: 'QR-to-kitchen café orders in real time.',
     meta: 'Smart QR-based café platform (MERN + Socket.IO): signed per-table QR ordering, 24-dish menu with a customiser and live cart, server-priced Razorpay checkout with signature verification, kitchen Kanban display, public order board, and an admin dashboard with KPIs, table floor plan and sales analytics.',
     tags: ['React 19', 'Express', 'MongoDB', 'Socket.IO', 'Razorpay', 'Tailwind'],
+    highlights: [
+      'Signed QR ordering for every table',
+      'Kitchen Kanban updates over Socket.IO',
+      'Razorpay checkout with signature checks',
+    ],
     color: '#0f7a5a',
     liveUrl: 'https://cafee-management.vercel.app/',
     github: 'https://github.com/thesujith23/cafe-management',
@@ -21,8 +27,14 @@ export const PROJECTS = [
   {
     idx: '02',
     name: 'AI Research Assistant (RAG)',
+    tagline: 'Cited answers from your own PDFs.',
     meta: 'An intelligent document assistant using Retrieval-Augmented Generation (RAG). Features hybrid search (FAISS + BM25) and cross-encoder reranking to extract precise insights from raw PDFs.',
     tags: ['Python', 'Streamlit', 'FAISS', 'OpenAI'],
+    highlights: [
+      'Hybrid FAISS + BM25 retrieval',
+      'Cross-encoder reranking of passages',
+      'Answers carry page-level citations',
+    ],
     color: '#0ea5e9',
     liveUrl: 'https://nexus-research-document-assist.streamlit.app/',
     github: 'https://github.com/thesujith23/AI-Research-Document-assistance',
@@ -38,8 +50,14 @@ export const PROJECTS = [
   {
     idx: '03',
     name: 'BodySync-AI',
+    tagline: 'Pose-tracked workouts with live form feedback.',
     meta: 'Intelligent Pose Detection & Fitness Tracker. An AI fitness assistant that uses pose estimation for real-time exercise tracking, form feedback, and performance analytics.',
     tags: ['MediaPipe', 'OpenCV', 'Python', 'Flask'],
+    highlights: [
+      'MediaPipe pose estimation in the browser',
+      'Live form cues while a set is running',
+      'Session history with performance trends',
+    ],
     color: '#3d2fa9',
     github: 'https://github.com/thesujith23/BodySync-AI---Intelligent-Pose-Detection-and-Fitness-Tracker',
     quote:
@@ -54,8 +72,14 @@ export const PROJECTS = [
   {
     idx: '04',
     name: 'Expense Tracker & Analytics',
+    tagline: 'Spending mapped into monthly insight.',
     meta: 'Secure multi-user financial tracking with JWT auth, role-protected routes, and MongoDB aggregation-powered real-time analytics dashboard.',
     tags: ['MERN', 'Recharts', 'JWT', 'Aggregation'],
+    highlights: [
+      'JWT auth with role-protected routes',
+      'MongoDB aggregation reports',
+      'Recharts monthly spending insights',
+    ],
     color: '#ff3c34',
     liveUrl: 'https://expense-tracker-and-financial-analy-five.vercel.app/',
     liveBtnColor: '#111111',
@@ -76,8 +100,14 @@ export const PROJECTS = [
   {
     idx: '05',
     name: 'Book Store Management',
+    tagline: 'Inventory, orders and stock in one place.',
     meta: 'Full CRUD inventory system with secure REST APIs, input validation, JWT authentication, and a responsive React UI with reusable components. Fully deployed via Vercel and Render.',
     tags: ['React (Vercel)', 'Node.js (Render)', 'MongoDB Atlas', 'JWT'],
+    highlights: [
+      'Full CRUD with input validation',
+      'JWT-secured REST API',
+      'Split deploy on Vercel and Render',
+    ],
     color: '#1a1a1a',
     liveUrl: 'https://book-store-mgt.vercel.app/',
     github: 'https://github.com/thesujith23/bookstore-management-mern',
@@ -94,8 +124,14 @@ export const PROJECTS = [
   {
     idx: '06',
     name: 'AI Food Recommendation',
+    tagline: 'Meals matched to your goals and diet.',
     meta: 'A personalized smart food discovery platform that suggests optimal meals based on dietary preferences, health goals, and real-time nutritional analysis.',
     tags: ['React', 'Python', 'Machine Learning', 'API'],
+    highlights: [
+      'Goal and diet preference inputs',
+      'Real-time nutrition scoring',
+      'ML-ranked meal suggestions',
+    ],
     color: '#F97316',
     github: 'https://github.com/thesujith23/Food-recommendation-System',
     mainVideo: '/foodrecmdvdo.mp4',

@@ -1,10 +1,45 @@
-import ThreeSlide from './ThreeSlide';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import {
   motion, useScroll, useTransform, useSpring, useInView, AnimatePresence,
 } from 'framer-motion';
 import { play } from '../lib/sound';
 import SlideRider from './SlideRider';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import TornEdge from './TornEdge';
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* The WebGL chute (three.js) is the heaviest module on the page, so it is
+   split out of the first load and only fetched when the section approaches. */
+const ThreeSlide = lazy(() => import('./ThreeSlide'));
+
+/* Real cumulus photography, cut out of its sky and served with alpha. The
+   wrapper keeps the CSS drift animation; the artwork inside is what the
+   scroll reveal and parallax move. */
+const CLOUD_SRC = {
+  singles: ['/clouds/cloud-a.png', '/clouds/cloud-c.png'],
+  bank: '/clouds/cloud-bank.png',
+};
+
+export const Cloud = ({ className }) => {
+  // The last letter of the class (a, b, c…) picks a cut-out so neighbouring
+  // clouds in the same sky are never the identical shape.
+  const variant = className.charCodeAt(className.length - 1) % 2;
+  const src = CLOUD_SRC.singles[variant];
+  return (
+  <span className={className}>
+    <img
+      className="cloud-art"
+      src={src}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+    />
+  </span>
+  );
+};
 
 
 // ── Scroll-Linked Character
@@ -443,7 +478,7 @@ function ExperiencePopup({ exp, index, total, onClose, onStep }) {
 }
 
 // ── Experience Card
-function ExperienceCard({ exp, index, onOpen, onHover }) {
+function ExperienceCard({ exp, index, onOpen, onHover = () => {} }) {
   // Cards sit at a slight angle each side so the zig-zag reads hand-placed.
   const base = exp.side === 'left' ? -1.4 : 1.1;
 
@@ -507,8 +542,24 @@ const ExperienceTimeline = () => {
   const itemRefs = useRef([]);
 
   const [activeStop, setActiveStop] = useState(0);
-  const [hoverStop, setHoverStop] = useState(-1);
   const [activeIndex, setActiveIndex] = useState(null);
+  /* Mount the WebGL chute only when its section gets close to the viewport. */
+  const [slideReady, setSlideReady] = useState(() => typeof IntersectionObserver === 'undefined');
+
+  useEffect(() => {
+    const el = timelineRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setSlideReady(true);
+        io.disconnect();
+      },
+      { rootMargin: '150% 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const goToStop = useCallback((i) => {
     const idx = Math.max(0, Math.min(experiences.length - 1, i));
@@ -579,6 +630,40 @@ const ExperienceTimeline = () => {
     return () => window.removeEventListener('pika-boost', onBoost);
   }, [activeStop, goToStop]);
 
+  /* Clouds arrive with the scroll: each layer drifts up and fades in as the
+     sky enters, so the section never shows a finished wallpaper. */
+  useEffect(() => {
+    const wrap = document.querySelector('.exp-clouds');
+    if (!wrap) return undefined;
+    const targets = [...wrap.querySelectorAll('.cloud-art'), wrap.querySelector('.exp-cloud-bank')].filter(Boolean);
+    if (!targets.length) return undefined;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      targets.forEach((el) => { el.style.opacity = 1; el.style.transform = 'none'; });
+      return undefined;
+    }
+
+    const tween = gsap.fromTo(
+      targets,
+      { y: 90, opacity: 0 },
+      {
+        y: 0, opacity: 1, ease: 'none', stagger: 0.16,
+        scrollTrigger: {
+          trigger: wrap.closest('.exp-section') || wrap,
+          start: 'top 92%',
+          end: 'top 48%',
+          scrub: 0.7,
+          invalidateOnRefresh: true,
+        },
+      }
+    );
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, []);
+
   const activeExp = activeIndex === null ? null : experiences[activeIndex];
 
   return (
@@ -592,6 +677,24 @@ const ExperienceTimeline = () => {
       />
 
       <section id="education" className="section exp-section">
+        {/* A full sky, with a soft bank of clouds along the bottom so the
+            rider appears to climb up out of them. */}
+                <TornEdge className="exp-tear" fill="#111111" shadow={false} />
+
+
+        <div className="exp-clouds" aria-hidden="true">
+          <Cloud id="a" seed="3" className="exp-cloud exp-cloud-a" />
+          <Cloud id="b" seed="11" className="exp-cloud exp-cloud-b" />
+          <Cloud id="c" seed="19" className="exp-cloud exp-cloud-c" />
+          <Cloud id="d" seed="27" className="exp-cloud exp-cloud-d" />
+          <Cloud id="e" seed="35" className="exp-cloud exp-cloud-e" />
+          <Cloud id="f" seed="43" className="exp-cloud exp-cloud-f" />
+          <Cloud id="g" seed="51" className="exp-cloud exp-cloud-g" />
+          <Cloud id="h" seed="59" className="exp-cloud exp-cloud-h" />
+          <span className="exp-cloud-bank">
+            <span className="exp-cloud-bank-inner"><i /><i /><i /><i /><i /><i /></span>
+          </span>
+        </div>
         <div className="container relative">
           <div className="section-header" style={{ textAlign: 'center' }}>
             <motion.span
@@ -663,7 +766,11 @@ const ExperienceTimeline = () => {
           </div>
 
           <div className="timeline-container" ref={timelineRef}>
-            <ThreeSlide activeIndex={activeStop} hoverIndex={hoverStop} />
+            {slideReady && (
+              <Suspense fallback={null}>
+                <ThreeSlide activeIndex={activeStop} />
+              </Suspense>
+            )}
 
             <SlideRider containerRef={timelineRef} />
 
@@ -680,7 +787,6 @@ const ExperienceTimeline = () => {
                   exp={exp}
                   index={i}
                   onOpen={openExp}
-                  onHover={(on) => setHoverStop(on ? i : -1)}
                 />
               </div>
             ))}
