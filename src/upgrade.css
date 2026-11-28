@@ -5972,3 +5972,20 @@ body,
   .pika-dust span { display: none; }
   .grain { opacity: 0.02; }
 }
+
+/* ── Scroll-cost fixes ──────────────────────────────────────
+   The cloud bank's reveal moves this wrapper; a blurred node that transforms
+   has to be re-rasterised every scroll frame, so the blur sits on the child
+   now. Visually identical, one composited layer instead of a repaint. */
+.exp-cloud-bank { filter: none; }
+.exp-cloud-bank-inner {
+  position: absolute; inset: 0; display: block;
+  filter: blur(13px);
+}
+@media (max-width: 768px) {
+  .exp-cloud-bank-inner { filter: blur(10px); }
+}
+
+/* Each typed letter toggles a class while About is pinned; containment keeps
+   that style invalidation inside the paragraph instead of the whole panel. */
+.about .typewriter-container { contain: layout style; }

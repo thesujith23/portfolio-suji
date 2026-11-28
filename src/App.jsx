@@ -31,7 +31,7 @@ function Cursor() {
       if (!reqId) reqId = requestAnimationFrame(tick);
     };
     const tick = () => {
-      x += (tx - x) * 0.15; y += (ty - y) * 0.15;
+      x += (tx - x) * 0.28; y += (ty - y) * 0.28;
       if (dot) { dot.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
       if (sym) { sym.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`; }
       // Once the dot has caught up there is nothing left to draw — stop the loop.
@@ -952,7 +952,7 @@ function PikaPet() {
     };
     // Reading layout every frame is what makes a fixed sprite feel laggy, so
     // the page anchors are measured ~11x a second and reused in between.
-    const rectCache = { at: 0, matter: null, coaster: null, book: null, about: null };
+    const rectCache = { at: 0, scroll: -1, matter: null, coaster: null, book: null, about: null };
 
     /* A parked pet has nothing to animate, so the loop drops from 60 fps to
        ~4 wake-ups a second; hidden tabs are parked entirely. */
@@ -1033,7 +1033,9 @@ function PikaPet() {
       const pathEl = els.path;
 
       const stamp = typeof performance !== 'undefined' ? performance.now() : now;
-      if (!rectCache.at || stamp - rectCache.at > 90) {
+      const scrollNow = window.scrollY || 0;
+      if (!rectCache.at || (stamp - rectCache.at > 90 && (scrollNow !== rectCache.scroll || stamp - rectCache.at > 400))) {
+        rectCache.scroll = scrollNow;
         rectCache.at = stamp;
         rectCache.matter = matterEl ? matterEl.getBoundingClientRect() : null;
         rectCache.coaster = els.coaster ? els.coaster.getBoundingClientRect() : null;
@@ -1479,7 +1481,7 @@ export default function App() {
         gestureDirection: 'vertical',
         smoothWheel: true,
         syncTouch: false,
-        mouseMultiplier: 0.78,
+        mouseMultiplier: 1,
         touchMultiplier: 1.5,
         infinite: false,
       });

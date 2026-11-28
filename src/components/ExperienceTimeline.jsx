@@ -692,7 +692,7 @@ const ExperienceTimeline = () => {
           <Cloud id="g" seed="51" className="exp-cloud exp-cloud-g" />
           <Cloud id="h" seed="59" className="exp-cloud exp-cloud-h" />
           <span className="exp-cloud-bank">
-            <i /><i /><i /><i /><i /><i />
+            <span className="exp-cloud-bank-inner"><i /><i /><i /><i /><i /><i /></span>
           </span>
         </div>
         <div className="container relative">
