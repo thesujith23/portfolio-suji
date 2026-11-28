@@ -1464,6 +1464,32 @@ export default function App() {
     return () => io.disconnect();
   }, []);
 
+  /* The two sky cut-outs are large PNGs, and they are first painted while the
+     page is being scrolled (Experience, then Contact). Decoding them during an
+     idle slot means the scroll only composites them. */
+  useEffect(() => {
+    if (!loaded) return undefined;
+    const warm = () => {
+      ['/clouds/cloud-a.png', '/clouds/cloud-c.png'].forEach((src) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+        img.decode?.().catch(() => {});
+      });
+    };
+    let idleId;
+    let timer;
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(warm, { timeout: 2500 });
+    } else {
+      timer = window.setTimeout(warm, 1500);
+    }
+    return () => {
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [loaded]);
+
   useEffect(() => {
     const root = document.documentElement;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

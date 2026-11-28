@@ -546,19 +546,40 @@ const ExperienceTimeline = () => {
   /* Mount the WebGL chute only when its section gets close to the viewport. */
   const [slideReady, setSlideReady] = useState(() => typeof IntersectionObserver === 'undefined');
 
+  /* Creating the WebGL context is a long, blocking job (it was the single
+     biggest hitch when scrolling in). Mounting it here, while the browser is
+     idle after first paint, keeps that cost off the scroll; the observer is
+     still there in case the section is reached before the idle slot. */
   useEffect(() => {
     const el = timelineRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setSlideReady(true);
-        io.disconnect();
-      },
-      { rootMargin: '150% 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    const warm = () => setSlideReady(true);
+
+    let idleId;
+    let timer;
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(warm, { timeout: 3000 });
+    } else {
+      timer = window.setTimeout(warm, 2000);
+    }
+
+    let io;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          setSlideReady(true);
+          io.disconnect();
+        },
+        { rootMargin: '150% 0px' },
+      );
+      io.observe(el);
+    }
+
+    return () => {
+      io?.disconnect();
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timer) window.clearTimeout(timer);
+    };
   }, []);
 
   const goToStop = useCallback((i) => {
