@@ -3333,7 +3333,11 @@ body,
 }
 .ckey-note { color: rgba(23, 19, 15, 0.66); }
 
-.contact .cloud-art { filter: saturate(0.92) brightness(1.06); }
+/* The sky photos used to carry `saturate(0.92) brightness(1.06)` here. A
+   colour filter on each of the fifteen drifting, masked cloud layers made
+   Chrome re-layerize them on every scroll frame — the stutter on the way
+   into Contact. The tint was imperceptible, so it is gone. */
+.contact .cloud-art { filter: none; }
 .contact-foot-a,
 .contact-foot-b { opacity: 0.62; }
 .contact-foot-c { opacity: 0.8; }
@@ -5989,3 +5993,30 @@ body,
 /* Each typed letter toggles a class while About is pinned; containment keeps
    that style invalidation inside the paragraph instead of the whole panel. */
 .about .typewriter-container { contain: layout style; }
+
+/* ── Selected work: a smaller screen, tighter spacing ────────
+   The staged screenshot was reading wider than the copy beside it. It is
+   capped and centred now, and the rail sits closer to the frame. Phones keep
+   their full-width stage — the 28svh row already bounds it there. */
+@media (min-width: 821px) {
+  .pbox-case-stage {
+    width: min(100%, 368px);
+    margin-inline: auto;
+    padding: 6px 6px 0;
+  }
+  .pbox-case-side { gap: 8px; }
+  .pbox-case-thumbs { gap: 8px; }
+  .pbox-case-thumb { flex: 0 0 84px; }
+  /* A smaller shot leaves the column short: the quote follows the rail
+     instead of being pinned to the bottom of an empty gap. */
+  .pbox-case-side .pbox-case-quote { margin: 8px 0 0; }
+}
+
+/* Phones: the quote is meant to be two lines, but its `-webkit-box` clamp is
+   overridden to `flow-root` further up, so the third line used to poke out of
+   the box and into the copy row. Cap it at exactly two lines instead. */
+@media (max-width: 820px) {
+  .pbox-case-side .pbox-case-quote {
+    max-height: calc(2 * 1.4em + 9px);
+  }
+}
